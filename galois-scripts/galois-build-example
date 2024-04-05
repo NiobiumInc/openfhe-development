@@ -1,0 +1,18 @@
+#!/bin/bash
+EXAMPLE=advanced-ckks-bootstrapping
+# EXAMPLE=simple-ckks-bootstrapping
+
+g++ \
+  -I src/pke/include \
+  -I src/core/include \
+  -I src/math/include \
+  -I build/src/core \
+  -I third-party/cereal/include/ \
+  -I src/binfhe/include \
+     src/pke/examples/$EXAMPLE.cpp \
+   -o $EXAMPLE \
+  -L build/lib \
+  -lOPENFHEpke_static \
+  -lOPENFHEcore_static \
+  -lOPENFHEbinfhe_static
+
