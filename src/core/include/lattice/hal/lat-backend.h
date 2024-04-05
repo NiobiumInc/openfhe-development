@@ -38,8 +38,8 @@
 
 #define ILPARAMS_IMPLEMENTATION     "lattice/hal/default/ilparams.h"
 #define ILDCRTPARAMS_IMPLEMENTATION "lattice/hal/default/ildcrtparams.h"
-#define POLY_IMPLEMENTATION         "lattice/hal/default/poly-impl.h"
-#define DCRTPOLY_IMPLEMENTATION     "lattice/hal/default/dcrtpoly-impl.h"
+#define POLY_IMPLEMENTATION         "lattice/hal/basalisc/poly-impl.h"
+#define DCRTPOLY_IMPLEMENTATION     "lattice/hal/basalisc/dcrtpoly-impl.h"
 
 #define MAKE_ILPARAMS_TYPE(T)     template class ILParamsImpl<T>;
 #define MAKE_ILDCRTPARAMS_TYPE(T) template class ILDCRTParams<T>;
@@ -48,8 +48,8 @@
 
 #include "lattice/hal/default/ilparams.h"
 #include "lattice/hal/default/ildcrtparams.h"
-#include "lattice/hal/default/poly.h"
-#include "lattice/hal/default/dcrtpoly.h"
+#include "lattice/hal/basalisc/poly.h"
+#include "lattice/hal/basalisc/dcrtpoly.h"
 
 namespace lbcrypto {
 
