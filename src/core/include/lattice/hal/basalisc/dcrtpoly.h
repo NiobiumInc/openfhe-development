@@ -56,15 +56,15 @@
 namespace lbcrypto {
 
 template <typename VecType>
-class DCRTPolyImpl final : public DCRTPolyInterface<DCRTPolyImpl<VecType>, VecType, NativeVector, PolyImpl> {
+class DCRTPolyImpl final : public DCRTPolyInterface<DCRTPolyImpl<VecType>, VecType, NativeVector, BasPoly> {
 public:
     using Vector                = VecType;
     using Integer               = typename VecType::Integer;
     using Params                = ILDCRTParams<Integer>;
-    using PolyType              = PolyImpl<NativeVector>;
-    using PolyLargeType         = PolyImpl<VecType>;
+    using PolyType              = BasPoly<NativeVector>;
+    using PolyLargeType         = BasPoly<VecType>;
     using DCRTPolyType          = DCRTPolyImpl<VecType>;
-    using DCRTPolyInterfaceType = DCRTPolyInterface<DCRTPolyImpl<VecType>, VecType, NativeVector, PolyImpl>;
+    using DCRTPolyInterfaceType = DCRTPolyInterface<DCRTPolyImpl<VecType>, VecType, NativeVector, BasPoly>;
     using Precomputations       = typename DCRTPolyInterfaceType::CRTBasisExtensionPrecomputations;
     using DggType               = typename DCRTPolyInterfaceType::DggType;
     using DugType               = typename DCRTPolyInterfaceType::DugType;

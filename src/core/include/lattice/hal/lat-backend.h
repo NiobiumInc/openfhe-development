@@ -43,7 +43,7 @@
 
 #define MAKE_ILPARAMS_TYPE(T)     template class ILParamsImpl<T>;
 #define MAKE_ILDCRTPARAMS_TYPE(T) template class ILDCRTParams<T>;
-#define MAKE_POLY_TYPE(T)         template class PolyImpl<T>;
+#define MAKE_POLY_TYPE(T)         template class BasPoly<T>;
 #define MAKE_DCRTPOLY_TYPE(T)     template class DCRTPolyImpl<T>;
 
 #include "lattice/hal/default/ilparams.h"
@@ -55,14 +55,14 @@ namespace lbcrypto {
 
 using ILNativeParams = ILParamsImpl<NativeInteger>;
 using ILParams       = ILParamsImpl<BigInteger>;
-using Poly           = PolyImpl<BigVector>;
-using NativePoly     = PolyImpl<NativeVector>;
+using Poly           = BasPoly<BigVector>;
+using NativePoly     = BasPoly<NativeVector>;
 using DCRTPoly       = DCRTPolyImpl<BigVector>;
 
 #ifdef WITH_BE2
 using M2Params     = ILParamsImpl<M2Integer>;
 using M2DCRTParams = ILDCRTParams<M2Integer>;
-using M2Poly       = PolyImpl<M2Vector>;
+using M2Poly       = BasPoly<M2Vector>;
 using M2DCRTPoly   = DCRTPolyImpl<M2Vector>;
 #else
 using M2Params     = void;
@@ -74,7 +74,7 @@ using M2DCRTPoly   = void;
 #ifdef WITH_BE4
 using M4Params     = ILParamsImpl<M4Integer>;
 using M4DCRTParams = ILDCRTParams<M4Integer>;
-using M4Poly       = PolyImpl<M4Vector>;
+using M4Poly       = BasPoly<M4Vector>;
 using M4DCRTPoly   = DCRTPolyImpl<M4Vector>;
 #else
 using M4Params     = void;
@@ -86,7 +86,7 @@ using M4DCRTPoly   = void;
 #ifdef WITH_NTL
 using M6Params     = ILParamsImpl<M6Integer>;
 using M6DCRTParams = ILDCRTParams<M6Integer>;
-using M6Poly       = PolyImpl<M6Vector>;
+using M6Poly       = BasPoly<M6Vector>;
 using M6DCRTPoly   = DCRTPolyImpl<M6Vector>;
 #else
 using M6Params     = void;

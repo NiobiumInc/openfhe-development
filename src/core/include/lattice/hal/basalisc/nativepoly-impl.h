@@ -33,8 +33,6 @@
   implementation of the integer lattice
  */
 
-#ifndef LBCRYPTO_INC_LATTICE_HAL_DEFAULT_POLY_IMPL_H
-#define LBCRYPTO_INC_LATTICE_HAL_DEFAULT_POLY_IMPL_H
 
 #include "lattice/hal/basalisc/poly.h"
 
@@ -52,39 +50,34 @@
 
 namespace lbcrypto {
 
-template <typename VecType>
-PolyImpl<VecType>::PolyImpl(const DggType& dgg, const std::shared_ptr<PolyImpl::Params>& params, Format format)
+BasPoly<NativeVector>::BasPoly(const DggType& dgg, const std::shared_ptr<BasPoly::Params>& params, Format format)
     : m_format{Format::COEFFICIENT},
       m_params{params},
-      m_values{std::make_unique<VecType>(dgg.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
-    PolyImpl<VecType>::SetFormat(format);
+      m_values{std::make_unique<NativeVector>(dgg.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
+    BasPoly<NativeVector>::SetFormat(format);
 }
 
-template <typename VecType>
-PolyImpl<VecType>::PolyImpl(DugType& dug, const std::shared_ptr<PolyImpl::Params>& params, Format format)
+BasPoly<NativeVector>::BasPoly(DugType& dug, const std::shared_ptr<BasPoly::Params>& params, Format format)
     : m_format{format},
       m_params{params},
-      m_values{std::make_unique<VecType>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {}
+      m_values{std::make_unique<NativeVector>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {}
 
-template <typename VecType>
-PolyImpl<VecType>::PolyImpl(const BugType& bug, const std::shared_ptr<PolyImpl::Params>& params, Format format)
+BasPoly<NativeVector>::BasPoly(const BugType& bug, const std::shared_ptr<BasPoly::Params>& params, Format format)
     : m_format{Format::COEFFICIENT},
       m_params{params},
-      m_values{std::make_unique<VecType>(bug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
-    PolyImpl<VecType>::SetFormat(format);
+      m_values{std::make_unique<NativeVector>(bug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
+    BasPoly<NativeVector>::SetFormat(format);
 }
 
-template <typename VecType>
-PolyImpl<VecType>::PolyImpl(const TugType& tug, const std::shared_ptr<PolyImpl::Params>& params, Format format,
+BasPoly<NativeVector>::BasPoly(const TugType& tug, const std::shared_ptr<BasPoly::Params>& params, Format format,
                             uint32_t h)
     : m_format{Format::COEFFICIENT},
       m_params{params},
-      m_values{std::make_unique<VecType>(tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h))} {
-    PolyImpl<VecType>::SetFormat(format);
+      m_values{std::make_unique<NativeVector>(tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h))} {
+    BasPoly<NativeVector>::SetFormat(format);
 }
 
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const BasPoly& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
     if (!rhs.m_values) {
@@ -95,20 +88,19 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
         *m_values = *rhs.m_values;
         return *this;
     }
-    m_values = std::make_unique<VecType>(*rhs.m_values);
+    m_values = std::make_unique<NativeVector>(*rhs.m_values);
     return *this;
 }
 
 // assumes that elements in rhs less than modulus?
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator=(std::initializer_list<uint64_t> rhs) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<uint64_t> rhs) {
     static const Integer ZERO(0);
     const size_t llen = rhs.size();
     const size_t vlen = m_params->GetRingDimension();
     if (!m_values) {
-        VecType temp(vlen);
+        NativeVector temp(vlen);
         temp.SetModulus(m_params->GetModulus());
-        PolyImpl<VecType>::SetValues(std::move(temp), m_format);
+        BasPoly<NativeVector>::SetValues(std::move(temp), m_format);
     }
     for (size_t j = 0; j < vlen; ++j)
         (*m_values)[j] = (j < llen) ? *(rhs.begin() + j) : ZERO;
@@ -116,17 +108,16 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(std::initializer_list<uint64_t> 
 }
 
 // TODO: template with enable_if int64_t/int32_t
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator=(const std::vector<int64_t>& rhs) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int64_t>& rhs) {
     static const Integer ZERO(0);
     m_format = Format::COEFFICIENT;
     const size_t llen{rhs.size()};
     const size_t vlen{m_params->GetRingDimension()};
     const auto& m = m_params->GetModulus();
     if (!m_values) {
-        VecType tmp(vlen);
+        NativeVector tmp(vlen);
         tmp.SetModulus(m);
-        PolyImpl<VecType>::SetValues(std::move(tmp), m_format);
+        BasPoly<NativeVector>::SetValues(std::move(tmp), m_format);
     }
     for (size_t j = 0; j < vlen; ++j) {
         if (j < llen)
@@ -138,17 +129,16 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const std::vector<int64_t>& rhs)
     return *this;
 }
 
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator=(const std::vector<int32_t>& rhs) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int32_t>& rhs) {
     static const Integer ZERO(0);
     m_format = Format::COEFFICIENT;
     const size_t llen{rhs.size()};
     const size_t vlen{m_params->GetRingDimension()};
     const auto& m = m_params->GetModulus();
     if (!m_values) {
-        VecType tmp(vlen);
+        NativeVector tmp(vlen);
         tmp.SetModulus(m);
-        PolyImpl<VecType>::SetValues(std::move(tmp), m_format);
+        BasPoly<NativeVector>::SetValues(std::move(tmp), m_format);
     }
     for (size_t j = 0; j < vlen; ++j) {
         if (j < llen)
@@ -160,25 +150,23 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const std::vector<int32_t>& rhs)
     return *this;
 }
 
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator=(std::initializer_list<std::string> rhs) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<std::string> rhs) {
     const size_t vlen = m_params->GetRingDimension();
     if (!m_values) {
-        VecType temp(vlen);
+        NativeVector temp(vlen);
         temp.SetModulus(m_params->GetModulus());
-        PolyImpl<VecType>::SetValues(std::move(temp), m_format);
+        BasPoly<NativeVector>::SetValues(std::move(temp), m_format);
     }
     *m_values = rhs;
     return *this;
 }
 
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator=(uint64_t val) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(uint64_t val) {
     m_format = Format::EVALUATION;
     if (!m_values) {
         auto d{m_params->GetRingDimension()};
         const auto& m{m_params->GetModulus()};
-        m_values = std::make_unique<VecType>(d, m);
+        m_values = std::make_unique<NativeVector>(d, m);
     }
     size_t vlen{m_values->GetLength()};
     Integer ival{val};
@@ -187,29 +175,26 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(uint64_t val) {
     return *this;
 }
 
-template <typename VecType>
-void PolyImpl<VecType>::SetValues(const VecType& values, Format format) {
+void BasPoly<NativeVector>::SetValues(const NativeVector& values, Format format) {
     if (m_params->GetRootOfUnity() == Integer(0))
         OPENFHE_THROW("Polynomial has a 0 root of unity");
     if (m_params->GetRingDimension() != values.GetLength() || m_params->GetModulus() != values.GetModulus())
         OPENFHE_THROW("Parameter mismatch on SetValues for Polynomial");
     m_format = format;
-    m_values = std::make_unique<VecType>(values);
+    m_values = std::make_unique<NativeVector>(values);
 }
 
-template <typename VecType>
-void PolyImpl<VecType>::SetValues(VecType&& values, Format format) {
+void BasPoly<NativeVector>::SetValues(NativeVector&& values, Format format) {
     if (m_params->GetRootOfUnity() == Integer(0))
         OPENFHE_THROW("Polynomial has a 0 root of unity");
     if (m_params->GetRingDimension() != values.GetLength() || m_params->GetModulus() != values.GetModulus())
         OPENFHE_THROW("Parameter mismatch on SetValues for Polynomial");
     m_format = format;
-    m_values = std::make_unique<VecType>(std::move(values));
+    m_values = std::make_unique<NativeVector>(std::move(values));
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::Plus(const typename NativeVector::Integer& element) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     if (m_format == Format::COEFFICIENT)
         tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
     else
@@ -217,23 +202,20 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::Minus(const typename NativeVector::Integer& element) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModSub(element), m_format);
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::Times(const typename NativeVector::Integer& element) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModMul(element), m_format);
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::Times(NativeInteger::SignedNativeInt element) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     Integer q{m_params->GetModulus()};
     if (element < 0) {
         Integer elementReduced{NativeInteger::Integer(-element)};
@@ -250,55 +232,48 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Minus(const PolyImpl& rhs) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::Minus(const BasPoly& rhs) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::MultiplyAndRound(const typename VecType::Integer& p,
-                                                      const typename VecType::Integer& q) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::MultiplyAndRound(const typename NativeVector::Integer& p,
+                                                      const typename NativeVector::Integer& q) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).MultiplyAndRound(p, q), m_format);
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::DivideAndRound(const typename VecType::Integer& q) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::DivideAndRound(const typename NativeVector::Integer& q) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).DivideAndRound(q), m_format);
     return tmp;
 }
 
 // TODO: this will return vec of 0s for BigIntegers
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Negate() const {
+BasPoly<NativeVector> BasPoly<NativeVector>::Negate() const {
     //  UnitTestBFVrnsCRTOperations.cpp line 316 throws with this uncommented
     //    if (m_format != Format::EVALUATION)
-    //        OPENFHE_THROW("Negate for PolyImpl is supported only in Format::EVALUATION format.\n");
-    return PolyImpl<VecType>(m_params, m_format, true) -= *this;
+    //        OPENFHE_THROW("Negate for BasPoly is supported only in Format::EVALUATION format.\n");
+    return BasPoly<NativeVector>(m_params, m_format, true) -= *this;
 }
 
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator+=(const BasPoly& element) {
     if (!m_values)
-        m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
+        m_values = std::make_unique<NativeVector>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModAddEq(*element.m_values);
     return *this;
 }
 
-template <typename VecType>
-PolyImpl<VecType>& PolyImpl<VecType>::operator-=(const PolyImpl& element) {
+BasPoly<NativeVector>& BasPoly<NativeVector>::operator-=(const BasPoly& element) {
     if (!m_values)
-        m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
+        m_values = std::make_unique<NativeVector>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModSubEq(*element.m_values);
     return *this;
 }
 
-template <typename VecType>
-void PolyImpl<VecType>::AddILElementOne() {
+void BasPoly<NativeVector>::AddILElementOne() {
     static const Integer ONE(1);
     usint vlen{m_params->GetRingDimension()};
     const auto& m{m_params->GetModulus()};
@@ -306,8 +281,7 @@ void PolyImpl<VecType>::AddILElementOne() {
         (*m_values)[i].ModAddFastEq(ONE, m);
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
+BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k) const {
     uint32_t n{m_params->GetRingDimension()};
     uint32_t m{m_params->GetCyclotomicOrder()};
     bool bp{n == (m >> 1)};
@@ -319,7 +293,7 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
     /*
     // TODO: is this branch ever called?
 
-    PolyImpl<VecType> result(m_params, m_format, true);
+    BasPoly<NativeVector> result(m_params, m_format, true);
     if (bf && !bp) {
         // TODO: Add a test based on the inverse totient hash table?
 
@@ -328,7 +302,7 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
 
         // This step can be eliminated by using a hash table that looks up the
         // ring index (between 0 and n - 1) based on the totient index (between 0 and m - 1)
-        VecType expanded(m, m_params->GetModulus());
+        NativeVector expanded(m, m_params->GetModulus());
         for (uint32_t i = 0; i < n; ++i)
             expanded[totientList[i]] = (*m_values)[i];
 
@@ -342,7 +316,7 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
 
-    PolyImpl<VecType> result(m_params, m_format, true);
+    BasPoly<NativeVector> result(m_params, m_format, true);
     uint32_t logm{lbcrypto::GetMSB(m) - 1};
     uint32_t logn{logm - 1};
     uint32_t mask{(uint32_t(1) << logn) - 1};
@@ -362,58 +336,52 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
     return result;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std::vector<uint32_t>& precomp) const {
+BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k, const std::vector<uint32_t>& precomp) const {
     if ((m_format != Format::EVALUATION) || (m_params->GetRingDimension() != (m_params->GetCyclotomicOrder() >> 1)))
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
-    PolyImpl<VecType> tmp(m_params, m_format, true);
+    BasPoly<NativeVector> tmp(m_params, m_format, true);
     uint32_t n = m_params->GetRingDimension();
     for (uint32_t j = 0; j < n; ++j)
         (*tmp.m_values)[j] = (*m_values)[precomp[j]];
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::MultiplicativeInverse() const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::MultiplicativeInverse() const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModInverse(), m_format);
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::ModByTwo() const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::ModByTwo() const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModByTwo(), m_format);
     return tmp;
 }
 
-template <typename VecType>
-PolyImpl<VecType> PolyImpl<VecType>::Mod(const Integer& modulus) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+BasPoly<NativeVector> BasPoly<NativeVector>::Mod(const Integer& modulus) const {
+    BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).Mod(modulus), m_format);
     return tmp;
 }
 
-template <typename VecType>
-void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
+void BasPoly<NativeVector>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
                                       const Integer& rootOfUnityArb) {
     if (m_values != nullptr) {
         m_values->SwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
-        m_params = std::make_shared<PolyImpl::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
+        m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     }
 }
 
-template <typename VecType>
-void PolyImpl<VecType>::SwitchFormat() {
+void BasPoly<NativeVector>::SwitchFormat() {
     const auto& co{m_params->GetCyclotomicOrder()};
     const auto& rd{m_params->GetRingDimension()};
     const auto& ru{m_params->GetRootOfUnity()};
 
     if (rd != (co >> 1)) {
-        PolyImpl<VecType>::ArbitrarySwitchFormat();
+        BasPoly<NativeVector>::ArbitrarySwitchFormat();
         return;
     }
 
@@ -422,15 +390,14 @@ void PolyImpl<VecType>::SwitchFormat() {
 
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;
-        ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
+        ChineseRemainderTransformFTT<NativeVector>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
         return;
     }
     m_format = Format::EVALUATION;
-    ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
+    ChineseRemainderTransformFTT<NativeVector>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
 }
 
-template <typename VecType>
-void PolyImpl<VecType>::ArbitrarySwitchFormat() {
+void BasPoly<NativeVector>::ArbitrarySwitchFormat() {
     if (m_values == nullptr)
         OPENFHE_THROW("Poly switch format to empty values");
     const auto& lr = m_params->GetRootOfUnity();
@@ -439,18 +406,19 @@ void PolyImpl<VecType>::ArbitrarySwitchFormat() {
     const auto& co = m_params->GetCyclotomicOrder();
     if (m_format == Format::COEFFICIENT) {
         m_format = Format::EVALUATION;
-        auto&& v = ChineseRemainderTransformArb<VecType>().ForwardTransform(*m_values, lr, bm, br, co);
-        m_values = std::make_unique<VecType>(v);
+        auto&& v = ChineseRemainderTransformArb<NativeVector>().ForwardTransform(*m_values, lr, bm, br, co);
+        m_values = std::make_unique<NativeVector>(v);
     }
     else {
         m_format = Format::COEFFICIENT;
-        auto&& v = ChineseRemainderTransformArb<VecType>().InverseTransform(*m_values, lr, bm, br, co);
-        m_values = std::make_unique<VecType>(v);
+        auto&& v = ChineseRemainderTransformArb<NativeVector>().InverseTransform(*m_values, lr, bm, br, co);
+        m_values = std::make_unique<NativeVector>(v);
     }
 }
 
-template <typename VecType>
-std::ostream& operator<<(std::ostream& os, const PolyImpl<VecType>& p) {
+#if 0
+template <>
+std::ostream& operator<<(std::ostream& os, const BasPoly<NativeVector>& p) {
     if (p.m_values != nullptr) {
         os << *(p.m_values);
         os << " mod:" << (p.m_values)->GetModulus() << std::endl;
@@ -462,9 +430,9 @@ std::ostream& operator<<(std::ostream& os, const PolyImpl<VecType>& p) {
     os << std::endl;
     return os;
 }
+#endif
 
-template <typename VecType>
-void PolyImpl<VecType>::MakeSparse(uint32_t wFactor) {
+void BasPoly<NativeVector>::MakeSparse(uint32_t wFactor) {
     static const Integer ZERO(0);
     if (m_values != nullptr) {
         uint32_t vlen{m_params->GetRingDimension()};
@@ -475,8 +443,7 @@ void PolyImpl<VecType>::MakeSparse(uint32_t wFactor) {
     }
 }
 
-template <typename VecType>
-bool PolyImpl<VecType>::InverseExists() const {
+bool BasPoly<NativeVector>::InverseExists() const {
     static const Integer ZERO(0);
     usint vlen{m_params->GetRingDimension()};
     for (usint i = 0; i < vlen; ++i) {
@@ -486,8 +453,7 @@ bool PolyImpl<VecType>::InverseExists() const {
     return true;
 }
 
-template <typename VecType>
-double PolyImpl<VecType>::Norm() const {
+double BasPoly<NativeVector>::Norm() const {
     usint vlen{m_params->GetRingDimension()};
     const auto& q{m_params->GetModulus()};
     const auto& half{q >> 1};
@@ -503,27 +469,26 @@ double PolyImpl<VecType>::Norm() const {
     return (minVal > maxVal ? minVal : maxVal).ConvertToDouble();
 }
 
-// Write vector x(current value of the PolyImpl object) as \sum\limits{ i = 0
+// Write vector x(current value of the BasPoly object) as \sum\limits{ i = 0
 // }^{\lfloor{ \log q / base } \rfloor} {(base^i u_i)} and return the vector of{
 // u_0, u_1,...,u_{ \lfloor{ \log q / base } \rfloor } } \in R_base^{ \lceil{
 // \log q / base } \rceil }; used as a subroutine in the relinearization
 // procedure baseBits is the number of bits in the base, i.e., base = 2^baseBits
 
 // TODO: optimize this
-template <typename VecType>
-std::vector<PolyImpl<VecType>> PolyImpl<VecType>::BaseDecompose(usint baseBits, bool evalModeAnswer) const {
+std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::BaseDecompose(usint baseBits, bool evalModeAnswer) const {
     usint nBits = m_params->GetModulus().GetLengthForBase(2);
 
     usint nWindows = nBits / baseBits;
     if (nBits % baseBits > 0)
         nWindows++;
 
-    PolyImpl<VecType> xDigit(m_params);
+    BasPoly<NativeVector> xDigit(m_params);
 
-    std::vector<PolyImpl<VecType>> result;
+    std::vector<BasPoly<NativeVector>> result;
     result.reserve(nWindows);
 
-    PolyImpl<VecType> x(*this);
+    BasPoly<NativeVector> x(*this);
     x.SetFormat(Format::COEFFICIENT);
 
     // TP: x is same for BACKEND 2 and 6
@@ -539,44 +504,40 @@ std::vector<PolyImpl<VecType>> PolyImpl<VecType>::BaseDecompose(usint baseBits, 
     return result;
 }
 
-// Generate a vector of PolyImpl's as {x, base*x, base^2*x, ..., base^{\lfloor
-// {\log q/base} \rfloor}*x, where x is the current PolyImpl object; used as a
+// Generate a vector of BasPoly's as {x, base*x, base^2*x, ..., base^{\lfloor
+// {\log q/base} \rfloor}*x, where x is the current BasPoly object; used as a
 // subroutine in the relinearization procedure to get powers of a certain "base"
 // for the secret key element baseBits is the number of bits in the base, i.e.,
 // base = 2^baseBits
 
-template <typename VecType>
-std::vector<PolyImpl<VecType>> PolyImpl<VecType>::PowersOfBase(usint baseBits) const {
+std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::PowersOfBase(usint baseBits) const {
     static const Integer TWO(2);
     const auto& m{m_params->GetModulus()};
     usint nBits{m.GetLengthForBase(2)};
     usint nWindows{nBits / baseBits};
     if (nBits % baseBits > 0)
         ++nWindows;
-    std::vector<PolyImpl<VecType>> result(nWindows);
+    std::vector<BasPoly<NativeVector>> result(nWindows);
     Integer shift{0}, bbits{baseBits};
     for (usint i = 0; i < nWindows; ++i, shift += bbits)
         result[i] = (*this) * TWO.ModExp(shift, m);
     return result;
 }
 
-template <typename VecType>
-typename PolyImpl<VecType>::PolyNative PolyImpl<VecType>::DecryptionCRTInterpolate(PlaintextModulus ptm) const {
-    const PolyImpl<VecType> smaller(PolyImpl<VecType>::Mod(ptm));
+typename BasPoly<NativeVector>::PolyNative BasPoly<NativeVector>::DecryptionCRTInterpolate(PlaintextModulus ptm) const {
+    const BasPoly<NativeVector> smaller(BasPoly<NativeVector>::Mod(ptm));
     usint vlen{m_params->GetRingDimension()};
     auto c{m_params->GetCyclotomicOrder()};
     auto params{std::make_shared<ILNativeParams>(c, NativeInteger(ptm), 1)};
-    typename PolyImpl<VecType>::PolyNative tmp(params, m_format, true);
+    typename BasPoly<NativeVector>::PolyNative tmp(params, m_format, true);
     for (usint i = 0; i < vlen; ++i)
         tmp[i] = NativeInteger((*smaller.m_values)[i]);
     return tmp;
 }
 
-template <>
-inline PolyImpl<NativeVector> PolyImpl<NativeVector>::ToNativePoly() const {
-    return *this;
+inline BasPoly<NativeVector> BasPoly<NativeVector>::ToNativePoly() const {
+  return *this;
 }
 
 }  // namespace lbcrypto
 
-#endif
