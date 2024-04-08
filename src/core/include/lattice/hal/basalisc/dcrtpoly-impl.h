@@ -33,8 +33,8 @@
   Implementation of the integer lattice using double-CRT representations
  */
 
-#ifndef LBCRYPTO_INC_LATTICE_HAL_DEFAULT_DCRTPOLY_IMPL_H
-#define LBCRYPTO_INC_LATTICE_HAL_DEFAULT_DCRTPOLY_IMPL_H
+#ifndef LBCRYPTO_INC_LATTICE_HAL_BASALISC_DCRTPOLY_IMPL_H
+#define LBCRYPTO_INC_LATTICE_HAL_BASALISC_DCRTPOLY_IMPL_H
 
 #include "config_core.h"
 

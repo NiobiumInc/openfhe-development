@@ -33,8 +33,8 @@
   Represents integer lattice elements with double-CRT
  */
 
-#ifndef LBCRYPTO_INC_LATTICE_HAL_DEFAULT_DCRTPOLY_H
-#define LBCRYPTO_INC_LATTICE_HAL_DEFAULT_DCRTPOLY_H
+#ifndef LBCRYPTO_INC_LATTICE_HAL_BASALISC_DCRTPOLY_H
+#define LBCRYPTO_INC_LATTICE_HAL_BASALISC_DCRTPOLY_H
 
 #include "lattice/hal/default/ildcrtparams.h"
 #include "lattice/hal/basalisc/poly.h"
