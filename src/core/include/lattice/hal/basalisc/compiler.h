@@ -107,9 +107,9 @@ struct Instruction {
 
 private:
   uint64_t setbits(uint64_t initial, uint64_t lo, uint64_t hi, uint64_t val) {
-  uint64_t mask = (UINT64_MAX >> (UINT64_WIDTH - hi - 1)) & (UINT64_MAX << lo);
-  return (initial & ~mask) | ((val << lo) & mask);
-}
+    uint64_t mask = (UINT64_MAX >> (UINT64_WIDTH - hi - 1)) & (UINT64_MAX << lo);
+    return (initial & ~mask) | ((val << lo) & mask);
+  }
 };
 
 // Program that does nothing
