@@ -38,6 +38,7 @@
 
 #include "lattice/hal/basalisc/poly.h"
 #include "lattice/hal/basalisc/nativepoly-impl.h"
+#include "lattice/hal/basalisc/compiler-impl.h"
 
 #include "utils/debug.h"
 #include "utils/exception.h"

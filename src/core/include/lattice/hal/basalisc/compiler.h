@@ -5,6 +5,7 @@
 #include<stdint.h>
 #include<assert.h>
 #include<optional>
+#include<map>
 #include"utils/exception.h"
 #include"math/hal/nativeintbackend.h"
 #include"lattice/hal/default/poly.h"
@@ -13,7 +14,7 @@ namespace lbcrypto {
 
 using Register = uint64_t;
 using Address = uint64_t;
-using Immediate = int64_t;
+using Immediate = uint64_t;
 using PrimeModulusIndex = uint8_t;
 using AutomorphismNumber = uint64_t;
 using RngConfig = uint64_t;
@@ -203,82 +204,7 @@ private:
 
 using ValueId = uint64_t;
 
-// Program that does nothing
-class ProgramNull {
-public:
-  using SymbolicValue = uint64_t;
-
-  inline SymbolicValue PolyValues(NativeVector& v, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue Add(SymbolicValue a1, SymbolicValue a2, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue AddI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue Sub(SymbolicValue a1, SymbolicValue a2, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue SubI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue AddMulI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue Morph(SymbolicValue a1, AutomorphismNumber n, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue NTT(SymbolicValue a1, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline SymbolicValue INTT(SymbolicValue a1, NativeInteger modulus) {
-    return 0;
-  }
-
-  inline void increment_refcount(ValueId val) {
-
-  }
-
-  inline void decrement_refcount(ValueId val) {
-
-  }
-
-};
-
-
-
-
-// SSA form instructions
-struct SSAInst {
-  enum Op {
-    ADD,
-    ADDI,
-    SUB,
-    SUBI,
-    ADDMULI,
-    NTT,
-    INTT,
-    MORPH,
-  };
-
-  uint64_t arg1;
-  uint64_t arg2;
-  uint64_t imm;
-  uint64_t modulus;
-};
-
-
-// **************** COMPILER GLOBAL VARIABLE **********************************
-inline ProgramNull Basalisc;
+// class Program;
 
 // struct SymbolicValue {
 //   SymbolicValue(uint64_t value): value {value} {
@@ -312,6 +238,237 @@ inline ProgramNull Basalisc;
 //   ValueId value;
 // };
 
+enum SSAInstOp {
+  TODO,
+  ADD,
+  ADDI,
+  SUB,
+  SUBI,
+  MUL,
+  MULI,
+  ADDMULI,
+  NTT,
+  INTT,
+  MORPH,
+  FREE,
+  SWITCHMODULUS,
+};
+
+// SSA form instructions
+
+// struct SymbolicValue {
+//   SymbolicValue(uint64_t value): value {value} {
+//     Basalisc.increment_refcount(value);
+//   }
+
+//   SymbolicValue(SymbolicValue const& s) {
+//     Basalisc.increment_refcount(s.value);
+//     value = s.value;
+//   }
+
+//   SymbolicValue(SymbolicValue&& s) noexcept {
+//     value = s.value;
+//   }
+
+//   SymbolicValue& operator=(SymbolicValue const& other)
+//   {
+//     return *this = SymbolicValue(other);
+//   }
+
+//   SymbolicValue& operator=(SymbolicValue&& other) noexcept
+//   {
+//     value = other.value;
+//     return *this;
+//   }
+
+//   ~SymbolicValue() {
+//     Basalisc.decrement_refcount(value);
+//   }
+
+//   ValueId value;
+// };
+
+// struct SSAInst {
+//     SSAInstOp op;
+//     ValueId dest;
+//     ValueId arg1;
+//     ValueId arg2; 
+//     Immediate imm; // or AutomorphismNumber if it is MORPH
+//     PrimeModulusIndex modulus;
+
+//     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m): op {op}, arg1 { arg1.value }, arg2 { arg2.value } { 
+//       modulus = Basalisc.modulus_index(m);
+//     }
+
+//     SSAInst(SSAInstOp op, SymbolicValue const& arg, Immediate i, NativeInteger const& m): op {op}, arg1 { arg.value } { 
+//       modulus = Basalisc.modulus_index(m);
+//     }
+
+//     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, Immediate i, NativeInteger const& m): op {op}, arg1 { arg1.value }, arg2 { arg2.value }, imm { i } { 
+//       modulus = Basalisc.modulus_index(m);
+//     }
+
+//     SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m): op {op}, arg1 { arg.value } { 
+//       modulus = Basalisc.modulus_index(m);
+//     }
+
+//     // SSAInst(SSAInstOp op, SymbolicValue& arg, AutomorphismNumber n, NativeInteger const& m): op { op }, arg1 { arg.value }, arg2 { n } {
+//     //   modulus = Basalisc.modulus_index(m);
+//     // }
+// };
+
+
+struct SymbolicValue {
+  SymbolicValue(uint64_t value);
+  SymbolicValue(SymbolicValue const& s);
+  SymbolicValue(SymbolicValue&& s) noexcept;
+  SymbolicValue& operator=(SymbolicValue const& other);
+  SymbolicValue& operator=(SymbolicValue&& other) noexcept;
+  ~SymbolicValue();
+
+  ValueId value;
+};
+
+struct SSAInst {
+    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, Immediate i, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, Immediate i, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m);
+
+    SSAInstOp op;
+    ValueId dest;
+    ValueId arg1;
+    ValueId arg2; 
+    Immediate imm; // or AutomorphismNumber if it is MORPH
+    PrimeModulusIndex modulus;
+};
+
+// Program that does nothing
+class Program {
+public:
+  SymbolicValue PolyValues(std::unique_ptr<NativeVector> v, NativeInteger modulus) {
+    auto value = new_value();
+    auto midx = modulus_index(modulus);
+    m_concrete_polys[value.value] = {std::move(v), midx};
+    return value;    
+  }
+
+  SymbolicValue Add(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::ADD, a1, a2, m});
+  }
+
+  SymbolicValue AddI(SymbolicValue const& a1, Immediate i, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::ADDI, a1.value, i, m});
+  }
+
+  SymbolicValue Sub(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::SUB, a1, a2, m});
+  }
+
+  SymbolicValue SubI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::SUBI, a1, i, m});
+  }
+
+  SymbolicValue Mul(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::MUL, a1, a2, m});
+  }
+
+  SymbolicValue MulI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::MULI, a1, i, m});
+  }
+
+  SymbolicValue Morph(SymbolicValue a1, AutomorphismNumber n, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::MORPH, a1, n, m});
+  }
+
+  SymbolicValue NTT(SymbolicValue a1, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::NTT, a1, m});
+  }
+
+  SymbolicValue INTT(SymbolicValue a1, NativeInteger const& m) {
+    return emit_instruction({SSAInstOp::INTT, a1, m});
+  }
+
+  SymbolicValue emit_instruction(SSAInst const& ssa) {
+    auto v = new_value();
+    m_inst.push_back(ssa);
+    m_inst.back().dest = v.value;
+    return v;
+  }
+
+  void increment_refcount(ValueId val) {
+    auto res = m_symbolic_refcount.find(val);
+    if(res != m_symbolic_refcount.end()) {
+      res->second++;
+    } else {
+      m_symbolic_refcount[val] = 1;
+    }
+  }
+
+  void decrement_refcount(ValueId val) {
+    auto res = m_symbolic_refcount.find(val);
+    if(res != m_symbolic_refcount.end()) {
+      res->second--;
+      if(res->second <= 0) {
+        // emit hint to memory that this value is dead
+        m_symbolic_refcount.erase(val);
+      }
+    }
+  }
+
+  size_t modulus_index(NativeInteger const& m) {
+    auto midx = m_modulus_lookup.find(m);
+    if(midx != m_modulus_lookup.end()) {
+      return midx->second;
+    }
+
+    if(m_next_modulus_slot >= MODULUS_TABLE_SIZE) {
+      OPENFHE_THROW(not_implemented_error, "program exceeds modulus table size");
+    }
+
+    m_modulus_table[m_next_modulus_slot] = m;
+    m_modulus_lookup[m] = m_next_modulus_slot;
+    return m_next_modulus_slot++;
+  }
+
+  SymbolicValue new_value() {
+    return {m_next_value_name++};
+  }
+
+private:
+  struct ConcretePolyData {
+    std::unique_ptr<NativeVector> coeff;
+    size_t modulus_index;
+
+    ConcretePolyData() {
+
+    }
+
+    ConcretePolyData(std::unique_ptr<NativeVector> v, size_t idx) {
+      coeff = std::move(v);
+      modulus_index = idx;
+    }
+
+  };
+
+  // modulus table
+  static const size_t MODULUS_TABLE_SIZE = 32;
+  size_t m_next_modulus_slot;
+  NativeInteger m_modulus_table[MODULUS_TABLE_SIZE];
+  std::map<NativeInteger, size_t> m_modulus_lookup;
+
+  // symbolic value stuff
+  std::unordered_map<ValueId, size_t> m_symbolic_refcount;
+  ValueId m_next_value_name = 0;
+
+  // the program
+  std::unordered_map<ValueId, ConcretePolyData> m_concrete_polys; // mapping from symbolic value to index into m_concrete_polys;
+  std::vector<SSAInst> m_inst;
+};
+
+
+// **************** COMPILER GLOBAL VARIABLE **********************************
+inline Program Basalisc;
 
 } // namespace lbcrypto
 

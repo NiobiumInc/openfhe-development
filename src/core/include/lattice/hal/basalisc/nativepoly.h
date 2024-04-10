@@ -36,6 +36,7 @@
 #include "lattice/hal/poly-interface.h"
 #include "lattice/hal/default/ildcrtparams.h"
 #include "lattice/hal/default/ilparams.h"
+#include "lattice/hal/basalisc/compiler.h"
 
 #include "math/distrgen.h"
 #include "math/math-hal.h"
