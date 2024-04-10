@@ -6,7 +6,7 @@
 #include<assert.h>
 #include<optional>
 #include"utils/exception.h"
-#include"nativeintbackend.h"
+#include"math/hal/nativeintbackend.h"
 #include"lattice/hal/default/poly.h"
 
 namespace lbcrypto {
@@ -15,10 +15,8 @@ using Register = uint64_t;
 using Address = uint64_t;
 using Immediate = int64_t;
 using PrimeModulusIndex = uint8_t;
-using Instruction = uint64_t;
 using AutomorphismNumber = uint64_t;
-
-
+using RngConfig = uint64_t;
 
 // Encoding for BASALISC instructions
 struct Instruction {
@@ -46,6 +44,90 @@ struct Instruction {
 
   Instruction() {
     encoded = 0;
+    imm = 0;
+  }
+
+  void into_load(Register dest, Address src_addr) {
+    opcode(LOAD).rd(dest).load_addr(src_addr);
+  }
+
+  void into_store(Address dest_addr, Register src) {
+    opcode(STORE).rs1(src).store_addr(dest_addr);
+  }
+
+  void into_add(Register dest, Register src1, Register src2, PrimeModulusIndex m) {
+    rtype(ADD, dest, src1, src2, m);
+  }
+
+  void into_addi(Register dest, Register src, Immediate i, PrimeModulusIndex m) {
+    rtype(ADDI, dest, src, 0, m).immediate(i);
+  }
+
+  void into_sub(Register dest, Register src1, Register src2, PrimeModulusIndex m) {
+    rtype(SUB, dest, src1, src2, m);
+  }
+
+  void into_subi(Register dest, Register src, Immediate i, PrimeModulusIndex m) {
+    rtype(SUBI, dest, src, 0, m).immediate(i);
+  }
+
+  void into_mul(Register dest, Register src1, Register src2, PrimeModulusIndex m) {
+    rtype(MUL, dest, src1, src2, m);
+  }
+
+  void into_muli(Register dest, Register src, Immediate i, PrimeModulusIndex m) {
+    rtype(MULI, dest, src, 0, m).immediate(i);
+  }
+
+  void into_addmuli(Register dest, Register src1, Register src2, Immediate i, PrimeModulusIndex m) {
+    rtype(ADDMULI, dest, src1, src2, m).immediate(i);
+  }
+
+  void into_morph1(Register dest, Register src, AutomorphismNumber num) {
+    opcode(MORPH1).rd(dest).rs1(src).automorphism(num);
+  }
+
+  void into_morph2(Register dest, Register src, AutomorphismNumber num) {
+    opcode(MORPH2).rd(dest).rs1(src).automorphism(num);
+  }
+
+  void into_ntt1(Register dest, Register src, PrimeModulusIndex m) {
+    rtype(NTT1, dest, src, 0, m);
+  }
+
+  void into_ntt2(Register dest, Register src, PrimeModulusIndex m) {
+    rtype(NTT2, dest, src, 0, m);
+  }
+
+  void into_intt1(Register dest, Register src, PrimeModulusIndex m) {
+    rtype(INTT1, dest, src, 0, m);
+  }
+
+  void into_intt2(Register dest, Register src, PrimeModulusIndex m) {
+    rtype(INTT2, dest, src, 0, m);
+  }
+
+  void into_fence() {
+    opcode(FENCE);
+  }
+
+  void into_rngconfig(RngConfig dest, Immediate i, PrimeModulusIndex idx) {
+    opcode(RNGCONFIG).rd(dest).immediate(i).mod_index(idx);
+  }
+
+  void into_rngsetup(PrimeModulusIndex idx) {
+    opcode(RNGSETUP).mod_index(idx);
+  }
+
+  void into_rnggenerate(Register dest) {
+    opcode(RNGGENERATE).rd(dest);
+  }
+
+
+private:
+  Instruction& rtype(Opcode op, Register dest, Register src1, Register src2, PrimeModulusIndex midx) {
+    opcode(op).rd(dest).rs1(src1).rs2(src2).mod_index(midx);
+    return *this;
   }
 
   // opcode
@@ -79,9 +161,8 @@ struct Instruction {
   }
 
   // automorphism number
-  Instruction& automorphism(uint64_t anum) {
-    anum >>= 1;
-    setbits(19, 33, anum);
+  Instruction& automorphism(AutomorphismNumber anum) {
+    setbits(19, 33, anum >> 1);
     return *this;
   }
 
@@ -93,7 +174,8 @@ struct Instruction {
 
   // address for STORE instructions
   Instruction& store_addr(uint64_t addr) {
-    setbits(19, 63, addr);
+    rd(addr);
+    setbits(19, 63, addr << 7);
     return *this;
   }
 
@@ -102,69 +184,78 @@ struct Instruction {
     return *this;
   }
 
-  uint64_t encoded;
-  std::optional<Immediate> imm;
-
-private:
-  uint64_t setbits(uint64_t initial, uint64_t lo, uint64_t hi, uint64_t val) {
-    uint64_t mask = (UINT64_MAX >> (UINT64_WIDTH - hi - 1)) & (UINT64_MAX << lo);
-    return (initial & ~mask) | ((val << lo) & mask);
+  inline uint64_t compute_mask(uint64_t lo, uint64_t hi) {
+    return (UINT64_MAX >> (UINT64_WIDTH - hi - 1)) & (UINT64_MAX << lo);
   }
+
+  void setbits(uint64_t lo, uint64_t hi, uint64_t val) {
+    uint64_t mask = compute_mask(lo, hi);
+    encoded = (encoded & ~mask) | ((val << lo) & mask);
+  }
+
+  uint64_t getbits(uint64_t lo, uint64_t hi) {
+    return (encoded & compute_mask(lo, hi)) >> lo;
+  }
+
+  uint64_t encoded;
+  uint64_t imm;       
 };
+
+using ValueId = uint64_t;
 
 // Program that does nothing
 class ProgramNull {
-  inline uint64_t PolyValues(NativeVector& v, uint64_t modulus) {
+public:
+  using SymbolicValue = uint64_t;
 
-  }
-
-  inline uint64_t Add(uint64_t a1, uint64_t a2, uint64_t modulus) {
+  inline SymbolicValue PolyValues(NativeVector& v, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t AddI(uint64_t a1, uint64_t a2, Immediate i, uint64_t modulus) {
+  inline SymbolicValue Add(SymbolicValue a1, SymbolicValue a2, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t Sub(uint64_t a1, uint64_t a2, uint64_t modulus) {
+  inline SymbolicValue AddI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t SubI(uint64_t a1, uint64_t a2, Immediate i, uint64_t modulus) {
+  inline SymbolicValue Sub(SymbolicValue a1, SymbolicValue a2, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t AddMulI(uint64_t a1, uint64_t a2, Immediate i, uint64_t modulus) {
+  inline SymbolicValue SubI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t Morph(uint64_t a1, AutomorphismNumber n, uint64_t modulus) {
+  inline SymbolicValue AddMulI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t NTT(uint64_t a1, uint64_t modulus) {
+  inline SymbolicValue Morph(SymbolicValue a1, AutomorphismNumber n, NativeInteger modulus) {
     return 0;
   }
 
-  inline uint64_t INTT(uint64_t a1, uint64_t modulus) {
+  inline SymbolicValue NTT(SymbolicValue a1, NativeInteger modulus) {
     return 0;
   }
 
-  // inform program that an address is being used
-  inline void increment_refcount(uint64_t a) {
+  inline SymbolicValue INTT(SymbolicValue a1, NativeInteger modulus) {
+    return 0;
+  }
+
+  inline void increment_refcount(ValueId val) {
 
   }
 
-  // inform program that an address is no longer live
-  inline void decrement_refcount(uint64_t a) {
+  inline void decrement_refcount(ValueId val) {
 
   }
 
-  // force computation
-  inline void force() {
-    OPENFHE_THROW(not_implemented_error, "force() called on ProgramNull");
-  }
 };
+
+
+
 
 // SSA form instructions
 struct SSAInst {
@@ -187,7 +278,40 @@ struct SSAInst {
 
 
 // **************** COMPILER GLOBAL VARIABLE **********************************
-inline ProgramNull compiler;
+inline ProgramNull Basalisc;
+
+// struct SymbolicValue {
+//   SymbolicValue(uint64_t value): value {value} {
+//     Basalisc.increment_refcount(value);
+//   }
+
+//   SymbolicValue(SymbolicValue const& s) {
+//     Basalisc.increment_refcount(s.value);
+//     value = s.value;
+//   }
+
+//   SymbolicValue(SymbolicValue&& s) noexcept {
+//     value = s.value;
+//   }
+
+//   SymbolicValue& operator=(SymbolicValue const& other)
+//   {
+//     return *this = SymbolicValue(other);
+//   }
+ 
+//   SymbolicValue& operator=(SymbolicValue&& other) noexcept
+//   {
+//     value = other.value;
+//     return *this;
+//   }
+
+//   ~SymbolicValue() {
+//     Basalisc.decrement_refcount(value);
+//   }
+
+//   ValueId value;
+// };
+
 
 } // namespace lbcrypto
 
