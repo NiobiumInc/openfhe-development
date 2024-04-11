@@ -247,7 +247,6 @@ struct SSAInst {
     SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& i, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& i, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue& arg, AutomorphismNumber n, NativeInteger const& m);
 
     SSAInstOp op;
@@ -264,7 +263,7 @@ class Program {
 public:
   SymbolicValue ConcretePoly(NativeVector&& v) {
     auto value = new_value();
-    auto midx = modulus_index(v.GetModulus());
+    modulus_index(v.GetModulus());
     m_concrete_polys[value.value] = v;
     m_modifiable_concrete.insert(value.value);
     return value;

@@ -153,15 +153,12 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<st
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(uint64_t val) {
     m_format = Format::EVALUATION;
-    if (!m_values) {
-        auto d{m_params->GetRingDimension()};
-        const auto& m{m_params->GetModulus()};
-        m_values = std::make_unique<NativeVector>(d, m);
-    }
-    size_t vlen{m_values->GetLength()};
+    NativeVector vec { m_params->GetRingDimension(), m_params->GetModulus() };
+    size_t vlen{vec.GetLength()};
     Integer ival{val};
     for (size_t i = 0; i < vlen; ++i)
-        (*m_values)[i] = ival;
+        vec[i] = ival;
+    BasPoly<NativeVector>::SetValues(std::move(vec), m_format);
     return *this;
 }
 
@@ -184,62 +181,64 @@ void BasPoly<NativeVector>::SetValues(NativeVector&& values, Format format) {
     m_sym_value = std::move(Basalisc.ConcretePoly(std::move(values)));
 }
 
+
 BasPoly<NativeVector> BasPoly<NativeVector>::Plus(const typename NativeVector::Integer& element) const {
-    BasPoly<NativeVector> tmp(m_params, m_format);
-    if (m_format == Format::COEFFICIENT)
-        tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
+    if (m_format == Format::COEFFICIENT) 
+        // XXX: BASALISC: Why is this a special case? Sub does not seem to have it...
+        // tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
+        OPENFHE_THROW("Plus: ModAddAtIndex");
     else
-        tmp.SetValues((*m_values).ModAdd(element), m_format);
-    return tmp;
+        return CloneWithNewValues(Basalisc.AddI(m_sym_value, element, m_params->GetModulus()));
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::Minus(const typename NativeVector::Integer& element) const {
-    BasPoly<NativeVector> tmp(m_params, m_format);
-    tmp.SetValues((*m_values).ModSub(element), m_format);
-    return tmp;
+    return CloneWithNewValues(Basalisc.SubI(m_sym_value, element, m_params->GetModulus()));
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::Times(const typename NativeVector::Integer& element) const {
-    BasPoly<NativeVector> tmp(m_params, m_format);
-    tmp.SetValues((*m_values).ModMul(element), m_format);
-    return tmp;
+    return CloneWithNewValues(Basalisc.MulI(m_sym_value, element, m_params->GetModulus()));
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::Times(NativeInteger::SignedNativeInt element) const {
-    BasPoly<NativeVector> tmp(m_params, m_format);
+
     Integer q{m_params->GetModulus()};
+    Integer elementReduced;
     if (element < 0) {
-        Integer elementReduced{NativeInteger::Integer(-element)};
+        elementReduced = NativeInteger::Integer(-element);
         if (elementReduced > q)
             elementReduced.ModEq(q);
-        tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
+        elementReduced = q - elementReduced;
     }
     else {
-        Integer elementReduced{NativeInteger::Integer(element)};
+        elementReduced = NativeInteger::Integer(element);
         if (elementReduced > q)
             elementReduced.ModEq(q);
-        tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
     }
-    return tmp;
+
+    return CloneWithNewValues(Basalisc.MulI(m_sym_value, elementReduced, q));
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::Minus(const BasPoly& rhs) const {
-    BasPoly<NativeVector> tmp(m_params, m_format);
-    tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
-    return tmp;
+    return CloneWithNewValues(Basalisc.Mul(m_sym_value, rhs.m_sym_value, m_params->GetModulus()));
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::MultiplyAndRound(const typename NativeVector::Integer& p,
                                                       const typename NativeVector::Integer& q) const {
+    OPENFHE_THROW("BASALISC: MultiplyAndRound");
+/*
     BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).MultiplyAndRound(p, q), m_format);
     return tmp;
+*/
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::DivideAndRound(const typename NativeVector::Integer& q) const {
+    OPENFHE_THROW("BASALISC: DivideAndRound");
+/*
     BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).DivideAndRound(q), m_format);
     return tmp;
+*/
 }
 
 // TODO: this will return vec of 0s for BigIntegers
@@ -251,25 +250,19 @@ BasPoly<NativeVector> BasPoly<NativeVector>::Negate() const {
 }
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator+=(const BasPoly& element) {
-    if (!m_values)
-        m_values = std::make_unique<NativeVector>(m_params->GetRingDimension(), m_params->GetModulus());
-    m_values->ModAddEq(*element.m_values);
-    return *this;
+    // XXX: The original seems to "this = undefined" as "this = 0".
+    // But it does not do that for element...??
+    m_sym_value = Basalisc.Add(m_sym_value, element.m_sym_value);
 }
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator-=(const BasPoly& element) {
-    if (!m_values)
-        m_values = std::make_unique<NativeVector>(m_params->GetRingDimension(), m_params->GetModulus());
-    m_values->ModSubEq(*element.m_values);
-    return *this;
+    /// XXX: Undefined?
+    m_sym_value = Basalisc.Sub(m_sym_value, element.m_sym_value);
 }
 
 void BasPoly<NativeVector>::AddILElementOne() {
     static const Integer ONE(1);
-    usint vlen{m_params->GetRingDimension()};
-    const auto& m{m_params->GetModulus()};
-    for (usint i = 0; i < vlen; ++i)
-        (*m_values)[i].ModAddFastEq(ONE, m);
+    m_sym_value = Basalisc.AddI(m_sym_value, ONE, m_params->GetModulus());
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k) const {
@@ -281,32 +274,13 @@ BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k) c
     // if (!bf && !bp)
     if (!bp)
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
-    /*
-    // TODO: is this branch ever called?
+    // TODO: is this branch ever called
 
-    BasPoly<NativeVector> result(m_params, m_format, true);
-    if (bf && !bp) {
-        // TODO: Add a test based on the inverse totient hash table?
-
-        // All automorphism operations are performed for k coprime to m
-        auto totientList = GetTotientList(m);
-
-        // This step can be eliminated by using a hash table that looks up the
-        // ring index (between 0 and n - 1) based on the totient index (between 0 and m - 1)
-        NativeVector expanded(m, m_params->GetModulus());
-        for (uint32_t i = 0; i < n; ++i)
-            expanded[totientList[i]] = (*m_values)[i];
-
-        for (uint32_t i = 0; i < n; ++i) {
-            // determines which power of primitive root unity we should switch to
-            (*result.m_values)[i] = expanded[totientList[i] * k % m];
-        }
-        return result;
-    }
-*/
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
-
+    // XXX: BASALISC: Do we need to something special in the EVALUATION case? 
+    return CloneWithNewValues(Basalisc.Morph(m_sym_value, k, m_params->GetModulus()));
+/*
     BasPoly<NativeVector> result(m_params, m_format, true);
     uint32_t logm{lbcrypto::GetMSB(m) - 1};
     uint32_t logn{logm - 1};
@@ -325,6 +299,7 @@ BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k) c
     for (uint32_t j{0}, jk{0}; j < n; ++j, jk += k)
         (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
     return result;
+*/
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k, const std::vector<uint32_t>& precomp) const {
@@ -332,29 +307,42 @@ BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k, c
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
+    OPENFHE_THROW("BASALISC: AutomorphismTransform - precomp");
+    /// XXX: BASALISC we could make this work for concrete polynomials.
+/*
     BasPoly<NativeVector> tmp(m_params, m_format, true);
     uint32_t n = m_params->GetRingDimension();
     for (uint32_t j = 0; j < n; ++j)
         (*tmp.m_values)[j] = (*m_values)[precomp[j]];
     return tmp;
+*/
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::MultiplicativeInverse() const {
+    OPENFHE_THROW("BASALISC: MultiplicativeInverse");
+/*
     BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModInverse(), m_format);
     return tmp;
+*/
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::ModByTwo() const {
+    OPENFHE_THROW("BASALISC: ModByTwo");
+/*
     BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModByTwo(), m_format);
     return tmp;
+*/
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::Mod(const Integer& modulus) const {
+      OPENFHE_THROW("BASALISC: Mod");
+/*
     BasPoly<NativeVector> tmp(m_params, m_format);
     tmp.SetValues((*m_values).Mod(modulus), m_format);
     return tmp;
+*/
 }
 
 void BasPoly<NativeVector>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
@@ -381,14 +369,16 @@ void BasPoly<NativeVector>::SwitchFormat() {
 
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;
-        ChineseRemainderTransformFTT<NativeVector>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
+        m_sym_value = Basalisc.INTT(m_sym_value, m_params->GetModulus());
         return;
     }
     m_format = Format::EVALUATION;
-    ChineseRemainderTransformFTT<NativeVector>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
+    m_sym_value = Basalisc.NTT(m_sym_value, m_params->GetModulus());
 }
 
 void BasPoly<NativeVector>::ArbitrarySwitchFormat() {
+    OPENFHE_THROW("BASALISC: ArbitrarySwitchFromat");
+/*
     if (m_values == nullptr)
         OPENFHE_THROW("Poly switch format to empty values");
     const auto& lr = m_params->GetRootOfUnity();
@@ -405,6 +395,7 @@ void BasPoly<NativeVector>::ArbitrarySwitchFormat() {
         auto&& v = ChineseRemainderTransformArb<NativeVector>().InverseTransform(*m_values, lr, bm, br, co);
         m_values = std::make_unique<NativeVector>(v);
     }
+*/
 }
 
 #if 0
@@ -424,6 +415,8 @@ std::ostream& operator<<(std::ostream& os, const BasPoly<NativeVector>& p) {
 #endif
 
 void BasPoly<NativeVector>::MakeSparse(uint32_t wFactor) {
+    OPENFHE_THROW("BASALISC: MakeSparse");
+/*
     static const Integer ZERO(0);
     if (m_values != nullptr) {
         uint32_t vlen{m_params->GetRingDimension()};
@@ -432,9 +425,12 @@ void BasPoly<NativeVector>::MakeSparse(uint32_t wFactor) {
                 (*m_values)[i] = ZERO;
         }
     }
+*/
 }
 
 bool BasPoly<NativeVector>::InverseExists() const {
+    OPENFHE_THROW("BASALISC: InverseExists");
+/*
     static const Integer ZERO(0);
     usint vlen{m_params->GetRingDimension()};
     for (usint i = 0; i < vlen; ++i) {
@@ -442,9 +438,12 @@ bool BasPoly<NativeVector>::InverseExists() const {
             return false;
     }
     return true;
+*/
 }
 
 double BasPoly<NativeVector>::Norm() const {
+    OPENFHE_THROW("BASALISC: Norm");
+/*
     usint vlen{m_params->GetRingDimension()};
     const auto& q{m_params->GetModulus()};
     const auto& half{q >> 1};
@@ -458,6 +457,7 @@ double BasPoly<NativeVector>::Norm() const {
     }
     minVal = q - minVal;
     return (minVal > maxVal ? minVal : maxVal).ConvertToDouble();
+*/
 }
 
 // Write vector x(current value of the BasPoly object) as \sum\limits{ i = 0
@@ -468,6 +468,8 @@ double BasPoly<NativeVector>::Norm() const {
 
 // TODO: optimize this
 std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::BaseDecompose(usint baseBits, bool evalModeAnswer) const {
+    OPENFHE_THROW("BASALISC: BaseDecompose");
+/*
     usint nBits = m_params->GetModulus().GetLengthForBase(2);
 
     usint nWindows = nBits / baseBits;
@@ -493,6 +495,7 @@ std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::BaseDecompose(usint ba
         result.push_back(xDigit);
     }
     return result;
+*/
 }
 
 // Generate a vector of BasPoly's as {x, base*x, base^2*x, ..., base^{\lfloor
@@ -502,6 +505,8 @@ std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::BaseDecompose(usint ba
 // base = 2^baseBits
 
 std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::PowersOfBase(usint baseBits) const {
+    OPENFHE_THROW("BASALISC: BaseDecompose");
+/*
     static const Integer TWO(2);
     const auto& m{m_params->GetModulus()};
     usint nBits{m.GetLengthForBase(2)};
@@ -513,9 +518,12 @@ std::vector<BasPoly<NativeVector>> BasPoly<NativeVector>::PowersOfBase(usint bas
     for (usint i = 0; i < nWindows; ++i, shift += bbits)
         result[i] = (*this) * TWO.ModExp(shift, m);
     return result;
+*/
 }
 
 typename BasPoly<NativeVector>::PolyNative BasPoly<NativeVector>::DecryptionCRTInterpolate(PlaintextModulus ptm) const {
+    OPENFHE_THROW("BASALISC: DecryptionCRTInterpolate");
+/*
     const BasPoly<NativeVector> smaller(BasPoly<NativeVector>::Mod(ptm));
     usint vlen{m_params->GetRingDimension()};
     auto c{m_params->GetCyclotomicOrder()};
@@ -524,6 +532,7 @@ typename BasPoly<NativeVector>::PolyNative BasPoly<NativeVector>::DecryptionCRTI
     for (usint i = 0; i < vlen; ++i)
         tmp[i] = NativeInteger((*smaller.m_values)[i]);
     return tmp;
+*/
 }
 
 inline BasPoly<NativeVector> BasPoly<NativeVector>::ToNativePoly() const {
