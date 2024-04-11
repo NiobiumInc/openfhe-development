@@ -203,41 +203,10 @@ private:
 };
 
 using ValueId = uint64_t;
+const ValueId undef_value_id = 0;
+const ValueId zero_value_id = 1;
 
-// class Program;
-
-// struct SymbolicValue {
-//   SymbolicValue(uint64_t value): value {value} {
-//     Basalisc.increment_refcount(value);
-//   }
-
-//   SymbolicValue(SymbolicValue const& s) {
-//     Basalisc.increment_refcount(s.value);
-//     value = s.value;
-//   }
-
-//   SymbolicValue(SymbolicValue&& s) noexcept {
-//     value = s.value;
-//   }
-
-//   SymbolicValue& operator=(SymbolicValue const& other)
-//   {
-//     return *this = SymbolicValue(other);
-//   }
- 
-//   SymbolicValue& operator=(SymbolicValue&& other) noexcept
-//   {
-//     value = other.value;
-//     return *this;
-//   }
-
-//   ~SymbolicValue() {
-//     Basalisc.decrement_refcount(value);
-//   }
-
-//   ValueId value;
-// };
-
+// SSA form instructions
 enum SSAInstOp {
   TODO,
   ADD,
@@ -254,81 +223,23 @@ enum SSAInstOp {
   SWITCHMODULUS,
 };
 
-// SSA form instructions
 
-// struct SymbolicValue {
-//   SymbolicValue(uint64_t value): value {value} {
-//     Basalisc.increment_refcount(value);
-//   }
-
-//   SymbolicValue(SymbolicValue const& s) {
-//     Basalisc.increment_refcount(s.value);
-//     value = s.value;
-//   }
-
-//   SymbolicValue(SymbolicValue&& s) noexcept {
-//     value = s.value;
-//   }
-
-//   SymbolicValue& operator=(SymbolicValue const& other)
-//   {
-//     return *this = SymbolicValue(other);
-//   }
-
-//   SymbolicValue& operator=(SymbolicValue&& other) noexcept
-//   {
-//     value = other.value;
-//     return *this;
-//   }
-
-//   ~SymbolicValue() {
-//     Basalisc.decrement_refcount(value);
-//   }
-
-//   ValueId value;
-// };
-
-// struct SSAInst {
-//     SSAInstOp op;
-//     ValueId dest;
-//     ValueId arg1;
-//     ValueId arg2; 
-//     Immediate imm; // or AutomorphismNumber if it is MORPH
-//     PrimeModulusIndex modulus;
-
-//     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m): op {op}, arg1 { arg1.value }, arg2 { arg2.value } { 
-//       modulus = Basalisc.modulus_index(m);
-//     }
-
-//     SSAInst(SSAInstOp op, SymbolicValue const& arg, Immediate i, NativeInteger const& m): op {op}, arg1 { arg.value } { 
-//       modulus = Basalisc.modulus_index(m);
-//     }
-
-//     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, Immediate i, NativeInteger const& m): op {op}, arg1 { arg1.value }, arg2 { arg2.value }, imm { i } { 
-//       modulus = Basalisc.modulus_index(m);
-//     }
-
-//     SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m): op {op}, arg1 { arg.value } { 
-//       modulus = Basalisc.modulus_index(m);
-//     }
-
-//     // SSAInst(SSAInstOp op, SymbolicValue& arg, AutomorphismNumber n, NativeInteger const& m): op { op }, arg1 { arg.value }, arg2 { n } {
-//     //   modulus = Basalisc.modulus_index(m);
-//     // }
-// };
-
-
+// Symbolic value
 struct SymbolicValue {
-  SymbolicValue(uint64_t value);
+  constexpr SymbolicValue(): value{undef_value_id} {};
+  SymbolicValue(ValueId value);
   SymbolicValue(SymbolicValue const& s);
   SymbolicValue(SymbolicValue&& s) noexcept;
   SymbolicValue& operator=(SymbolicValue const& other);
   SymbolicValue& operator=(SymbolicValue&& other) noexcept;
   ~SymbolicValue();
 
+  NativeInteger const& operator[](usint i) const;
+
   ValueId value;
 };
 
+// Compiler state
 struct SSAInst {
     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg, Immediate i, NativeInteger const& m);
@@ -343,14 +254,15 @@ struct SSAInst {
     PrimeModulusIndex modulus;
 };
 
-// Program that does nothing
+
+// Compiler state
 class Program {
 public:
   SymbolicValue PolyValues(std::unique_ptr<NativeVector> v, NativeInteger modulus) {
     auto value = new_value();
     auto midx = modulus_index(modulus);
     m_concrete_polys[value.value] = {std::move(v), midx};
-    return value;    
+    return value;
   }
 
   SymbolicValue Add(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
@@ -397,6 +309,8 @@ public:
   }
 
   void increment_refcount(ValueId val) {
+    if (val == undef_value_id) return;
+
     auto res = m_symbolic_refcount.find(val);
     if(res != m_symbolic_refcount.end()) {
       res->second++;
@@ -406,6 +320,8 @@ public:
   }
 
   void decrement_refcount(ValueId val) {
+    if (val == undef_value_id) return;
+
     auto res = m_symbolic_refcount.find(val);
     if(res != m_symbolic_refcount.end()) {
       res->second--;
@@ -459,7 +375,9 @@ private:
 
   // symbolic value stuff
   std::unordered_map<ValueId, size_t> m_symbolic_refcount;
-  ValueId m_next_value_name = 0;
+  ValueId m_next_value_name = 2;
+      // 0 is reserved for uninitialized symbolic value
+      // 1 is reserved for constant 0 polynomial
 
   // the program
   std::unordered_map<ValueId, ConcretePolyData> m_concrete_polys; // mapping from symbolic value to index into m_concrete_polys;

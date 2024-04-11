@@ -349,6 +349,7 @@ protected:
     std::shared_ptr<Params> m_params{nullptr};
     std::unique_ptr<VecType> m_values{nullptr};
     void ArbitrarySwitchFormat();
+    SymbolicValue m_sym_value;
 };
 
 }  // namespace lbcrypto
