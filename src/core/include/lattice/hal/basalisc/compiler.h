@@ -6,6 +6,7 @@
 #include<assert.h>
 #include<optional>
 #include<map>
+#include<set>
 #include"utils/exception.h"
 #include"math/hal/nativeintbackend.h"
 #include"lattice/hal/default/poly.h"
@@ -16,7 +17,7 @@ using Register = uint64_t;
 using Address = uint64_t;
 using Immediate = uint64_t;
 using PrimeModulusIndex = uint8_t;
-using AutomorphismNumber = uint64_t;
+using AutomorphismNumber = uint32_t;
 using RngConfig = uint64_t;
 
 // Encoding for BASALISC instructions
@@ -241,16 +242,19 @@ struct SymbolicValue {
 
 // Compiler state
 struct SSAInst {
+    // TODO:  nativeinteger const&
     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue const& arg, Immediate i, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, Immediate i, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& i, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& i, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue& arg, AutomorphismNumber n, NativeInteger const& m);
 
     SSAInstOp op;
     ValueId dest;
     ValueId arg1;
     ValueId arg2; 
-    Immediate imm; // or AutomorphismNumber if it is MORPH
+    NativeInteger imm; // or AutomorphismNumber if it is MORPH
     PrimeModulusIndex modulus;
 };
 
@@ -258,18 +262,23 @@ struct SSAInst {
 // Compiler state
 class Program {
 public:
-  SymbolicValue PolyValues(std::unique_ptr<NativeVector> v, NativeInteger modulus) {
+  SymbolicValue ConcretePoly(NativeVector&& v) {
     auto value = new_value();
-    auto midx = modulus_index(modulus);
-    m_concrete_polys[value.value] = {std::move(v), midx};
+    auto midx = modulus_index(v.GetModulus());
+    m_concrete_polys[value.value] = v;
+    m_modifiable_concrete.insert(value.value);
     return value;
+  }
+
+  SymbolicValue ConcretePoly(std::unique_ptr<NativeVector> v) {
+    return ConcretePoly(std::move(*v));
   }
 
   SymbolicValue Add(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::ADD, a1, a2, m});
   }
 
-  SymbolicValue AddI(SymbolicValue const& a1, Immediate i, NativeInteger const& m) {
+  SymbolicValue AddI(SymbolicValue const& a1, NativeInteger const& i, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::ADDI, a1.value, i, m});
   }
 
@@ -277,7 +286,7 @@ public:
     return emit_instruction({SSAInstOp::SUB, a1, a2, m});
   }
 
-  SymbolicValue SubI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger const& m) {
+  SymbolicValue SubI(SymbolicValue a1, NativeInteger const& i, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::SUBI, a1, i, m});
   }
 
@@ -285,7 +294,7 @@ public:
     return emit_instruction({SSAInstOp::MUL, a1, a2, m});
   }
 
-  SymbolicValue MulI(SymbolicValue a1, SymbolicValue a2, Immediate i, NativeInteger const& m) {
+  SymbolicValue MulI(SymbolicValue a1, NativeInteger const& i, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::MULI, a1, i, m});
   }
 
@@ -351,22 +360,55 @@ public:
     return {m_next_value_name++};
   }
 
+  bool is_concrete(SymbolicValue const& s) const {
+    return m_concrete_polys.find(s.value) != m_concrete_polys.end();
+  }
+
+  void freeze_value(SymbolicValue const& v) {
+    m_modifiable_concrete.erase(v.value);
+  }
+
+  NativeVector const& get_values(SymbolicValue const& s) {
+    auto p = m_concrete_polys.find(s.value);
+    if(p == m_concrete_polys.end()) {
+      OPENFHE_THROW(not_available_error, "get_values() called on symbolic value");
+    }
+    return p->second;
+  }
+
+  NativeVector& get_values_mut(SymbolicValue& s) {
+    bool is_mod = m_modifiable_concrete.find(s.value) == m_modifiable_concrete.end();
+    if(is_mod) {
+      return m_concrete_polys[s.value];
+    } else {
+      OPENFHE_THROW(not_available_error, "get_values_mut() called on symbolic or frozen value");
+    }
+  }
+
+  // do a deep, modifiable copy of a polynomial if it is concrete
+  // if it is symbolic, does a normal (by-reference) copy instead
+  SymbolicValue deepcopy(SymbolicValue const& s) {
+    auto poly = m_concrete_polys.find(s.value);
+    if(poly == m_concrete_polys.end()) {
+      return s;
+    } else {
+      auto data = std::make_unique<NativeVector>(poly->second);
+      return ConcretePoly(std::move(data));
+    }
+  }
+
+  // std::optional<NativeVector&> get_values_if_modifiable(SymbolicValue const& s) {
+  //   auto poly = m_concrete_polys.find(s.value);
+  //   auto refs = m_symbolic_refcount[s.value];
+
+  //   if(poly == m_concrete_polys.end() || refs != 1) {
+  //     return std::nullopt;
+  //   } else {
+  //     return *(poly->second.coeff);
+  //   }
+  // }
+
 private:
-  struct ConcretePolyData {
-    std::unique_ptr<NativeVector> coeff;
-    size_t modulus_index;
-
-    ConcretePolyData() {
-
-    }
-
-    ConcretePolyData(std::unique_ptr<NativeVector> v, size_t idx) {
-      coeff = std::move(v);
-      modulus_index = idx;
-    }
-
-  };
-
   // modulus table
   static const size_t MODULUS_TABLE_SIZE = 32;
   size_t m_next_modulus_slot;
@@ -378,9 +420,10 @@ private:
   ValueId m_next_value_name = 2;
       // 0 is reserved for uninitialized symbolic value
       // 1 is reserved for constant 0 polynomial
+  std::unordered_set<ValueId> m_modifiable_concrete;
 
   // the program
-  std::unordered_map<ValueId, ConcretePolyData> m_concrete_polys; // mapping from symbolic value to index into m_concrete_polys;
+  std::unordered_map<ValueId, NativeVector> m_concrete_polys; // mapping from symbolic value to index into m_concrete_polys;
   std::vector<SSAInst> m_inst;
 };
 

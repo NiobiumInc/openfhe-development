@@ -79,7 +79,6 @@ public:
     BasPoly(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
         : m_format{format}, m_params{params} {
-        std::cout << "HERE\n";
         if (initializeElementToZero)
             BasPoly::SetValuesToZero();
     }
@@ -131,17 +130,18 @@ public:
 
     BasPoly(const PolyType& p) noexcept
         : m_format{p.m_format},
-          m_params{p.m_params},
-          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {}
+          m_params{p.m_params} {
+        m_sym_value = std::move(Basalisc.deepcopy(p.m_sym_value));
+    }
 
     BasPoly(PolyType&& p) noexcept
-        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {}
+        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_sym_value{std::move(p.m_sym_value)} {}
 
     PolyType& operator=(const PolyType& rhs) noexcept override;
     PolyType& operator=(PolyType&& rhs) noexcept override {
         m_format = std::move(rhs.m_format);
         m_params = std::move(rhs.m_params);
-        m_values = std::move(rhs.m_values);
+        m_sym_value = std::move(rhs.m_sym_value);
         return *this;
     }
     PolyType& operator=(const std::vector<int32_t>& rhs);
@@ -149,6 +149,12 @@ public:
     PolyType& operator=(std::initializer_list<uint64_t> rhs) override;
     PolyType& operator=(std::initializer_list<std::string> rhs);
     PolyType& operator=(uint64_t val);
+
+    PolyType CloneWithNewValues(SymbolicValue&& v) const {
+        PolyType p { m_params, m_format };
+        p.m_sym_value = std::move(v);
+        return p;
+    }
 
     PolyNative DecryptionCRTInterpolate(PlaintextModulus ptm) const override;
     PolyNative ToNativePoly() const final;
@@ -158,13 +164,15 @@ public:
 
     void SetValuesToZero() override {
         usint r{m_params->GetRingDimension()};
-        m_values = std::make_unique<VecType>(r, m_params->GetModulus());
+        auto modulus = m_params->GetModulus();
+        m_sym_value = std::move(Basalisc.ConcretePoly({r, modulus}));
     }
 
     void SetValuesToMax() override {
         usint r{m_params->GetRingDimension()};
-        auto max{m_params->GetModulus() - Integer(1)};
-        m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
+        auto modulus = m_params->GetModulus();
+        auto max{modulus - Integer(1)};
+        m_sym_value = std::move(Basalisc.ConcretePoly({r, modulus, max}));
     }
 
     inline Format GetFormat() const final {
@@ -180,33 +188,27 @@ public:
     }
 
     inline const VecType& GetValues() const final {
-        if (m_values == nullptr)
-            OPENFHE_THROW("No values in BasPoly");
-        return *m_values;
+        return Basalisc.get_values(m_sym_value);
     }
 
     inline bool IsEmpty() const final {
-        return m_values == nullptr;
+        return m_sym_value.value == undef_value_id;
     }
 
     inline Integer& at(usint i) final {
-        if (m_values == nullptr)
-            OPENFHE_THROW("No values in BasPoly");
-        return m_values->at(i);
+        return Basalisc.get_values_mut(m_sym_value).at(i);
     }
 
     inline const Integer& at(usint i) const final {
-        if (m_values == nullptr)
-            OPENFHE_THROW("No values in BasPoly");
-        return m_values->at(i);
+        return Basalisc.get_values(m_sym_value).at(i);
     }
 
     inline Integer& operator[](usint i) final {
-        return (*m_values)[i];
+        return Basalisc.get_values_mut(m_sym_value)[i];
     }
 
     inline const Integer& operator[](usint i) const final {
-        return (*m_values)[i];
+        return Basalisc.get_values(m_sym_value)[i];
     }
 
     BasPoly Plus(const BasPoly& rhs) const override {
@@ -216,14 +218,11 @@ public:
             OPENFHE_THROW("Modulus missmatch");
         if (m_format != rhs.m_format)
             OPENFHE_THROW("Format missmatch");
-        auto tmp(*this);
-        tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
-        return tmp;
+        return PlusNoCheck(rhs);
     }
     BasPoly PlusNoCheck(const BasPoly& rhs) const {
-        auto tmp(*this);
-        tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
-        return tmp;
+        SymbolicValue v = Basalisc.Add(m_sym_value, rhs.m_sym_value, m_params->GetModulus());
+        return CloneWithNewValues(std::move(v));
     }
     BasPoly& operator+=(const BasPoly& element) override;
 
@@ -237,7 +236,7 @@ public:
 
     BasPoly Minus(const Integer& element) const override;
     BasPoly& operator-=(const Integer& element) override {
-        m_values->ModSubEq(element);
+        m_sym_value = Basalisc.SubI(m_sym_value, element, m_params->GetModulus());
         return *this;
     }
 
@@ -248,14 +247,10 @@ public:
             OPENFHE_THROW("Modulus missmatch");
         if (m_format != Format::EVALUATION || rhs.m_format != Format::EVALUATION)
             OPENFHE_THROW("operator* for BasPoly supported only in Format::EVALUATION");
-        auto tmp(*this);
-        tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
-        return tmp;
+        return TimesNoCheck(rhs);
     }
     BasPoly TimesNoCheck(const BasPoly& rhs) const {
-        auto tmp(*this);
-        tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
-        return tmp;
+        return CloneWithNewValues(Basalisc.Mul(m_sym_value, rhs.m_sym_value, m_params->GetModulus()));
     }
     BasPoly& operator*=(const BasPoly& rhs) override {
         if (m_params->GetRingDimension() != rhs.m_params->GetRingDimension())
@@ -264,17 +259,12 @@ public:
             OPENFHE_THROW("Modulus missmatch");
         if (m_format != Format::EVALUATION || rhs.m_format != Format::EVALUATION)
             OPENFHE_THROW("operator* for BasPoly supported only in Format::EVALUATION");
-        if (m_values) {
-            m_values->ModMulNoCheckEq(*rhs.m_values);
-            return *this;
-        }
-        m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
-        return *this;
+        m_sym_value = std::move(Basalisc.Mul(m_sym_value, rhs.m_sym_value, m_params->GetModulus()));
     }
 
     BasPoly Times(const Integer& element) const override;
     BasPoly& operator*=(const Integer& element) override {
-        m_values->ModMulEq(element);
+        m_sym_value = std::move(Basalisc.MulI(m_sym_value, element, m_params->GetModulus()));
         return *this;
     }
 
@@ -347,7 +337,7 @@ public:
 protected:
     Format m_format{Format::EVALUATION};
     std::shared_ptr<Params> m_params{nullptr};
-    std::unique_ptr<VecType> m_values{nullptr};
+    // std::unique_ptr<VecType> m_values{nullptr};
     void ArbitrarySwitchFormat();
     SymbolicValue m_sym_value;
 };

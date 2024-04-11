@@ -46,10 +46,6 @@ SymbolicValue::~SymbolicValue()
   Basalisc.decrement_refcount(value);
 }
 
-NativeInteger const& SymbolicValue::operator[](usint i) const {
-  
-}
-
 // -----------------------------------------------------------------------------
 // SSAInst
 // -----------------------------------------------------------------------------
@@ -57,15 +53,17 @@ SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& a
   : op {op}, arg1 { arg1.value }, arg2 { arg2.value }
 {
   modulus = Basalisc.modulus_index(m);
+  Basalisc.freeze_value(arg1.value);
+  Basalisc.freeze_value(arg2.value);
 }
 
-SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg, Immediate i, NativeInteger const& m)
+SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& i, NativeInteger const& m)
   : op {op}, arg1 { arg.value }
 {
   modulus = Basalisc.modulus_index(m);
 }
 
-SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, Immediate i, NativeInteger const& m)
+SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& i, NativeInteger const& m)
   : op {op}, arg1 { arg1.value }, arg2 { arg2.value }, imm { i }
 {
   modulus = Basalisc.modulus_index(m);

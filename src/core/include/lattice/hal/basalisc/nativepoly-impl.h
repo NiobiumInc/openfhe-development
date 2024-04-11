@@ -52,43 +52,41 @@ namespace lbcrypto {
 
 BasPoly<NativeVector>::BasPoly(const DggType& dgg, const std::shared_ptr<BasPoly::Params>& params, Format format)
     : m_format{Format::COEFFICIENT},
-      m_params{params},
-      m_values{std::make_unique<NativeVector>(dgg.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
+      m_params{params} {
+    auto vec = dgg.GenerateVector(params->GetRingDimension(), params->GetModulus());
+    m_sym_value = Basalisc.ConcretePoly(std::move(vec));
     BasPoly<NativeVector>::SetFormat(format);
 }
 
 BasPoly<NativeVector>::BasPoly(DugType& dug, const std::shared_ptr<BasPoly::Params>& params, Format format)
     : m_format{format},
-      m_params{params},
-      m_values{std::make_unique<NativeVector>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {}
+      m_params{params} {
+    auto vec = dug.GenerateVector(params->GetRingDimension(), params->GetModulus());
+    m_sym_value = Basalisc.ConcretePoly(std::move(vec));
+    BasPoly<NativeVector>::SetFormat(format);
+}
 
 BasPoly<NativeVector>::BasPoly(const BugType& bug, const std::shared_ptr<BasPoly::Params>& params, Format format)
     : m_format{Format::COEFFICIENT},
-      m_params{params},
-      m_values{std::make_unique<NativeVector>(bug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
+      m_params{params} {
+    auto vec = bug.GenerateVector(params->GetRingDimension(), params->GetModulus());
+    m_sym_value = Basalisc.ConcretePoly(std::move(vec));
     BasPoly<NativeVector>::SetFormat(format);
 }
 
 BasPoly<NativeVector>::BasPoly(const TugType& tug, const std::shared_ptr<BasPoly::Params>& params, Format format,
                             uint32_t h)
     : m_format{Format::COEFFICIENT},
-      m_params{params},
-      m_values{std::make_unique<NativeVector>(tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h))} {
+      m_params{params} {
+    auto vec = tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h);
+    m_sym_value = Basalisc.ConcretePoly(std::move(vec));
     BasPoly<NativeVector>::SetFormat(format);
 }
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const BasPoly& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
-    if (!rhs.m_values) {
-        m_values = nullptr;
-        return *this;
-    }
-    if (m_values) {
-        *m_values = *rhs.m_values;
-        return *this;
-    }
-    m_values = std::make_unique<NativeVector>(*rhs.m_values);
+    m_sym_value = std::move(Basalisc.deepcopy(rhs.m_sym_value));
     return *this;
 }
 
@@ -97,13 +95,11 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<ui
     static const Integer ZERO(0);
     const size_t llen = rhs.size();
     const size_t vlen = m_params->GetRingDimension();
-    if (!m_values) {
-        NativeVector temp(vlen);
-        temp.SetModulus(m_params->GetModulus());
-        BasPoly<NativeVector>::SetValues(std::move(temp), m_format);
-    }
+    NativeVector vals {vlen, m_params->GetModulus()};
     for (size_t j = 0; j < vlen; ++j)
-        (*m_values)[j] = (j < llen) ? *(rhs.begin() + j) : ZERO;
+        vals[j] = (j < llen) ? *(rhs.begin() + j) : ZERO;
+
+    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vals)));
     return *this;
 }
 
@@ -114,18 +110,17 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int64_
     const size_t llen{rhs.size()};
     const size_t vlen{m_params->GetRingDimension()};
     const auto& m = m_params->GetModulus();
-    if (!m_values) {
-        NativeVector tmp(vlen);
-        tmp.SetModulus(m);
-        BasPoly<NativeVector>::SetValues(std::move(tmp), m_format);
-    }
+    NativeVector vals {vlen, m};
+
     for (size_t j = 0; j < vlen; ++j) {
         if (j < llen)
-            (*m_values)[j] =
+            (vals)[j] =
                 (rhs[j] < 0) ? m - Integer(static_cast<uint64_t>(-rhs[j])) : Integer(static_cast<uint64_t>(rhs[j]));
         else
-            (*m_values)[j] = ZERO;
+            (vals)[j] = ZERO;
     }
+
+    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vals)));
     return *this;
 }
 
@@ -135,29 +130,24 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int32_
     const size_t llen{rhs.size()};
     const size_t vlen{m_params->GetRingDimension()};
     const auto& m = m_params->GetModulus();
-    if (!m_values) {
-        NativeVector tmp(vlen);
-        tmp.SetModulus(m);
-        BasPoly<NativeVector>::SetValues(std::move(tmp), m_format);
-    }
+    NativeVector vals {vlen, m};
+
     for (size_t j = 0; j < vlen; ++j) {
         if (j < llen)
-            (*m_values)[j] =
+            vals[j] =
                 (rhs[j] < 0) ? m - Integer(static_cast<uint64_t>(-rhs[j])) : Integer(static_cast<uint64_t>(rhs[j]));
         else
-            (*m_values)[j] = ZERO;
+            vals[j] = ZERO;
     }
+    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vals)));
     return *this;
 }
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<std::string> rhs) {
     const size_t vlen = m_params->GetRingDimension();
-    if (!m_values) {
-        NativeVector temp(vlen);
-        temp.SetModulus(m_params->GetModulus());
-        BasPoly<NativeVector>::SetValues(std::move(temp), m_format);
-    }
-    *m_values = rhs;
+    NativeVector vec {vlen, m_params->GetModulus() };
+    vec = rhs;
+    BasPoly<NativeVector>::SetValues(std::move(vec), m_format);
     return *this;
 }
 
@@ -181,7 +171,8 @@ void BasPoly<NativeVector>::SetValues(const NativeVector& values, Format format)
     if (m_params->GetRingDimension() != values.GetLength() || m_params->GetModulus() != values.GetModulus())
         OPENFHE_THROW("Parameter mismatch on SetValues for Polynomial");
     m_format = format;
-    m_values = std::make_unique<NativeVector>(values);
+    auto vec = values;
+    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vec)));
 }
 
 void BasPoly<NativeVector>::SetValues(NativeVector&& values, Format format) {
@@ -190,7 +181,7 @@ void BasPoly<NativeVector>::SetValues(NativeVector&& values, Format format) {
     if (m_params->GetRingDimension() != values.GetLength() || m_params->GetModulus() != values.GetModulus())
         OPENFHE_THROW("Parameter mismatch on SetValues for Polynomial");
     m_format = format;
-    m_values = std::make_unique<NativeVector>(std::move(values));
+    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(values)));
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::Plus(const typename NativeVector::Integer& element) const {
