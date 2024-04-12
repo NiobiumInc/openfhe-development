@@ -69,7 +69,7 @@ SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& a
   modulus = Basalisc.modulus_index(m);
 }
 
-SSAInst::SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m)
+SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& m)
   : op {op}, arg1 { arg.value }
 {
   modulus = Basalisc.modulus_index(m);

@@ -95,7 +95,8 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<ui
     static const Integer ZERO(0);
     const size_t llen = rhs.size();
     const size_t vlen = m_params->GetRingDimension();
-    NativeVector vals {vlen, m_params->GetModulus()};
+
+    NativeVector vals(vlen, m_params->GetModulus());
     for (size_t j = 0; j < vlen; ++j)
         vals[j] = (j < llen) ? *(rhs.begin() + j) : ZERO;
 
@@ -110,7 +111,7 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int64_
     const size_t llen{rhs.size()};
     const size_t vlen{m_params->GetRingDimension()};
     const auto& m = m_params->GetModulus();
-    NativeVector vals {vlen, m};
+    NativeVector vals(vlen, m);
 
     for (size_t j = 0; j < vlen; ++j) {
         if (j < llen)
@@ -130,7 +131,7 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int32_
     const size_t llen{rhs.size()};
     const size_t vlen{m_params->GetRingDimension()};
     const auto& m = m_params->GetModulus();
-    NativeVector vals {vlen, m};
+    NativeVector vals(vlen, m);
 
     for (size_t j = 0; j < vlen; ++j) {
         if (j < llen)
@@ -145,7 +146,7 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int32_
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<std::string> rhs) {
     const size_t vlen = m_params->GetRingDimension();
-    NativeVector vec {vlen, m_params->GetModulus() };
+    NativeVector vec(vlen, m_params->GetModulus());
     vec = rhs;
     BasPoly<NativeVector>::SetValues(std::move(vec), m_format);
     return *this;
@@ -252,12 +253,14 @@ BasPoly<NativeVector> BasPoly<NativeVector>::Negate() const {
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator+=(const BasPoly& element) {
     // XXX: The original seems to "this = undefined" as "this = 0".
     // But it does not do that for element...??
-    m_sym_value = Basalisc.Add(m_sym_value, element.m_sym_value);
+    m_sym_value = Basalisc.Add(m_sym_value, element.m_sym_value, m_params->GetModulus());
+    return *this;
 }
 
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator-=(const BasPoly& element) {
     /// XXX: Undefined?
-    m_sym_value = Basalisc.Sub(m_sym_value, element.m_sym_value);
+    m_sym_value = Basalisc.Sub(m_sym_value, element.m_sym_value, m_params->GetModulus());
+    return *this;
 }
 
 void BasPoly<NativeVector>::AddILElementOne() {
@@ -272,7 +275,7 @@ BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k) c
     bool bf{m_format == Format::EVALUATION};
 
     // if (!bf && !bp)
-    if (!bp)
+    if (!bp || !bf)
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
     // TODO: is this branch ever called
 
@@ -347,25 +350,26 @@ BasPoly<NativeVector> BasPoly<NativeVector>::Mod(const Integer& modulus) const {
 
 void BasPoly<NativeVector>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
                                       const Integer& rootOfUnityArb) {
-    if (m_values != nullptr) {
-        m_values->SwitchModulus(modulus);
-        auto c{m_params->GetCyclotomicOrder()};
-        m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
-    }
+    // if (m_values != nullptr) {
+    //     m_values->SwitchModulus(modulus);
+    //     auto c{m_params->GetCyclotomicOrder()};
+    //     m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
+    // }
+    m_sym_value = std::move(Basalisc.SwitchModulus(m_sym_value, rootOfUnity, modulus));
 }
 
 void BasPoly<NativeVector>::SwitchFormat() {
     const auto& co{m_params->GetCyclotomicOrder()};
     const auto& rd{m_params->GetRingDimension()};
-    const auto& ru{m_params->GetRootOfUnity()};
+    // const auto& ru{m_params->GetRootOfUnity()};
 
     if (rd != (co >> 1)) {
         BasPoly<NativeVector>::ArbitrarySwitchFormat();
         return;
     }
 
-    if (!m_values)
-        OPENFHE_THROW("Poly switch format to empty values");
+    // if (!m_values)
+    //     OPENFHE_THROW("Poly switch format to empty values");
 
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;

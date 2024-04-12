@@ -107,8 +107,8 @@ public:
     BasPoly(const PolyNative& rhs, Format format,
              typename std::enable_if_t<std::is_same_v<T, NativeVector>, bool> = true)
         : m_format{rhs.m_format},
-          m_params{rhs.m_params},
-          m_values{rhs.m_values ? std::make_unique<VecType>(*rhs.m_values) : nullptr} {
+          m_params{rhs.m_params} {
+        m_values = std::make_unique<VecType>(Basalisc.get_values(rhs.m_sym_value));
         BasPoly<VecType>::SetFormat(format);
     }
 

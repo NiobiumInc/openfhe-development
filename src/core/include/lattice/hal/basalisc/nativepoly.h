@@ -104,8 +104,8 @@ public:
     BasPoly(const PolyNative& rhs, Format format,
              typename std::enable_if_t<std::is_same_v<T, NativeVector>, bool> = true)
         : m_format{rhs.m_format},
-          m_params{rhs.m_params},
-          m_values{rhs.m_values ? std::make_unique<VecType>(*rhs.m_values) : nullptr} {
+          m_params{rhs.m_params} {
+        m_sym_value = std::move(Basalisc.deepcopy(rhs.m_sym_value));
         BasPoly<VecType>::SetFormat(format);
     }
 
@@ -124,8 +124,7 @@ public:
         tmp.SetModulus(m_params->GetModulus());
         for (uint32_t i{0}; i < vlen; ++i)
             tmp[i] = Integer(v[i]);
-        m_values = std::make_unique<VecType>(tmp);
-        BasPoly<VecType>::SetFormat(format);
+        SetValues(std::move(tmp), format);
     }
 
     BasPoly(const PolyType& p) noexcept
@@ -260,6 +259,7 @@ public:
         if (m_format != Format::EVALUATION || rhs.m_format != Format::EVALUATION)
             OPENFHE_THROW("operator* for BasPoly supported only in Format::EVALUATION");
         m_sym_value = std::move(Basalisc.Mul(m_sym_value, rhs.m_sym_value, m_params->GetModulus()));
+        return *this;
     }
 
     BasPoly Times(const Integer& element) const override;
@@ -306,20 +306,23 @@ public:
 
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
-        ar(::cereal::make_nvp("v", m_values));
-        ar(::cereal::make_nvp("f", m_format));
-        ar(::cereal::make_nvp("p", m_params));
+        // ar(::cereal::make_nvp("v", m_values));
+        // ar(::cereal::make_nvp("f", m_format));
+        // ar(::cereal::make_nvp("p", m_params));
+        OPENFHE_THROW(not_implemented_error, "save() not implemented for specialized basalic nativepoly");
     }
 
     template <class Archive>
     void load(Archive& ar, std::uint32_t const version) {
-        if (version > SerializedVersion()) {
-            OPENFHE_THROW("serialized object version " + std::to_string(version) +
-                          " is from a later version of the library");
-        }
-        ar(::cereal::make_nvp("v", m_values));
-        ar(::cereal::make_nvp("f", m_format));
-        ar(::cereal::make_nvp("p", m_params));
+        // if (version > SerializedVersion()) {
+        //     OPENFHE_THROW("serialized object version " + std::to_string(version) +
+        //                   " is from a later version of the library");
+        // }
+        // ar(::cereal::make_nvp("v", m_values));
+        // ar(::cereal::make_nvp("f", m_format));
+        // ar(::cereal::make_nvp("p", m_params));
+
+        OPENFHE_THROW(not_implemented_error, "load() not implemented for specialized basalic nativepoly");
     }
 
     static const std::string GetElementName() {

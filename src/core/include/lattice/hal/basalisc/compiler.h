@@ -203,6 +203,11 @@ private:
   uint64_t imm;       
 };
 
+
+struct BasaliscImage {
+  std::vector<uint64_t> memory;
+}
+
 using ValueId = uint64_t;
 const ValueId undef_value_id = 0;
 const ValueId zero_value_id = 1;
@@ -246,8 +251,8 @@ struct SSAInst {
     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& i, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& i, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue& arg, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue& arg, AutomorphismNumber n, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, AutomorphismNumber n, NativeInteger const& m);
 
     SSAInstOp op;
     ValueId dest;
@@ -293,20 +298,24 @@ public:
     return emit_instruction({SSAInstOp::MUL, a1, a2, m});
   }
 
-  SymbolicValue MulI(SymbolicValue a1, NativeInteger const& i, NativeInteger const& m) {
+  SymbolicValue MulI(SymbolicValue const& a1, NativeInteger const& i, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::MULI, a1, i, m});
   }
 
-  SymbolicValue Morph(SymbolicValue a1, AutomorphismNumber n, NativeInteger const& m) {
+  SymbolicValue Morph(SymbolicValue const& a1, AutomorphismNumber n, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::MORPH, a1, n, m});
   }
 
-  SymbolicValue NTT(SymbolicValue a1, NativeInteger const& m) {
+  SymbolicValue NTT(SymbolicValue const& a1, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::NTT, a1, m});
   }
 
-  SymbolicValue INTT(SymbolicValue a1, NativeInteger const& m) {
+  SymbolicValue INTT(SymbolicValue const& a1, NativeInteger const& m) {
     return emit_instruction({SSAInstOp::INTT, a1, m});
+  }
+
+  SymbolicValue SwitchModulus(SymbolicValue const& a, NativeInteger rootOfUnity, NativeInteger m) {
+    return emit_instruction({SSAInstOp::SWITCHMODULUS, a, rootOfUnity, m});
   }
 
   SymbolicValue emit_instruction(SSAInst const& ssa) {
