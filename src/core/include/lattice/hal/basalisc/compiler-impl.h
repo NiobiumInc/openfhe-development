@@ -75,4 +75,16 @@ SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& m)
   modulus = Basalisc.modulus_index(m);
 }
 
+SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg)
+  : op {op}, arg1 {arg.value}
+{
+
+}
+
+SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg, AutomorphismNumber n, NativeInteger const& m)
+  : op { op }, arg1 { arg.value }, imm { NativeInteger { n } }
+{
+  modulus = Basalisc.modulus_index(m);
+}
+
 } // namespace lbcrypto

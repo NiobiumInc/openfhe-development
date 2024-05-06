@@ -191,7 +191,7 @@ public:
     }
 
     inline bool IsEmpty() const final {
-        return m_sym_value.value == undef_value_id;
+        return m_sym_value.value == UNDEF_VALUE_ID;
     }
 
     inline Integer& at(usint i) final {
