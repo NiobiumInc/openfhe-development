@@ -321,7 +321,7 @@ const ValueId ZERO_VALUE_ID = 1;
 
 struct SymbolicValue {
   constexpr SymbolicValue(): value{UNDEF_VALUE_ID} {};
-  SymbolicValue(ValueId value);
+  explicit SymbolicValue(ValueId value);
   SymbolicValue(SymbolicValue const& s);
   SymbolicValue(SymbolicValue&& s) noexcept;
   SymbolicValue& operator=(SymbolicValue const& other);
@@ -359,12 +359,16 @@ struct SSAInst {
     SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg, AutomorphismNumber n, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg);
+    SSAInst(SSAInstOp op, ValueId const& arg)
+    : op { op }, arg1 { arg } {
+
+    }
 
     SSAInstOp op = SSAInstOp::TODO;
     ValueId dest = UNDEF_VALUE_ID;
     ValueId arg1 = UNDEF_VALUE_ID;
     ValueId arg2 = UNDEF_VALUE_ID; 
-    NativeInteger imm; // or AutomorphismNumber if it is MORPH
+    NativeInteger imm = 0; // immediate or or AutomorphismNumber if it is MORPH
     PrimeModulusIndex modulus = 0;
 };
 
@@ -1021,6 +1025,7 @@ public:
     return value;
   }
 
+
   SymbolicValue ConcretePoly(std::unique_ptr<NativeVector> v) {
     return ConcretePoly(std::move(*v));
   }
@@ -1030,7 +1035,7 @@ public:
   }
 
   SymbolicValue AddI(SymbolicValue const& a1, NativeInteger const& i, NativeInteger const& m) {
-    return emit_instruction({SSAInstOp::ADDI, a1.value, i, m});
+    return emit_instruction({SSAInstOp::ADDI, a1, i, m});
   }
 
   SymbolicValue Sub(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
@@ -1072,6 +1077,15 @@ public:
     return v;
   }
 
+  bool is_zero_vec(NativeVector const& nv) {
+    for(size_t i = 0; i < nv.GetLength(); i++) {
+      if(nv[i] != 0)
+        return false;
+    }
+
+    return true;
+  }
+
   void increment_refcount(ValueId val) {
     if (val == UNDEF_VALUE_ID) return;
 
@@ -1090,12 +1104,19 @@ public:
     if(res != m_symbolic_refcount.end()) {
       res->second--;
       if(res->second <= 0) {
-        // emit hint to memory that this value is dead
-        // don't call emit_instruction here because it causes infinite mutual recursion
         m_inst.push_back({FREE, val});  
         m_symbolic_refcount.erase(val);
       }
     }
+  }
+
+  bool is_used(ValueId const& v) {
+    for(auto const& ssa_inst: m_inst) {
+      if(ssa_inst.arg1 == v || ssa_inst.arg2 == v) {
+        return true;
+      }
+    }
+    return false;
   }
 
   size_t modulus_index(NativeInteger const& m) {
@@ -1103,7 +1124,7 @@ public:
   }
 
   SymbolicValue new_value() {
-    return {m_next_value_name++};
+    return SymbolicValue {m_next_value_name++};
   }
 
   bool is_concrete(SymbolicValue const& s) const {
@@ -1112,6 +1133,7 @@ public:
 
   void freeze_value(SymbolicValue const& v) {
     m_modifiable_concrete.erase(v.value);
+    m_concrete_polys.erase(v.value);
   }
 
   NativeVector const& get_values(SymbolicValue const& s) {

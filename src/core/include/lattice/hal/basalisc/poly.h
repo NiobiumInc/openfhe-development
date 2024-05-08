@@ -37,7 +37,9 @@
 #define LBCRYPTO_INC_LATTICE_HAL_BASALISC_POLY_H
 
 #include "lattice/hal/poly-interface.h"
+
 #include "lattice/hal/basalisc/nativepoly.h"
+
 #include "lattice/hal/default/ildcrtparams.h"
 #include "lattice/hal/default/ilparams.h"
 

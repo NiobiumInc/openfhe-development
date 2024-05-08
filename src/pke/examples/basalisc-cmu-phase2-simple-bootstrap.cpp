@@ -94,7 +94,9 @@ int main(int argc, char* argv[]) {
     double seconds = duration_cast<duration<double>>(clock.now() - start).count();
     std::cout << seconds << std::endl;
 
+#ifndef BASALISC_USE_OPENFHE_DEFAULT 
     Basalisc.instruction_stats().display();
+#endif
         // durations[iter_idx] = seconds;
     // }
     // auto [median, iqr] = median_iqr(durations.begin(), durations.end());

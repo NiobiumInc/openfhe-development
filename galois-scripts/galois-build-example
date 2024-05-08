@@ -1,5 +1,5 @@
 #!/bin/bash
-EXAMPLE=advanced-ckks-bootstrapping
+#EXAMPLE=advanced-ckks-bootstrapping
 # EXAMPLE=simple-ckks-bootstrapping
 
 g++ \

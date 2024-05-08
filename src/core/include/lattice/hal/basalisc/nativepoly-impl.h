@@ -310,15 +310,19 @@ BasPoly<NativeVector> BasPoly<NativeVector>::AutomorphismTransform(uint32_t k, c
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
-    OPENFHE_THROW("BASALISC: AutomorphismTransform - precomp");
+    return CloneWithNewValues(Basalisc.Morph(m_sym_value, k, m_params->GetModulus()));
+    // OPENFHE_THROW("BASALISC: AutomorphismTransform - precomp");
     /// XXX: BASALISC we could make this work for concrete polynomials.
-/*
-    BasPoly<NativeVector> tmp(m_params, m_format, true);
-    uint32_t n = m_params->GetRingDimension();
-    for (uint32_t j = 0; j < n; ++j)
-        (*tmp.m_values)[j] = (*m_values)[precomp[j]];
-    return tmp;
-*/
+    // BasPoly<NativeVector> tmp(m_params, m_format, true);
+    // uint32_t n = m_params->GetRingDimension();
+    // auto NativeVector v { n, GetModulus() };
+    // NativeVector const& values = GetValues();
+
+    // for (uint32_t j = 0; j < n; ++j)
+    //     v[j] = values[precomp[j]];
+    
+    // Basalisc.ConcretePoly
+    // CloneWithNewValues()
 }
 
 BasPoly<NativeVector> BasPoly<NativeVector>::MultiplicativeInverse() const {
@@ -356,6 +360,8 @@ void BasPoly<NativeVector>::SwitchModulus(const Integer& modulus, const Integer&
     //     m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     // }
     m_sym_value = std::move(Basalisc.SwitchModulus(m_sym_value, rootOfUnity, modulus));
+    auto c{m_params->GetCyclotomicOrder()};
+    m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
 }
 
 void BasPoly<NativeVector>::SwitchFormat() {
