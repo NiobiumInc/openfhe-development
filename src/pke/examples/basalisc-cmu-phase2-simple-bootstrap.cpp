@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     cc->EvalRotateKeyGen(keys.secretKey, rotation_indices);
 
     std::cout << "Bootstrap keygen " << slot_cnt << std::endl;
-    cc->EvalBootstrapKeyGen(keys.secretKey, slot_cnt);
+    // cc->EvalBootstrapKeyGen(keys.secretKey, slot_cnt);
     int depth = static_cast<int>(parameters.GetMultiplicativeDepth());
     std::cout << "Full depth " << depth << std::endl;
 

@@ -23,9 +23,12 @@ using RngConfig = uint64_t;
 const size_t BASALISC_REGISTER_COUNT = 128;
 
 // number of vector-sized blocks the memory contains
-const size_t BASALISC_MEMORY_SIZE_BLOCKS = 1000000;
+const size_t BASALISC_MEMORY_SIZE_GB = 128 * 100;
 const size_t BASALISC_POLY_LENGTH = (1 << 16);
 const size_t BASALISC_BLOCK_SIZE = 8 * BASALISC_POLY_LENGTH;
+const size_t BYTES_PER_GB = 1024 * 1024 * 1024;
+const size_t BASALISC_MEMORY_SIZE_BLOCKS = (BASALISC_MEMORY_SIZE_GB * BYTES_PER_GB) / BASALISC_BLOCK_SIZE;
+
 
 const size_t BASALISC_MODULUS_TABLE_SIZE = 32;
 
@@ -501,6 +504,7 @@ public:
     for(size_t i = 0; i < inst.size(); i++) {
       if(inst[i].op == SSAInstOp::FREE) {
         val_free[inst[i].arg1] = i;
+        continue;
       }
 
       if(inst[i].arg1 != UNDEF_VALUE_ID) {
@@ -521,8 +525,8 @@ public:
     int candidate_uses = 0;
 
     for(auto const& vs : vals) {
-      ValueId const& v = vs.first;
-      size_t const& slot = vs.second;
+      ValueId const& slot = vs.first;
+      size_t const& v = vs.second;
 
       auto uses = val_uses.find(v);
       auto freed = val_free.find(v);
@@ -602,7 +606,7 @@ struct ModulusTable {
       }
     }
 
-    if(modulus_table.size() < BASALISC_MODULUS_TABLE_SIZE) {
+    if(true || modulus_table.size() < BASALISC_MODULUS_TABLE_SIZE) {
       modulus_table.push_back(modulus);
       return modulus_table.size() - 1;
     }
@@ -615,6 +619,16 @@ struct ModulusTable {
       OPENFHE_THROW(openfhe_error, "index exceeds modulus table size");
 
     modulus_table[idx];
+  }
+
+  size_t size() const {
+    return modulus_table.size();
+  }
+
+  void display() {
+    for(size_t i = 0; i < modulus_table.size(); i++) {
+      std::cout << "modulus_table[" << i << "] = " << modulus_table[i] << std::endl;
+    }
   }
 };
 
@@ -708,8 +722,6 @@ private:
     return false;
   }
 
-
-
   bool allocate_reg(InstructionBuffer& buf, ValueId const& v, size_t ssa_idx, Register& r) {
     size_t rloc = 0;
     // if it's already in a register, return the register
@@ -728,7 +740,7 @@ private:
         }
       }
       rloc = e.slot;
-    }
+    } 
 
     r = rloc;
     return true;
@@ -804,18 +816,25 @@ private:
     if(ssa.dest != UNDEF_VALUE_ID && !allocate_reg(insts, ssa.dest, ssa_idx, rd)) {
       return false;
     }
+    vloc.registers.set_loc(ssa.dest, rd);
 
     // generate instructions an immediates
     switch(ssa.op) {
       case TODO:
         OPENFHE_THROW(not_available_error, "TODO found while generating instructions");
         break;
+
       case ADD:
-        insts.push_inst(inst.into_add(rd, rs1, rs2, modidx)); break;
+        insts.push_inst(inst.into_add(rd, rs1, rs2, modidx)); 
+        break;
+
       case SUB:
-        insts.push_inst(inst.into_sub(rd, rs1, rs2, modidx)); break;
+        insts.push_inst(inst.into_sub(rd, rs1, rs2, modidx)); 
+        break;
+
       case MUL:
-        insts.push_inst(inst.into_mul(rd, rs1, rs2, modidx)); break;
+        insts.push_inst(inst.into_mul(rd, rs1, rs2, modidx)); 
+        break;
 
       case ADDI:
         insts.push_inst(inst.into_addi(rd, rs1, modidx));
@@ -825,15 +844,17 @@ private:
       case SUBI:
         insts.push_inst(inst.into_subi(rd, rs1, modidx));
         insts.push_imm(ssa.imm);
+        break;
 
       case MULI:
         insts.push_inst(inst.into_muli(rd, rs1, modidx));
         insts.push_imm(ssa.imm);
+        break;
 
       case ADDMULI:
         insts.push_inst(inst.into_addmuli(rd, rs1, rs2, modidx));
         insts.push_imm(ssa.imm);
-
+        break;
 
       case NTT: 
         insts.push_inst(inst.into_ntt1(rd, rs1, modidx));
@@ -854,11 +875,13 @@ private:
         OPENFHE_THROW(not_implemented_error, "BUG: should have been heandled earlier");
         break;
       case SWITCHMODULUS: {
-        OPENFHE_THROW(not_implemented_error, "TODO: SWITCHMODULUS");
+        /// XXX: implement me
+        break;
       }
       default:
         OPENFHE_THROW(not_implemented_error, "instruction not implemented!");
     }
+
 
     // append temp instructions to buf
     buf.append(insts);
@@ -1145,7 +1168,7 @@ public:
   }
 
   NativeVector& get_values_mut(SymbolicValue& s) {
-    bool is_mod = m_modifiable_concrete.find(s.value) == m_modifiable_concrete.end();
+    bool is_mod = m_modifiable_concrete.find(s.value) != m_modifiable_concrete.end();
     if(is_mod) {
       return m_concrete_polys[s.value];
     } else {
@@ -1170,10 +1193,11 @@ public:
     size_t epoch_count = 0;
     size_t host_to_basalisc_bytes = 0;
     size_t basalisc_to_host_bytes = 0;
+    size_t modulus_table_size = 0;
 
     void display() {
       std::cout << "host_to_basalisc_bytes: " << host_to_basalisc_bytes << std::endl;
-      std::cout << "basalisc_to_host_bytes: " << host_to_basalisc_bytes << std::endl;
+      std::cout << "basalisc_to_host_bytes: " << basalisc_to_host_bytes << std::endl;
       std::cout << "epoch_count: " << epoch_count << std::endl;
 
       std::cout << std::endl;
@@ -1181,6 +1205,8 @@ public:
       for(auto const& opfreq : opcode_freq) {
         std::cout << Instruction::opcode_string(opfreq.first) << ": " <<  opfreq.second << std::endl;
       }
+
+      std::cout << "modulus_table size: " << modulus_table_size << std::endl;
 
       std::cout << std::endl;
     }
@@ -1194,34 +1220,36 @@ public:
     ModulusTable mt { modulus_table };
     ValueLoc vl { vloc };
 
-    while(inst.size() > 0) {
-      // generate instructions
-      auto epoch = InstructionGenerator::generate_instructions(inst, mt, vl);
-      inst.erase(m_inst.begin(), m_inst.begin() + epoch.gen_count);
+    // generate instructions
+    auto epoch = InstructionGenerator::generate_instructions(inst, mt, vl);
 
-      // track epoch
-      stats.epoch_count++;
+    std::cout << "epoch: " << epoch.gen_count << " ssa: " << inst.size() << "\n";
 
-      // track copies
-      stats.host_to_basalisc_bytes += epoch.input_map.size() * BASALISC_BLOCK_SIZE;
-      stats.host_to_basalisc_bytes += epoch.instructions.inst_buf.size() * sizeof(u_int64_t);
+    // track epoch
+    stats.epoch_count++;
 
-      stats.basalisc_to_host_bytes += vl.memory.size() * BASALISC_BLOCK_SIZE;
+    // track copies
+    stats.host_to_basalisc_bytes += epoch.input_map.size() * BASALISC_BLOCK_SIZE;
+    stats.host_to_basalisc_bytes += epoch.instructions.inst_buf.size() * sizeof(u_int64_t);
 
-      // count ops
-      for(size_t i = 0; i < epoch.instructions.inst_buf.size(); i++) {
-        if(!epoch.instructions.inst_buf_is_inst[i])
-          continue;
+    stats.basalisc_to_host_bytes += vl.memory.size() * BASALISC_BLOCK_SIZE;
 
-        auto opcode = Instruction { epoch.instructions.inst_buf[i] }.opcode();
-        auto op_count = stats.opcode_freq.find(opcode);
-        if(op_count == stats.opcode_freq.end()) {
-          stats.opcode_freq[opcode] = 1;
-        } else {
-          *op_count++;
-        }
+    // count ops
+    for(size_t i = 0; i < epoch.instructions.inst_buf.size(); i++) {
+      if(!epoch.instructions.inst_buf_is_inst[i])
+        continue;
+
+      auto opcode = Instruction { epoch.instructions.inst_buf[i] }.opcode();
+      auto op_count = stats.opcode_freq.find(opcode);
+      if(op_count == stats.opcode_freq.end()) {
+        stats.opcode_freq[opcode] = 1;
+      } else {
+        op_count->second += 1;
       }
     }
+
+    // modulus table size
+    stats.modulus_table_size = mt.size();
 
     return stats;
   }
