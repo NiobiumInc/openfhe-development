@@ -618,7 +618,7 @@ struct ModulusTable {
     if(idx >= modulus_table.size())
       OPENFHE_THROW(openfhe_error, "index exceeds modulus table size");
 
-    modulus_table[idx];
+    return modulus_table[idx];
   }
 
   size_t size() const {
