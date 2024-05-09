@@ -1,7 +1,10 @@
 #ifndef LBCRYPTO_INC_LATTICE_HAL_BASALISC_COMPILER_H
 #define LBCRYPTO_INC_LATTICE_HAL_BASALISC_COMPILER_H
 
+#include<filesystem>
 #include<variant>
+#include<sstream>
+#include<fstream>
 #include<stdint.h>
 #include<assert.h>
 #include<optional>
@@ -47,6 +50,32 @@ struct Bits {
     return (src & MASK) >> LO;
   }
 };
+
+inline std::string pp_reg(Register const& c) {
+  return "r" + std::to_string(c);
+}
+
+inline std::string pp_addr(Address const& a) {
+  std::stringstream stream;
+  stream << "$" << std::setfill('0') << std::setw(16) << std::hex << a;
+  return stream.str();
+}
+
+inline std::string pp_mod_index(PrimeModulusIndex const& i) {
+  return "mod" + std::to_string(i);
+}
+
+inline std::string pp_imm(uint64_t i) {
+  return "imm" + std::to_string(i);
+}
+
+inline std::string pp_autonum(AutomorphismNumber const& n) {
+  return "auto" + std::to_string(n);
+}
+
+inline std::string pp_rng_sram(uint64_t i) {
+  return "o" + std::to_string(i);
+}
 
 struct Instruction {
   enum Opcode {
@@ -245,7 +274,7 @@ struct Instruction {
     return encoded;
   }
 
-  static std::string opcode_string(Instruction::Opcode const& op) {
+  static std::string pp_opcode(Instruction::Opcode const& op) {
     switch(op) {
       case LOAD: return "LOAD";
       case STORE: return "STORE";
@@ -267,7 +296,7 @@ struct Instruction {
       case MULI: return "MULI";
       case ADDMULI: return "ADDMULI";
     }
-    OPENFHE_THROW(not_implemented_error, "opcode_string() not implemented for this opcode: " + std::to_string(uint64_t { op }));
+    OPENFHE_THROW(not_implemented_error, "pp_opcode() not implemented for this opcode: " + std::to_string(uint64_t { op }));
   }
 
   bool has_imm() const {
@@ -374,7 +403,6 @@ struct SSAInst {
     NativeInteger imm = 0; // immediate or or AutomorphismNumber if it is MORPH
     PrimeModulusIndex modulus = 0;
 };
-
 
 class AllocationTable {
 public:
@@ -625,9 +653,9 @@ struct ModulusTable {
     return modulus_table.size();
   }
 
-  void display() {
+  void display(std::ostream& os = std::cout) const {
     for(size_t i = 0; i < modulus_table.size(); i++) {
-      std::cout << "modulus_table[" << i << "] = " << modulus_table[i] << std::endl;
+      os << "modulus_table[" << i << "] = " << modulus_table[i] << std::endl;
     }
   }
 };
@@ -655,6 +683,116 @@ struct InstructionBuffer {
 
   std::vector<uint64_t> inst_buf;
   std::vector<bool> inst_buf_is_inst;
+
+  void display(std::ostream& os = std::cout) {
+    for(size_t i = 0; i < inst_buf.size(); i++) {
+      if(!inst_buf_is_inst[i])
+        continue;
+
+      Instruction inst = Instruction { inst_buf[i] };
+      uint64_t imm = inst.has_imm() ? inst_buf[i + 1]: 0;
+      switch(inst.opcode()) {
+        case Instruction::Opcode::LOAD:
+          display_instruction(os, inst.opcode(), 
+            { pp_reg(inst.rd()), 
+              pp_addr(inst.load_addr()) });
+          break;
+
+        case Instruction::Opcode::STORE:
+          display_instruction(os, inst.opcode(), 
+            { pp_addr(inst.load_addr()),
+              pp_reg(inst.rs1())});
+          break;
+
+        case Instruction::Opcode::ADD:
+        case Instruction::Opcode::SUB:
+        case Instruction::Opcode::MUL:
+          display_instruction(os, inst.opcode(), 
+            { pp_reg(inst.rd()), 
+              pp_reg(inst.rs1()), 
+              pp_reg(inst.rs1()), 
+              pp_mod_index(inst.mod_index())});
+          break;
+
+        case Instruction::Opcode::ADDI:
+        case Instruction::Opcode::SUBI:
+        case Instruction::Opcode::MULI:
+          display_instruction(os, inst.opcode(), 
+            { pp_reg(inst.rd()), 
+              pp_reg(inst.rs1()), 
+              pp_imm(imm), 
+              pp_mod_index(inst.mod_index())});
+          break;
+
+        case Instruction::Opcode::ADDMULI:
+          display_instruction(os, inst.opcode(), 
+            { pp_reg(inst.rd()), 
+              pp_reg(inst.rs1()), 
+              pp_reg(inst.rs2()), 
+              pp_imm(imm), 
+              pp_mod_index(inst.mod_index())});
+          break;
+
+        case Instruction::Opcode::NTT1:
+        case Instruction::Opcode::NTT2:
+        case Instruction::Opcode::INTT1:
+        case Instruction::Opcode::INTT2:
+          display_instruction(os, inst.opcode(), 
+            { pp_reg(inst.rd()), 
+              pp_reg(inst.rs1()), 
+              pp_reg(inst.rs1()),
+              pp_mod_index(inst.mod_index())});
+          break;
+
+        case Instruction::Opcode::MORPH1:
+        case Instruction::Opcode::MORPH2:
+          display_instruction(os, inst.opcode(), 
+            { pp_reg(inst.rd()), 
+              pp_reg(inst.rs1()), 
+              pp_autonum(inst.automorphism())});
+          break;
+
+        case Instruction::Opcode::FENCE:
+          display_instruction(os, inst.opcode(), {});
+          break;
+
+        case Instruction::Opcode::RNGCONFIG:
+          display_instruction(os, inst.opcode(), 
+            { pp_rng_sram(inst.rd()),
+              pp_imm(imm),
+              pp_mod_index(inst.mod_index())});
+          break;
+        case Instruction::Opcode::RNGSETUP:
+          display_instruction(os, inst.opcode(),
+            { pp_mod_index(inst.mod_index())});
+          break;
+        case Instruction::Opcode::RNGGENERATE:
+          display_instruction(os, inst.opcode(),
+            { pp_reg(inst.rd())});
+          break;
+
+        default:
+          OPENFHE_THROW(not_implemented_error, "InstructionBuffer::display_instruction not implemented for opcode: " + std::to_string(inst.opcode()));
+      }
+    }
+  }
+  
+private:
+  void display_instruction(std::ostream& os, Instruction::Opcode const& c, std::initializer_list<std::string> const& args) {
+    bool first = true;
+    os << Instruction::pp_opcode(c) << " ";
+    for(auto const& arg: args) {
+      if(!first) {
+        os << ", ";
+      } else {
+        first = false;
+      }
+
+      os << arg;
+    }
+
+    os << std::endl;
+  }
 };
 
 struct ValueLoc {
@@ -1195,22 +1333,45 @@ public:
     size_t basalisc_to_host_bytes = 0;
     size_t modulus_table_size = 0;
 
-    void display() {
-      std::cout << "host_to_basalisc_bytes: " << host_to_basalisc_bytes << std::endl;
-      std::cout << "basalisc_to_host_bytes: " << basalisc_to_host_bytes << std::endl;
-      std::cout << "epoch_count: " << epoch_count << std::endl;
+    void display(std::ostream& os = std::cout) {
+      os << "host_to_basalisc_bytes: " << host_to_basalisc_bytes << std::endl;
+      os << "basalisc_to_host_bytes: " << basalisc_to_host_bytes << std::endl;
+      os << "epoch_count: " << epoch_count << std::endl;
 
-      std::cout << std::endl;
-      std::cout << "instruction freq:" << std::endl;
+      os << std::endl;
+      os << "instruction freq:" << std::endl;
       for(auto const& opfreq : opcode_freq) {
-        std::cout << Instruction::opcode_string(opfreq.first) << ": " <<  opfreq.second << std::endl;
+        os << Instruction::pp_opcode(opfreq.first) << ": " <<  opfreq.second << std::endl;
       }
 
-      std::cout << "modulus_table size: " << modulus_table_size << std::endl;
+      os << "modulus_table size: " << modulus_table_size << std::endl;
 
-      std::cout << std::endl;
+      os << std::endl;
     }
   };
+
+  void write_program(std::filesystem::path const& path) {
+    std::ofstream f { path };
+    if(!f) {
+      OPENFHE_THROW(not_available_error, "could not open file: '" + path.string() + "' " );
+    }
+    display_program(f);
+    f.close();
+  }
+
+  void display_program(std::ostream& os) const {
+    // make copies of context stuff
+    std::vector<SSAInst> inst = m_inst;
+    ModulusTable mt { modulus_table };
+    ValueLoc vl { vloc };
+
+    // generate instructions
+    auto epoch = InstructionGenerator::generate_instructions(inst, mt, vl);
+
+    modulus_table.display(os);
+    os << std::endl << std::endl;
+    epoch.instructions.display(os);
+  }
 
   InstructionStats instruction_stats() const {
     InstructionStats stats;
