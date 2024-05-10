@@ -68,9 +68,7 @@ public:
       value_to_loc.erase(v->second);
       loc_to_value.erase(rloc);
       free_list.insert(rloc);
-      return true;
     }
-    return false;
   }
 
   // Remove the value from a location (if any),

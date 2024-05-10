@@ -9,8 +9,6 @@
 #include "alloc_table.h"
 #include "modulus_table.h"
 
-#include "linear_scan.h"
-
 struct ValueLoc {
   AllocationTable memory { BASALISC_MEMORY_SIZE_BLOCKS };
   AllocationTable registers { BASALISC_REGISTER_COUNT };
@@ -251,9 +249,6 @@ private:
   ValueLoc& vloc;
   InstructionAnalysis analysis;
   std::map<ValueId, size_t> input_map;
-
-  // linear-scan allocator test
-  std::unordered_map<ValueId,RegisterOrAddress> value_location;
 };
 
 
