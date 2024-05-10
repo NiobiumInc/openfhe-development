@@ -16,6 +16,7 @@
 #include "compiler/modulus_table.h"
 #include "compiler/evaluator.h"
 #include "compiler/instruction_generator.h"
+#include "compiler/linear_scan.h"
 
 
 class Program {
