@@ -54,6 +54,8 @@
 #include <utility>
 #include <vector>
 
+#undef HAVE_INT128
+
 namespace lbcrypto {
 
 template <typename VecType>
