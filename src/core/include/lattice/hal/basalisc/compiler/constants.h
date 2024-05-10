@@ -3,13 +3,6 @@
 #include <string>
 #include "utils/exception.h"
 
-using Register = uint64_t;
-using Address = uint64_t;
-using Immediate = uint64_t;
-using PrimeModulusIndex = uint8_t;
-using AutomorphismNumber = uint32_t;
-using RngConfig = uint64_t;
-
 const size_t BASALISC_MEMORY_SIZE_GB      = 128 * 100; // XXX
 const size_t BASALISC_REGISTER_COUNT      = 128;
 const size_t BASALISC_MODULUS_TABLE_SIZE  = 32;
@@ -20,6 +13,41 @@ const size_t BASALISC_BLOCK_SIZE  = 8 * BASALISC_POLY_LENGTH;
 const size_t BYTES_PER_GB         = 1024 * 1024 * 1024;
 const size_t BASALISC_MEMORY_SIZE_BLOCKS =
   (BASALISC_MEMORY_SIZE_GB * BYTES_PER_GB) / BASALISC_BLOCK_SIZE;
+
+
+
+using Register = uint64_t;
+using Address = uint64_t;
+using Immediate = uint64_t;
+using PrimeModulusIndex = uint8_t;
+using AutomorphismNumber = uint32_t;
+using RngConfig = uint64_t;
+
+class RegisterOrAddress {
+  int64_t value;
+  RegisterOrAddress(int64_t x) : value(x) {}
+
+public:
+  static RegisterOrAddress from_register(Register x) {
+    return RegisterOrAddress(static_cast<int64_t>(x));
+  }
+
+  static RegisterOrAddress from_address(Address x) {
+    return RegisterOrAddress(- static_cast<int64_t>(x) - 1);
+  }
+
+  RegisterOrAddress next() const {
+    return RegisterOrAddress(is_register() ? (value+1) : (value-1));
+  }
+
+  bool is_register() const { return value >= 0; }
+  bool is_address()  const { return value < 0; }
+
+  Register as_register() const { return value; }
+  Address  as_address()  const { return -value-1; }
+
+};
+
 
 
 
