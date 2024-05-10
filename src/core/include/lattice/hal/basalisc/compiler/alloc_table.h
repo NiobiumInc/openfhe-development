@@ -14,6 +14,7 @@ public:
     wm = size;
   }
 
+  // Is the value at the given location in this table?
   bool get_loc(ValueId id, size_t& rloc) const {
     auto l = value_to_loc.find(id);
     if(l != value_to_loc.end()) {
@@ -50,6 +51,7 @@ public:
     return true;
   }
 
+  // Deallocate a previously allocated location.
   void free_loc(size_t t) {
     auto i = loc_to_value.find(t);
     if(i != loc_to_value.end()) {
@@ -59,15 +61,20 @@ public:
     free_list.insert(t);
   }
 
+  // Deallocate a location, if it was allocated.
   void clear_loc(size_t rloc) {
     auto v = loc_to_value.find(rloc);
     if(v != loc_to_value.end()) {
       value_to_loc.erase(v->second);
       loc_to_value.erase(rloc);
       free_list.insert(rloc);
+      return true;
     }
+    return false;
   }
 
+  // Remove the value from a location (if any),
+  // and reserve it (i.e., it is not free).
   void burn_loc(size_t rloc) {
     clear_loc(rloc);
     free_list.erase(rloc);
