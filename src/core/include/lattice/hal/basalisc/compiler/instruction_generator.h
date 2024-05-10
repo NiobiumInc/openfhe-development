@@ -9,24 +9,30 @@
 #include "alloc_table.h"
 #include "modulus_table.h"
 
+#include "linear_scan.h"
+
 struct ValueLoc {
   AllocationTable memory { BASALISC_MEMORY_SIZE_BLOCKS };
   AllocationTable registers { BASALISC_REGISTER_COUNT };
 };
 
+
+// Result of instruction generation.
+struct Result {
+  InstructionBuffer instructions;      // the instructions
+  std::map<ValueId, size_t> input_map; // a map of the inputs to addresses
+  size_t gen_count;                    // number of instructions generated
+
+  Result(InstructionBuffer&& inst, std::map<ValueId, size_t> imap, size_t gen_count)
+  : instructions { inst }, input_map { imap }, gen_count { gen_count } 
+  {
+
+  }
+};
+
+
 class InstructionGenerator {
 public:
-  struct Result {
-    InstructionBuffer instructions;      // the instructions
-    std::map<ValueId, size_t> input_map; // a map of the inputs to addresses
-    size_t gen_count;                    // number of instructions generated
-
-    Result(InstructionBuffer&& inst, std::map<ValueId, size_t> imap, size_t gen_count)
-    : instructions { inst }, input_map { imap }, gen_count { gen_count } 
-    {
-
-    }
-  };
 
   // Generate instructions into `dest` until we exceed some limit
   // Transforms `mt` and `vloc` accordingly
@@ -245,6 +251,9 @@ private:
   ValueLoc& vloc;
   InstructionAnalysis analysis;
   std::map<ValueId, size_t> input_map;
+
+  // linear-scan allocator test
+  std::unordered_map<ValueId,RegisterOrAddress> value_location;
 };
 
 
