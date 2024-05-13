@@ -7,6 +7,32 @@
 #include "ssa.h"
 
 inline
+std::unordered_map<ValueId,ssize_t>
+  find_endpoints(std::vector<SSAInst> const& ssa) {
+
+  std::unordered_map<ValueId,ssize_t> endpoint;
+
+  auto use = [&](ValueId v, size_t i) {
+    if (v == UNDEF_VALUE_ID) return;
+    endpoint[v] = -static_cast<ssize_t>(i) - 1;
+  };
+
+  for (size_t i = 0; i < ssa.size(); ++i) {
+    auto& inst = ssa[i];
+    if (inst.op == FREE) {
+      auto& last = endpoint[inst.arg1];
+      last = -(last + 1);
+    } else {
+      use(inst.arg1,i);
+      use(inst.arg2,i);
+      endpoint[inst.dest] = 0;
+    }
+  }
+
+  return endpoint;
+}
+
+inline
 void linear_scan
   ( std::vector<SSAInst> const& ssa,
     /* Instructions */
@@ -46,6 +72,7 @@ void linear_scan
     active.erase(active.begin(),last);
 
     auto const& inst = ssa[i];
+    if (inst.op == FREE) continue;
 
     auto const endpoint_for = [&](ValueId v) {
       ssize_t const signed_end = endpoint.at(v);
@@ -53,10 +80,10 @@ void linear_scan
     };
 
     auto const f = [&](ValueId v) {
+      if (v == UNDEF_VALUE_ID) return;
+
       size_t v_endpoint = endpoint_for(v);
-      if ( v != UNDEF_VALUE_ID &&
-           value_location.find(v) == value_location.end() // first use.
-         )
+      if (value_location.find(v) == value_location.end()) // first use.
       {
         auto const rit = std::find(used_regs.begin(), used_regs.end(), false);
         if (rit != used_regs.end()) {
@@ -68,10 +95,9 @@ void linear_scan
         } else {
           // We don't have a register, we need to spill
           auto spill = --active.end();
-          size_t spill_endpoint = endpoint_for((*spill).first);
+          auto [spill_endpoint, spill_v] = *spill;
           if (spill_endpoint > v_endpoint) {
             // Plase last in memory, use its register for this value
-            auto spill_v = (*spill).second;
             RegisterOrAddress r = value_location.at(spill_v);
             value_location.insert({spill_v,next_stack});
             next_stack = next_stack.next();
