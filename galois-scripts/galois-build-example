@@ -1,17 +1,45 @@
 #!/bin/bash
 #EXAMPLE=advanced-ckks-bootstrapping
-# EXAMPLE=simple-ckks-bootstrapping
+EXAMPLE=simple-ckks-bootstrapping
+
+case $MODE in
+  release)
+  BUILD=build-release
+  ;;
+
+  release-no-bas)
+  BUILD=build-release-no-bas
+  FLAGS=-DBASALISC_USE_OPENFHE_DEFAULT
+  ;;
+
+  debug)
+  BUILD=build-debug
+  FLAGS=-g -pg
+  ;;
+
+  debug-no-bas)
+  BUILD=build-debug-no-bas
+  FLAGS=-g -pg -DBASALISC_USE_OPENFHE_DEFAULT
+  ;;
+
+  *)
+    echo "Unknown mode $MODE"
+    echo "MODE = release | release-no-bas | debug | debug-no-bas"
+    exit 1
+esac
+
 
 g++ \
   -I src/pke/include \
   -I src/core/include \
   -I src/math/include \
-  -I build/src/core \
+  -I $BUILD/src/core \
   -I third-party/cereal/include/ \
   -I src/binfhe/include \
      src/pke/examples/$EXAMPLE.cpp \
-   -o $EXAMPLE \
-  -L build/lib \
+   -o "$EXAMPLE-$MODE" \
+   $FLAGS \
+  -L $BUILD/lib \
   -lOPENFHEpke_static \
   -lOPENFHEcore_static \
   -lOPENFHEbinfhe_static
