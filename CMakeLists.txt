@@ -386,6 +386,9 @@ if(WITH_TCM OR WITH_NTL)
     endif()
 endif()
 
+
+add_compile_options(-Wfatal-errors)
+
 if (NOT WITH_BASALISC)
   add_definitions(-DBASALISC_USE_OPENFHE_DEFAULT)
 endif()
