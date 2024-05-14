@@ -16,7 +16,6 @@ enum SSAInstOp {
   INTT,
   MORPH,
   FREE,
-  SWITCHMODULUS,
 };
 
 struct SSAInst {

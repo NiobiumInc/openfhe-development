@@ -229,12 +229,8 @@ private:
         break;
       }
       case FREE: 
-        panic("BUG: FREE should have been heandled earlier");
+        panic("BUG: FREE should have been handled earlier");
         break;
-      case SWITCHMODULUS: {
-        /// XXX: implement me
-        break;
-      }
       default:
         not_implemented("instruction not implemented!");
     }
