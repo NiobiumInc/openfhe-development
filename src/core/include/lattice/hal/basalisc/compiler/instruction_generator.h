@@ -54,63 +54,59 @@ private:
 
   }
 
+  // Remove a value from the registers and memory.
   void free_value(ValueId const& v) {
     vloc.registers.free_val(v);
     vloc.memory.free_val(v);
   }
 
-  bool store(InstructionBuffer& buf, ValueId id, Register r, Address& a) {
-    size_t mloc;
+  // Store the value, which is in the given register somewhere in memory.
+  // Returns `false` if we do not have space.
+  bool store(InstructionBuffer& buf, ValueId id, Register r) {
+    Address a;
+
     // if it's already there, then use it as-is
-    if(vloc.memory.get_loc(id, mloc)) {
-      a = mloc;
-      return true;
-    }
+    if (vloc.memory.get_loc(id, a)) return true;
 
     // find a new free address to push it
-    if(vloc.memory.find_free(mloc)) {
-      Instruction i;
-      buf.push_inst(Instruction { }.into_store(mloc, r));
-      a = mloc;
-      return true;
-    }
+    if (!vloc.memory.alloc_val(id, a)) return false;
 
-    return false;
-  }
-
-  bool allocate_reg(InstructionBuffer& buf, ValueId const& v, size_t ssa_idx, Register& r) {
-    size_t rloc = 0;
-    // if it's already in a register, return the register
-    if(vloc.registers.get_loc(v, rloc)) {
-      r = rloc;
-      return true;
-    }
-
-    // if there are no free registers, evict something to memory - otherwise use the free register
-    if(!vloc.registers.find_free(rloc)) {
-      auto e = analysis.find_eviction_candidate(vloc.registers.get_slot_map(), ssa_idx);
-      if(!e.freed) {
-        Address addr;
-        if(!store(buf, v, e.slot, addr)) {
-          return false;
-        }
-      }
-      rloc = e.slot;
-    } 
-
-    r = rloc;
+    buf.push_inst(Instruction { }.into_store(a, r));
     return true;
   }
 
-  bool src_reg(InstructionBuffer& buf, ValueId const& v, size_t ssa_idx, Register& rloc) {
-    if(!allocate_reg(buf, v, ssa_idx, rloc)) {
-      return false;
-    }
+  // Allocate a register for a value.  Will evict stuff, if we need a new
+  // register and there are none free.
+  // Preloaded is an output argument indicating if the value was already
+  // in a register.
+  bool allocate_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& r, bool& preloaded) {
+
+    preloaded = false;
+
+    // if it's already in a register, return the register
+    if (vloc.registers.get_loc(v, r)) { preloaded = true; return true; }
+
+    // try to allocate a new register
+    if (vloc.registers.alloc_val(v,r)) return true;
+
+    // try to evict something to memeory.
+    auto e = analysis.find_eviction_candidate(vloc.registers.get_slot_map(), ssa_idx);
+    if (e.freed) { r = e.slot; return true; }
+
+    if (!store(buf, v, e.slot)) return false;
+    r = e.slot;
+    return true;
+  }
+
+  // Allocate a register for reading.  Read it in from memory, if needed.
+  bool src_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& rloc) {
+    bool preloaded;
+    if(!allocate_reg(buf, v, ssa_idx, rloc, preloaded)) return false;
+    if (preloaded) return true;
 
     // load value from memory
     size_t mloc;
-    if(vloc.memory.get_loc(v, mloc) || allocate_input(v, mloc)) {
-      vloc.registers.set_loc(v, rloc);
+    if (vloc.memory.get_loc(v, mloc) || allocate_input(v, mloc)) {
       buf.push_inst(Instruction {}.into_load(rloc, mloc));
       return true;
     }
@@ -122,22 +118,20 @@ private:
     // TODO: maybe we could allocate this sooner - we could do a pass at the beginning
     // to figure out all the inputs and allocate space for them but we don't know
     // how many instructions we'll be generating
-  bool allocate_input(ValueId const& v, size_t& mloc) {
-    if(vloc.memory.allocate(v, mloc)) {
-      input_map[v] = mloc;
-      return true;
-    }
-
-    return false;
+  bool allocate_input(ValueId v, size_t& mloc) {
+    if (!vloc.memory.alloc_val(v, mloc)) return false;
+    input_map[v] = mloc;
+    return true;
   }
 
   // copy all registers to memory (presumably every register is live)
   void complete(InstructionBuffer& buf) {
-    Address _a;
-    for(auto const& reg_slot : vloc.registers.get_slot_map()) {
-      if(!store(buf, reg_slot.first, reg_slot.second, _a)) {
-        panic("BUG not enough memory to complete?");
-      }
+    auto reg_map = vloc.registers.get_slot_map();
+    auto reg_num = reg_map.size();
+    for (Register r = 0; r < reg_num; ++r) {
+      auto v = reg_map[r];
+      if (v == UNDEF_VALUE_ID) continue;
+      if (!store(buf, v, r)) panic("BUG not enough memory to complete?");
     }
   }
 
@@ -170,10 +164,10 @@ private:
       return false;
     }
 
-    if(ssa.dest != UNDEF_VALUE_ID && !allocate_reg(insts, ssa.dest, ssa_idx, rd)) {
+    bool preload;
+    if(ssa.dest != UNDEF_VALUE_ID && !allocate_reg(insts, ssa.dest, ssa_idx, rd, preload)) {
       return false;
     }
-    vloc.registers.set_loc(ssa.dest, rd);
 
     // generate instructions an immediates
     switch(ssa.op) {

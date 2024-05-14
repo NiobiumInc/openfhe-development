@@ -7,17 +7,25 @@
 
 class AllocationTable {
 public:
-  AllocationTable(size_t size) {
+  AllocationTable(size_t size)
+    : loc_to_value(size, UNDEF_VALUE_ID), free_list(size) {
     for(size_t i = 0; i < size; i++) {
-      free_list.insert(i);
+      free_list[i] = i;
     }
-    wm = size;
   }
 
-  // Is the value at the given location in this table?
+  // Total number of slots
+  size_t total_slots() const { return loc_to_value.size(); }
+
+  // How many slots are allocated at the moment.
+  size_t allocated_slots() const { return total_slots() - free_list.size(); }
+
+  // Get the location for the given value.
+  // Returns `true` and updates `rloc` if we have it,
+  // otherwise return `false`.
   bool get_loc(ValueId id, size_t& rloc) const {
     auto l = value_to_loc.find(id);
-    if(l != value_to_loc.end()) {
+    if (l != value_to_loc.end()) {
       rloc = l->second;
       return true;
     }
@@ -25,91 +33,56 @@ public:
     return false;
   }
 
-  void set_loc(ValueId id, size_t rloc) {
-    free_loc(rloc);
-    value_to_loc[id] = rloc;
-    loc_to_value[rloc] = id;
-    free_list.erase(rloc);
-    wm = std::min(rloc, wm);
-  }
-
-  bool find_highest_free(size_t& rloc) const {
-    auto elt = free_list.lower_bound(size());
-    if(elt == free_list.end())
-      return false;
-
-    rloc = *elt;
-    return true;
-  }
-
-  bool find_free(size_t& rloc) const {
-    if(free_list.begin() == free_list.end()) {
-      return false;
-    }
-
-    rloc = *free_list.begin();
-    return true;
-  }
-
-  // Deallocate a previously allocated location.
-  void free_loc(size_t t) {
-    auto i = loc_to_value.find(t);
-    if(i != loc_to_value.end()) {
-      value_to_loc.erase(i->second);
-      loc_to_value.erase(t);
-    }
-    free_list.insert(t);
-  }
-
-  // Deallocate a location, if it was allocated.
-  void clear_loc(size_t rloc) {
-    auto v = loc_to_value.find(rloc);
-    if(v != loc_to_value.end()) {
-      value_to_loc.erase(v->second);
-      loc_to_value.erase(rloc);
-      free_list.insert(rloc);
-    }
-  }
-
-  // Remove the value from a location (if any),
-  // and reserve it (i.e., it is not free).
-  void burn_loc(size_t rloc) {
-    clear_loc(rloc);
-    free_list.erase(rloc);
-  }
-
-  void free_val(ValueId const& v) {
-    size_t loc;
-    while(get_loc(v, loc)) {
-      free_loc(loc);
-    }
-  }
-
-  size_t size() const {
-    return free_list.size() + loc_to_value.size();
-  }
-
-  size_t watermark() const {
-    return wm;
-  }
-
-  std::map<size_t, ValueId> const& get_slot_map() const {
+  // Get the slot allocation map.  Slots that are allocated but not
+  // occupied by values (e.g., code) contain UNDEF_VALUE_ID
+  std::vector<ValueId> const& get_slot_map() const {
     return loc_to_value;
   }
 
-  bool allocate(ValueId const& val, size_t& loc) {
-    if(!find_free(loc))
-      return false;
+  // Free the location for the given value.
+  void free_val(ValueId val) {
+    auto loci = value_to_loc.find(val);
+    if (loci == value_to_loc.end()) return;
+    loc_to_value[loci->second] = UNDEF_VALUE_ID;
+    value_to_loc.erase(loci);
+  }
 
-    set_loc(val, loc);
+  // Free a location and update value maps, if needed.
+  void free_slot(size_t loc) {
+    free_list.push_back(loc);
+    auto v = loc_to_value[loc];
+    if (v != UNDEF_VALUE_ID) {
+      loc_to_value[loc] = UNDEF_VALUE_ID;
+      value_to_loc.erase(v);
+    }
+  }
+
+  // Allocate a slot.  If one is available return true and set `loc`.
+  // This does not update the value indexes, so the slot may be used
+  // for a value or for code.
+  bool alloc_slot(size_t& loc) {
+    if (free_list.size() == 0) return false;
+    loc = free_list.back();
+    free_list.pop_back();
     return true;
   }
 
+  // Allocate a slot for a value.  If one is availabe return true and set `loc`,
+  // and update the value maps.
+  bool alloc_val(ValueId val, size_t& loc) {
+    if (!alloc_slot(loc)) return false;
+    loc_to_value[loc] = val;
+    value_to_loc.insert({val,loc});
+    return true;
+  }
+
+
 private:
-  size_t wm;
-  std::map<ValueId, size_t> value_to_loc;
-  std::map<size_t, ValueId> loc_to_value;
-  std::set<size_t> free_list;
+  std::unordered_map<ValueId, size_t> value_to_loc;
+
+  // disjoint:
+  std::vector<ValueId> loc_to_value;          // allocated
+  std::vector<size_t> free_list;              // unallocated
 };
 
 

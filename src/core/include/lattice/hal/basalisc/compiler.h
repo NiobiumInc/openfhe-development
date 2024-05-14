@@ -249,7 +249,7 @@ public:
     stats.host_to_basalisc_bytes += epoch.input_map.size() * BASALISC_BLOCK_SIZE;
     stats.host_to_basalisc_bytes += epoch.instructions.inst_buf.size() * sizeof(u_int64_t);
 
-    stats.basalisc_to_host_bytes += vl.memory.size() * BASALISC_BLOCK_SIZE;
+    stats.basalisc_to_host_bytes += vl.memory.allocated_slots() * BASALISC_BLOCK_SIZE;
 
     // count ops
     for(size_t i = 0; i < epoch.instructions.inst_buf.size(); i++) {

@@ -42,15 +42,16 @@ public:
   }
 
   // for a set of values, beginning at SSA 
-  Eviction find_eviction_candidate(std::map<size_t, ValueId> const& vals, size_t ssa_idx) {
+  Eviction find_eviction_candidate(std::vector<ValueId> const& vals, size_t ssa_idx) {
     bool first = true;
     size_t candidate_slot = 0;
     size_t candidate_next_use = 0;
     int candidate_uses = 0;
 
-    for(auto const& vs : vals) {
-      ValueId const& slot = vs.first;
-      size_t const& v = vs.second;
+    auto reg_num = vals.size();
+    for(size_t slot = 0; slot < reg_num; ++slot) {
+      ValueId v = vals[slot];
+      if (v == UNDEF_VALUE_ID) continue;
 
       auto uses = val_uses.find(v);
       auto freed = val_free.find(v);
