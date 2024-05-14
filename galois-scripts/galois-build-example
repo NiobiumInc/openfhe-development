@@ -11,6 +11,10 @@ case $MODE in
   ;;
 
   debug)
+  FLAGS="-g"
+  ;;
+
+  debug-prof)
   FLAGS="-g -pg"
   ;;
 

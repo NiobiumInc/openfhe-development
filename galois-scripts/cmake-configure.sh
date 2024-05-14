@@ -16,8 +16,16 @@ case $MODE in
   debug)
   BAS=ON
   BUILD_MODE=Debug
+  PROF=OFF
+  ;;
+
+  debug-prof)
+  BAS=ON
+  BUILD_MODE=Debug
   PROF=ON
   ;;
+
+
 
   debug-no-bas)
   BAS=OFF
@@ -27,7 +35,7 @@ case $MODE in
 
   *)
     echo "Unknown mode $MODE"
-    echo "MODE = release | release-no-bas | debug | debug-no-bas"
+    echo "MODE = release | release-no-bas | debug | debug-prof | debug-no-bas"
     exit 1
 esac
 
