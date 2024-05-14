@@ -4,22 +4,18 @@ EXAMPLE=simple-ckks-bootstrapping
 
 case $MODE in
   release)
-  BUILD=build-release
   ;;
 
   release-no-bas)
-  BUILD=build-release-no-bas
-  FLAGS=-DBASALISC_USE_OPENFHE_DEFAULT
+  FLAGS="-DBASALISC_USE_OPENFHE_DEFAULT"
   ;;
 
   debug)
-  BUILD=build-debug
-  FLAGS=-g -pg
+  FLAGS="-g -pg"
   ;;
 
   debug-no-bas)
-  BUILD=build-debug-no-bas
-  FLAGS=-g -pg -DBASALISC_USE_OPENFHE_DEFAULT
+  FLAGS="-g -pg -DBASALISC_USE_OPENFHE_DEFAULT"
   ;;
 
   *)
@@ -28,6 +24,7 @@ case $MODE in
     exit 1
 esac
 
+BUILD="build-$MODE"
 
 g++ \
   -I src/pke/include \

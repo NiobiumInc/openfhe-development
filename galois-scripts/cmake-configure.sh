@@ -3,24 +3,24 @@
 case $MODE in
   release)
   BUILD_MODE=Release
-  NO_BAS=OFF
+  BAS=ON
   PROF=OFF
   ;;
 
   release-no-bas)
   BUILD_MODE=Release
-  NO_BAS=ON
+  BAS=OFF
   PROF=OFF
   ;;
 
   debug)
-  NO_BAS=OFF
+  BAS=ON
   BUILD_MODE=Debug
   PROF=ON
   ;;
 
   debug-no-bas)
-  NO_BAS=ON
+  BAS=OFF
   BUILD_MODE=Debug
   PROF=ON
   ;;
@@ -36,7 +36,7 @@ esac
 #
 cmake .. \
   -DCMAKE_BUILD_TYPE=$BUILD_MODE \
-  -DBASALISC_USE_OPENFHE_DEFAULT=$NO_BAS \
+  -DWITH_BASALISC=$BAS \
   -DWITH_PROFILING=$PROF \
   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DBUILD_UNITTESTS=OFF \
