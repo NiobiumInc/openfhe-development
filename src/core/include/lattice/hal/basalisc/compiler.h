@@ -281,6 +281,18 @@ public:
     }
   }
 
+  void test_linear_scan() {
+    auto endpoint = find_endpoints(m_inst);
+    std::unordered_map<ValueId,RegisterOrAddress> value_location;
+    linear_scan(m_inst,endpoint,0,value_location);
+    size_t addresses = 0;
+    for (auto& x : value_location) {
+      if (x.second.is_address()) ++addresses;
+    }
+    std::cout << addresses << " spilled out of " << value_location.size() << "\n";
+  }
+
+
   // std::optional<NativeVector&> get_values_if_modifiable(SymbolicValue const& s) {
   //   auto poly = m_concrete_polys.find(s.value);
   //   auto refs = m_symbolic_refcount[s.value];
