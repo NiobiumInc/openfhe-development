@@ -359,7 +359,7 @@ void BasPoly<NativeVector>::SwitchModulus(const Integer& modulus, const Integer&
     //     auto c{m_params->GetCyclotomicOrder()};
     //     m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     // }
-    m_sym_value = std::move(Basalisc.SwitchModulus(m_sym_value, rootOfUnity, modulus));
+    m_sym_value = std::move(Basalisc.SwitchModulus(m_sym_value, GetModulus(), modulus));
     auto c{m_params->GetCyclotomicOrder()};
     m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
 }
