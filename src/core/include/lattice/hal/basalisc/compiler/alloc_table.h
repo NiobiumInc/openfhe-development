@@ -33,6 +33,14 @@ public:
     return false;
   }
 
+
+  // Replace the value in a given slot.
+  void replace_val(size_t slot, ValueId val_old, ValueId val_new) {
+    value_to_loc.erase(val_old);
+    value_to_loc.insert({val_new,slot});
+    loc_to_value[slot] = val_new;
+  }
+
   // Get the slot allocation map.  Slots that are allocated but not
   // occupied by values (e.g., code) contain UNDEF_VALUE_ID
   std::vector<ValueId> const& get_slot_map() const {
@@ -43,8 +51,10 @@ public:
   void free_val(ValueId val) {
     auto loci = value_to_loc.find(val);
     if (loci == value_to_loc.end()) return;
-    loc_to_value[loci->second] = UNDEF_VALUE_ID;
+    auto slot = loci->second;
+    loc_to_value[slot] = UNDEF_VALUE_ID;
     value_to_loc.erase(loci);
+    free_list.push_back(slot);
   }
 
   // Free a location and update value maps, if needed.

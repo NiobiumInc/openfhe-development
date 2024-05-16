@@ -79,7 +79,8 @@ private:
   // register and there are none free.
   // Preloaded is an output argument indicating if the value was already
   // in a register.
-  bool allocate_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& r, bool& preloaded) {
+  bool allocate_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& r,
+                      bool& preloaded, ValueId avoid = UNDEF_VALUE_ID) {
 
     preloaded = false;
 
@@ -90,18 +91,24 @@ private:
     if (vloc.registers.alloc_val(v,r)) return true;
 
     // try to evict something to memeory.
-    auto e = analysis.find_eviction_candidate(vloc.registers.get_slot_map(), ssa_idx);
-    if (e.freed) { r = e.slot; return true; }
+    auto e = analysis.find_eviction_candidate(vloc.registers.get_slot_map(), ssa_idx, avoid);
+    if (e.freed != UNDEF_VALUE_ID) {
+      r = e.slot;
+      vloc.memory.free_val(e.freed);
+      vloc.registers.replace_val(r, e.freed, v);
+      return true;
+    }
 
     if (!store(buf, v, e.slot)) return false;
     r = e.slot;
+    vloc.registers.replace_val(r, e.freed, v);
     return true;
   }
 
   // Allocate a register for reading.  Read it in from memory, if needed.
-  bool src_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& rloc) {
+  bool src_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& rloc, ValueId avoid = UNDEF_VALUE_ID) {
     bool preloaded;
-    if(!allocate_reg(buf, v, ssa_idx, rloc, preloaded)) return false;
+    if(!allocate_reg(buf, v, ssa_idx, rloc, preloaded, avoid)) return false;
     if (preloaded) return true;
 
     // load value from memory
@@ -160,7 +167,7 @@ private:
     }
 
     // XXX: BUG:  the register must be different than rs1 (unless the value is the same)
-    if(ssa.arg2 != UNDEF_VALUE_ID && !src_reg(insts, ssa.arg2, ssa_idx, rs2)) {
+    if(ssa.arg2 != UNDEF_VALUE_ID && !src_reg(insts, ssa.arg2, ssa_idx, rs2, rs1)) {
       return false;
     }
 

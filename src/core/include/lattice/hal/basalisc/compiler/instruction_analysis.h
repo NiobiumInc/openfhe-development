@@ -10,12 +10,12 @@ public:
       slot = 0;
     }
 
-    Eviction(size_t slot, bool fr): slot { slot }, freed { fr } {
+    Eviction(size_t slot, ValueId fr): slot { slot }, freed { fr } {
 
     }
 
     size_t slot;
-    bool freed;
+    ValueId freed;
   };
 
   InstructionAnalysis(std::vector<SSAInst> const& inst) {
@@ -41,8 +41,9 @@ public:
     }
   }
 
-  // for a set of values, beginning at SSA 
-  Eviction find_eviction_candidate(std::vector<ValueId> const& vals, size_t ssa_idx) {
+  // For a set of values, beginning at SSA 
+  // If `avoid` is defined, then we can't evict it.
+  Eviction find_eviction_candidate(std::vector<ValueId> const& vals, size_t ssa_idx, ValueId avoid) {
     bool first = true;
     size_t candidate_slot = 0;
     size_t candidate_next_use = 0;
@@ -51,7 +52,7 @@ public:
     auto reg_num = vals.size();
     for(size_t slot = 0; slot < reg_num; ++slot) {
       ValueId v = vals[slot];
-      if (v == UNDEF_VALUE_ID) continue;
+      if (v == avoid) continue;
 
       auto uses = val_uses.find(v);
       auto freed = val_free.find(v);
@@ -74,7 +75,7 @@ public:
 
       // if a value is not used and is eventually freed, free it now
       if(freed != val_free.end() && use_count == 0) {
-        return Eviction { slot, true };
+        return Eviction { slot, v };
       }
       
       if(first) {
@@ -104,7 +105,7 @@ public:
       panic("BUG: empty vals");
     }
 
-    return Eviction { candidate_slot, false };
+    return Eviction { candidate_slot, UNDEF_VALUE_ID };
   }
 
 private:
