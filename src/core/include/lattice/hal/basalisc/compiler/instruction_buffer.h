@@ -52,7 +52,7 @@ struct InstructionBuffer {
           display_instruction(os, inst.opcode(), 
             { pp_reg(inst.rd()), 
               pp_reg(inst.rs1()), 
-              pp_reg(inst.rs1()), 
+              pp_reg(inst.rs2()), 
               pp_mod_index(inst.mod_index())});
           break;
 
