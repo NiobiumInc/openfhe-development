@@ -206,6 +206,16 @@ public:
     }
   };
 
+  void write_ssa(std::filesystem::path const& path) {
+    std::ofstream f { path };
+    if(!f) {
+      not_available("could not open file: '" + path.string() + "' " );
+    }
+    for (auto& i : m_inst) {
+      i.display(f); f << "\n";
+    }
+  }
+
   void write_program(std::filesystem::path const& path) {
     std::ofstream f { path };
     if(!f) {

@@ -36,6 +36,75 @@ struct SSAInst {
     ValueId arg2 = UNDEF_VALUE_ID; 
     NativeInteger imm = 0; // immediate or or AutomorphismNumber if it is MORPH
     PrimeModulusIndex modulus = 0;
+
+    void display_val(std::ostream& os, ValueId x) { os << "x" << x; }
+    void display_mod(std::ostream& os) {
+      os << " mod " << uint64_t{modulus};
+    }
+    void display_assign(std::ostream& os) {
+      display_val(os, dest); os << " = ";
+    }
+
+    void display_bin(std::ostream& os, const char* op) {
+      display_assign(os);
+      display_val(os, arg1);
+      os << op;
+      display_val(os, arg2);
+      display_mod(os);
+    }
+
+    void display_bin_imm(std::ostream& os, const char* op) {
+      display_assign(os);
+      display_val(os, arg1);
+      os << op;
+      os << imm;
+      display_mod(os);
+    }
+
+
+
+    void display(std::ostream& os = std::cout) {
+      switch (op) {
+        case TODO:    os << "TODO"; break;
+        case ADD:     display_bin(os," + "); break;
+        case ADDI:    display_bin_imm(os," + "); break;
+        case SUB:     display_bin(os," - "); break;
+        case SUBI:    display_bin_imm(os," - "); break;
+        case MUL:     display_bin(os," * "); break;
+        case MULI:    display_bin_imm(os," * "); break;
+        case ADDMULI:
+          display_assign(os);
+          display_val(os,arg1);
+          os << " + ";
+          display_val(os,arg2);
+          os << " * " << imm;
+          display_mod(os);
+          break;
+
+        case NTT:
+          display_assign(os);
+          os << "NTT ";
+          display_val(os,arg1);
+          display_mod(os);
+          break;
+
+        case INTT:
+          display_assign(os);
+          os << "NTT ";
+          display_val(os,arg1);
+          display_mod(os);
+          break;
+
+        case MORPH:
+          display_assign(os);
+          os << "MORPH " << uint64_t{imm} << " ";
+          display_val(os,arg1);
+          break;
+
+        case FREE:
+          os << "FREE "; display_val(os,arg1);
+      }
+    }
 };
 
 
