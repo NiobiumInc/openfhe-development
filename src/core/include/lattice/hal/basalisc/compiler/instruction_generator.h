@@ -166,8 +166,7 @@ private:
       return false;
     }
 
-    // XXX: BUG:  the register must be different than rs1 (unless the value is the same)
-    if(ssa.arg2 != UNDEF_VALUE_ID && !src_reg(insts, ssa.arg2, ssa_idx, rs2, rs1)) {
+    if(ssa.arg2 != UNDEF_VALUE_ID && !src_reg(insts, ssa.arg2, ssa_idx, rs2, ssa.arg1)) {
       return false;
     }
 
