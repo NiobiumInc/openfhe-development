@@ -37,6 +37,7 @@ struct SSAInst {
     NativeInteger imm = 0; // immediate or or AutomorphismNumber if it is MORPH
     PrimeModulusIndex modulus = 0;
 
+private:
     void display_val(std::ostream& os, ValueId x) { os << "x" << x; }
     void display_mod(std::ostream& os) {
       os << " mod " << uint64_t{modulus};
@@ -47,37 +48,40 @@ struct SSAInst {
 
     void display_bin(std::ostream& os, const char* op) {
       display_assign(os);
-      display_val(os, arg1);
       os << op;
+      display_val(os, arg1);
+      os << " ";
       display_val(os, arg2);
       display_mod(os);
     }
 
     void display_bin_imm(std::ostream& os, const char* op) {
       display_assign(os);
-      display_val(os, arg1);
       os << op;
+      display_val(os, arg1);
+      os << " ";
       os << imm;
       display_mod(os);
     }
 
 
-
+public:
     void display(std::ostream& os = std::cout) {
       switch (op) {
         case TODO:    os << "TODO"; break;
-        case ADD:     display_bin(os," + "); break;
-        case ADDI:    display_bin_imm(os," + "); break;
-        case SUB:     display_bin(os," - "); break;
-        case SUBI:    display_bin_imm(os," - "); break;
-        case MUL:     display_bin(os," * "); break;
-        case MULI:    display_bin_imm(os," * "); break;
+        case ADD:     display_bin(os,"ADD "); break;
+        case ADDI:    display_bin_imm(os,"ADDI "); break;
+        case SUB:     display_bin(os,"SUB "); break;
+        case SUBI:    display_bin_imm(os,"SUBI "); break;
+        case MUL:     display_bin(os,"MUL "); break;
+        case MULI:    display_bin_imm(os,"MULI "); break;
         case ADDMULI:
           display_assign(os);
+          os << "ADDMULI ";
           display_val(os,arg1);
-          os << " + ";
+          os << " ";
           display_val(os,arg2);
-          os << " * " << imm;
+          os << " " << imm;
           display_mod(os);
           break;
 
@@ -103,6 +107,7 @@ struct SSAInst {
 
         case FREE:
           os << "FREE "; display_val(os,arg1);
+          break;
       }
     }
 };
