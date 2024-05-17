@@ -16,6 +16,7 @@ enum SSAInstOp {
   INTT,
   MORPH,
   FREE,
+  NOP
 };
 
 struct SSAInst {
@@ -26,9 +27,7 @@ struct SSAInst {
     SSAInst(SSAInstOp op, SymbolicValue const& arg, AutomorphismNumber n, NativeInteger const& m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg);
     SSAInst(SSAInstOp op, ValueId const& arg)
-    : op { op }, arg1 { arg } {
-
-    }
+    : op { op }, arg1 { arg } { }
 
     SSAInstOp op = SSAInstOp::TODO;
     ValueId dest = UNDEF_VALUE_ID;
@@ -36,6 +35,15 @@ struct SSAInst {
     ValueId arg2 = UNDEF_VALUE_ID; 
     NativeInteger imm = 0; // immediate or or AutomorphismNumber if it is MORPH
     PrimeModulusIndex modulus = 0;
+
+    void into_nop() {
+      op = NOP;
+      dest = UNDEF_VALUE_ID;
+      arg1 = UNDEF_VALUE_ID;
+      arg2 = UNDEF_VALUE_ID;
+      imm  = 0;
+      modulus = 0;
+    }
 
 private:
     void display_val(std::ostream& os, ValueId x) { os << "x" << x; }
@@ -107,6 +115,10 @@ public:
 
         case FREE:
           os << "FREE "; display_val(os,arg1);
+          break;
+
+        case NOP:
+          os << "NOP";
           break;
       }
     }

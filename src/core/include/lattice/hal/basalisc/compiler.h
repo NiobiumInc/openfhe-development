@@ -17,6 +17,7 @@
 #include "compiler/evaluator.h"
 #include "compiler/instruction_generator.h"
 #include "compiler/linear_scan.h"
+#include "compiler/dead_code.h"
 
 
 class Program {
@@ -211,6 +212,8 @@ public:
     if(!f) {
       not_available("could not open file: '" + path.string() + "' " );
     }
+
+    remove_dead(m_inst);
     for (auto& i : m_inst) {
       i.display(f); f << "\n";
     }
