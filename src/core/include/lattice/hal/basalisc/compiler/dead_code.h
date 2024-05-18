@@ -36,7 +36,7 @@ inline void remove_dead(std::vector<SSAInst> &ssa) {
   }
 
   // dead constants (should probably also delete)
-  for (auto& [_v,i] : dead) {
-    ssa[i].into_nop();
+  for (auto& v : dead) {
+    ssa[v.second].into_nop();
   }
 }

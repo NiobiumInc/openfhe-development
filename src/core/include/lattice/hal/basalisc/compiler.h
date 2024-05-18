@@ -111,7 +111,7 @@ public:
     if(res != m_symbolic_refcount.end()) {
       res->second++;
     } else {
-      m_symbolic_refcount[val] = 1;
+      panic("increment_refcount: already deallocated\n");
     }
   }
 
@@ -120,11 +120,14 @@ public:
 
     auto res = m_symbolic_refcount.find(val);
     if(res != m_symbolic_refcount.end()) {
-      res->second--;
-      if(res->second <= 0) {
+      if (res->second == 1) {
         m_inst.push_back({FREE, val});
         m_symbolic_refcount.erase(val);
+      } else {
+        res->second--;
       }
+    } else {
+      panic("decrement_refcount: already deallocated\n");
     }
   }
 
@@ -142,7 +145,9 @@ public:
   }
 
   SymbolicValue new_value() {
-    return SymbolicValue {m_next_value_name++};
+    auto id = m_next_value_name++;
+    m_symbolic_refcount.insert({id,1});
+    return SymbolicValue {id};
   }
 
   bool is_concrete(SymbolicValue const& s) const {
