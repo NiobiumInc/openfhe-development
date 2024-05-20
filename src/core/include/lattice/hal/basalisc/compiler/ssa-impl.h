@@ -7,7 +7,7 @@ SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& a
 }
 
 SSAInst::SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& i, NativeInteger const& m)
-  : op {op}, arg1 { arg.value() }
+  : op {op}, arg1 { arg.value() }, imm{i}
 {
   modulus = Basalisc.modulus_index(m);
   Basalisc.freeze_value(arg);
