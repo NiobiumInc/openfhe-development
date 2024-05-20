@@ -25,8 +25,8 @@ public:
   SymbolicValue ConcretePoly(NativeVector&& v) {
     auto value = new_value();
     modulus_index(v.GetModulus());
-    m_concrete_polys[value.value] = v;
-    m_modifiable_concrete.insert(value.value);
+    m_concrete_polys[value.value()] = v;
+    m_modifiable_concrete.insert(value.value());
     return value;
   }
 
@@ -91,7 +91,7 @@ public:
   SymbolicValue emit_instruction(SSAInst const& ssa) {
     auto v = new_value();
     m_inst.push_back(ssa);
-    m_inst.back().dest = v.value;
+    m_inst.back().dest = v.value();
     return v;
   }
 
@@ -104,31 +104,8 @@ public:
     return true;
   }
 
-  void increment_refcount(ValueId val) {
-    if (val == UNDEF_VALUE_ID) return;
-
-    auto res = m_symbolic_refcount.find(val);
-    if(res != m_symbolic_refcount.end()) {
-      res->second++;
-    } else {
-      panic("increment_refcount: already deallocated\n");
-    }
-  }
-
-  void decrement_refcount(ValueId val) {
-    if (val == UNDEF_VALUE_ID) return;
-
-    auto res = m_symbolic_refcount.find(val);
-    if(res != m_symbolic_refcount.end()) {
-      if (res->second == 1) {
-        m_inst.push_back({FREE, val});
-        m_symbolic_refcount.erase(val);
-      } else {
-        res->second--;
-      }
-    } else {
-      panic("decrement_refcount: already deallocated\n");
-    }
+  void free_sym_val(ValueId val) {
+    m_inst.push_back({FREE, val});
   }
 
   bool is_used(ValueId const& v) {
@@ -145,22 +122,20 @@ public:
   }
 
   SymbolicValue new_value() {
-    auto id = m_next_value_name++;
-    m_symbolic_refcount.insert({id,1});
-    return SymbolicValue {id};
+    return SymbolicValue(m_next_value_name++);
   }
 
   bool is_concrete(SymbolicValue const& s) const {
-    return m_concrete_polys.find(s.value) != m_concrete_polys.end();
+    return m_concrete_polys.find(s.value()) != m_concrete_polys.end();
   }
 
   void freeze_value(SymbolicValue const& v) {
-    m_modifiable_concrete.erase(v.value);
-    m_concrete_polys.erase(v.value);
+    m_modifiable_concrete.erase(v.value());
+    m_concrete_polys.erase(v.value());
   }
 
   NativeVector const& get_values(SymbolicValue const& s) {
-    auto p = m_concrete_polys.find(s.value);
+    auto p = m_concrete_polys.find(s.value());
     if(p == m_concrete_polys.end()) {
       not_available("get_values() called on symbolic value");
     }
@@ -168,9 +143,9 @@ public:
   }
 
   NativeVector& get_values_mut(SymbolicValue& s) {
-    bool is_mod = m_modifiable_concrete.find(s.value) != m_modifiable_concrete.end();
+    bool is_mod = m_modifiable_concrete.find(s.value()) != m_modifiable_concrete.end();
     if(is_mod) {
-      return m_concrete_polys[s.value];
+      return m_concrete_polys[s.value()];
     } else {
       not_available("get_values_mut() called on symbolic or frozen value");
     }
@@ -179,7 +154,7 @@ public:
   // do a deep, modifiable copy of a polynomial if it is concrete
   // if it is symbolic, does a normal (by-reference) copy instead
   SymbolicValue deepcopy(SymbolicValue const& s) {
-    auto poly = m_concrete_polys.find(s.value);
+    auto poly = m_concrete_polys.find(s.value());
     if(poly == m_concrete_polys.end()) {
       return s;
     } else {
@@ -329,7 +304,7 @@ private:
   ModulusTable modulus_table;
 
   // symbolic value stuff
-  std::unordered_map<ValueId, size_t> m_symbolic_refcount;
+  // std::unordered_map<ValueId, size_t> m_symbolic_refcount;
   ValueId m_next_value_name = 2;
       // 0 is reserved for uninitialized symbolic value
       // 1 is reserved for constant 0 polynomial

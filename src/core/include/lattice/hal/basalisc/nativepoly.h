@@ -74,7 +74,7 @@ public:
     using TugType           = typename PolyInterfaceType::TugType;
     using BugType           = typename PolyInterfaceType::BugType;
 
-    constexpr BasPoly() = default;
+    BasPoly() = default;
 
     BasPoly(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
@@ -191,7 +191,7 @@ public:
     }
 
     inline bool IsEmpty() const final {
-        return m_sym_value.value == UNDEF_VALUE_ID;
+        return m_sym_value.value() == UNDEF_VALUE_ID;
     }
 
     inline Integer& at(usint i) final {
