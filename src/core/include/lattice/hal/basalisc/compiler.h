@@ -72,20 +72,9 @@ public:
   }
 
   SymbolicValue SwitchModulus(SymbolicValue const& a, NativeInteger om, NativeInteger nm) {
-    auto balanced_mod = [&](NativeInteger const& x, NativeInteger const& y) {
-      return (x + y / 2) - (y / 2);
-    };
-    auto modi2 = [&](NativeInteger const& x) {
-      return balanced_mod(x, nm);
-    };
-    NativeInteger om_half = om / 2;
-
-    NativeInteger r = NativeInteger { 2 }.ModExp(64, nm);
-
-    auto sv = emit_instruction({SSAInstOp::MULI, a, 1, om});
-    sv = emit_instruction({SSAInstOp::ADDI, sv, om_half, om});
-    sv = emit_instruction({SSAInstOp::MULI, sv, modi2(r.ModExp(2, nm)), nm} );
-    return emit_instruction({SSAInstOp::ADDI, sv, modi2 (r.ModMul(om_half, nm)), nm});
+    auto half = om / 2;
+    auto sv = emit_instruction({SSAInstOp::ADDI, a, half, om});
+    return emit_instruction({SSAInstOp::SUBI, sv, half, nm});
   }
 
   SymbolicValue emit_instruction(SSAInst const& ssa) {
