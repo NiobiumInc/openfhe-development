@@ -177,6 +177,9 @@ private:
 
     // generate instructions an immediates
     switch(ssa.op) {
+      case NOP:
+        break;
+
       case TODO:
         panic("TODO found while generating instructions");
         break;
