@@ -34,7 +34,7 @@ struct SSAInst {
     ValueId arg1 = UNDEF_VALUE_ID;
     ValueId arg2 = UNDEF_VALUE_ID; 
     NativeInteger imm = 0; // immediate or or AutomorphismNumber if it is MORPH
-    PrimeModulusIndex modulus = 0;
+    PrimeModulus modulus = 0;
 
     void into_nop() {
       op = NOP;

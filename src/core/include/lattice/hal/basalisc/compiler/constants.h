@@ -19,6 +19,7 @@ const size_t BASALISC_MEMORY_SIZE_BLOCKS =
 using Register = uint64_t;
 using Address = uint64_t;
 using Immediate = uint64_t;
+using PrimeModulus = uint64_t;
 using PrimeModulusIndex = uint8_t;
 using AutomorphismNumber = uint32_t;
 using RngConfig = uint64_t;
