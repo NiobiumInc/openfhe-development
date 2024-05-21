@@ -52,12 +52,16 @@ public:
     auto reg_num = vals.size();
     for(size_t slot = 0; slot < reg_num; ++slot) {
       ValueId v = vals[slot];
-      if (v == avoid) continue;
+      if (v == UNDEF_VALUE_ID || v == avoid) continue;
 
       auto uses = val_uses.find(v);
       auto freed = val_free.find(v);
-      if(uses == val_uses.end())
-        panic("BUG: InstructionAnalysis is not complete");
+      if(uses == val_uses.end()) {
+        // We found something that is allocated, but never used, but
+        // also not freed so it won't be considered to be dead code.
+        // Seems like a good candidate for evication.
+        return Eviction { slot, v };
+      }
 
       // count the uses in the future, and determine the closest use in the future
       int use_count = 0;
