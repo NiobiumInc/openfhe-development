@@ -5,7 +5,8 @@
 
 template<uint64_t LO, uint64_t HI> 
 struct Bits {
-  const uint64_t MASK = (UINT64_MAX >> (UINT64_WIDTH - HI - 1)) & (UINT64_MAX << LO);
+  // XXX: should we use a literal 64 here?
+  const uint64_t MASK = (UINT64_MAX >> (64 - HI - 1)) & (UINT64_MAX << LO);
 
   void set(uint64_t& dest, uint64_t val) const {
     dest = (dest & ~MASK) | ((val << LO) & MASK);

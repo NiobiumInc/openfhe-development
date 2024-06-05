@@ -50,8 +50,6 @@ public:
   // Generate instructions into `dest` until we exceed some limit
   // Transforms `mt` and `vloc` accordingly
   static Epoch generate_instructions(std::vector<SSAInst> const& input, InstructionAnalysis const& analysis, size_t gen_start = 0) {
-    std::cout << "generating from " << gen_start << std::endl;
-
     Epoch epoch;
     ValueLoc vloc;
     InstructionGenerator ig { input, epoch.modulus_table, vloc, analysis };
