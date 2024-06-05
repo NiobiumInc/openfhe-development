@@ -2,24 +2,43 @@
 
 #include <iostream>
 #include "constants.h"
+#include <cassert>
 
 struct ModulusTable {
   std::vector<uint64_t> modulus_table;
 
-  PrimeModulusIndex get_modulus_index(uint64_t modulus) {
+  // PrimeModulusIndex get_modulus_index(uint64_t modulus) {
+  //   for(PrimeModulusIndex i = 0; i < modulus_table.size(); i++) {
+  //     if(modulus == modulus_table[i]) {
+  //       return i;
+  //     }
+  //   }
+
+  //   // XXX: Do not limit the table size, temporarily.
+  //   if(true || modulus_table.size() < BASALISC_MODULUS_TABLE_SIZE) {
+  //     modulus_table.push_back(modulus);
+  //     return modulus_table.size() - 1;
+  //   }
+
+  //   panic("Modulus table size exceeded");
+  // }
+
+  bool try_get_modulus_index(uint64_t modulus, PrimeModulusIndex& idx) {
+    assert(modulus != 0);
     for(PrimeModulusIndex i = 0; i < modulus_table.size(); i++) {
       if(modulus == modulus_table[i]) {
-        return i;
+        idx = i;
+        return true;
       }
     }
 
-    // XXX: Do not limit the table size, temporarily.
-    if(true || modulus_table.size() < BASALISC_MODULUS_TABLE_SIZE) {
+    if(modulus_table.size() < BASALISC_MODULUS_TABLE_SIZE) {
       modulus_table.push_back(modulus);
-      return modulus_table.size() - 1;
+      idx = modulus_table.size() - 1;
+      return true;
     }
 
-    panic("Modulus table size exceeded");
+    return false;
   }
 
   uint64_t get_modulus(PrimeModulusIndex const& idx) const {
@@ -31,6 +50,10 @@ struct ModulusTable {
 
   size_t size() const {
     return modulus_table.size();
+  }
+
+  bool operator==(ModulusTable const& other) const {
+    return modulus_table == other.modulus_table;
   }
 
   void display(std::ostream& os = std::cout) const {

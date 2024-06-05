@@ -24,7 +24,6 @@ class Program {
 public:
   SymbolicValue ConcretePoly(NativeVector&& v) {
     auto value = new_value();
-    modulus_index(v.GetModulus());
     m_concrete_polys[value.value()] = v;
     m_modifiable_concrete.insert(value.value());
     return value;
@@ -106,10 +105,6 @@ public:
     return false;
   }
 
-  size_t modulus_index(NativeInteger const& m) {
-    return modulus_table.get_modulus_index(uint64_t { m });
-  }
-
   SymbolicValue new_value() {
     return SymbolicValue(m_next_value_name++);
   }
@@ -157,7 +152,6 @@ public:
     size_t epoch_count = 0;
     size_t host_to_basalisc_bytes = 0;
     size_t basalisc_to_host_bytes = 0;
-    size_t modulus_table_size = 0;
 
     void display(std::ostream& os = std::cout) {
       os << "host_to_basalisc_bytes: " << host_to_basalisc_bytes << std::endl;
@@ -169,8 +163,6 @@ public:
       for(auto const& opfreq : opcode_freq) {
         os << Instruction::pp_opcode(opfreq.first) << ": " <<  opfreq.second << std::endl;
       }
-
-      os << "modulus_table size: " << modulus_table_size << std::endl;
 
       os << std::endl;
     }
@@ -197,18 +189,28 @@ public:
     f.close();
   }
 
-  void display_program(std::ostream& os) const {
+  void display_program(std::ostream& os = std::cout) const {
     // make copies of context stuff
     std::vector<SSAInst> inst = m_inst;
-    ModulusTable mt { modulus_table };
     ValueLoc vl { vloc };
 
     // generate instructions
-    auto epoch = InstructionGenerator::generate_instructions(inst, mt, vl);
+    size_t epoch_count = 0;
+    for(auto epoch : InstructionGenerator::generate_epochs(inst)) {
+      os << "-------------------------------------------- " << std::endl;
+      os << "Epoch: " << epoch_count << std::endl;
+      os << "Reason: " << epoch.end_reason << std::endl;
+      os << "Modulus Table:" << std::endl;
+      epoch.modulus_table.display(os);
+      os << std::endl << std::endl;
+      
+      os << "Instructions:" << std::endl;
+      epoch.instructions.display(os);
+      os << std::endl;
+      os << "-------------------------------------------- " << std::endl;
 
-    modulus_table.display(os);
-    os << std::endl << std::endl;
-    epoch.instructions.display(os);
+      epoch_count++;
+    }
   }
 
   InstructionStats instruction_stats() const {
@@ -216,51 +218,37 @@ public:
 
     // make copies of context stuff
     std::vector<SSAInst> inst = m_inst;
-    ModulusTable mt { modulus_table };
-    ValueLoc vl { vloc };
 
     // generate instructions
-    auto epoch = InstructionGenerator::generate_instructions(inst, mt, vl);
+    for(auto epoch : InstructionGenerator::generate_epochs(inst)) {
+      // track epoch
+      stats.epoch_count++;
 
-    std::cout << "epoch: " << epoch.gen_count << " ssa: " << inst.size() << "\n";
+      // track copies
+      stats.host_to_basalisc_bytes += epoch.input_map.size() * BASALISC_BLOCK_SIZE;
+      stats.host_to_basalisc_bytes += epoch.instructions.inst_buf.size() * sizeof(u_int64_t);
 
-    // track epoch
-    stats.epoch_count++;
+      stats.basalisc_to_host_bytes += epoch.output_map.size() * BASALISC_BLOCK_SIZE;
 
-    // track copies
-    stats.host_to_basalisc_bytes += epoch.input_map.size() * BASALISC_BLOCK_SIZE;
-    stats.host_to_basalisc_bytes += epoch.instructions.inst_buf.size() * sizeof(u_int64_t);
+      // count ops
+      for(size_t i = 0; i < epoch.instructions.inst_buf.size(); i++) {
+        if(!epoch.instructions.inst_buf_is_inst[i])
+          continue;
 
-    stats.basalisc_to_host_bytes += vl.memory.allocated_slots() * BASALISC_BLOCK_SIZE;
-
-    // count ops
-    for(size_t i = 0; i < epoch.instructions.inst_buf.size(); i++) {
-      if(!epoch.instructions.inst_buf_is_inst[i])
-        continue;
-
-      auto opcode = Instruction { epoch.instructions.inst_buf[i] }.opcode();
-      auto op_count = stats.opcode_freq.find(opcode);
-      if(op_count == stats.opcode_freq.end()) {
-        stats.opcode_freq[opcode] = 1;
-      } else {
-        op_count->second += 1;
+        auto opcode = Instruction { epoch.instructions.inst_buf[i] }.opcode();
+        auto op_count = stats.opcode_freq.find(opcode);
+        if(op_count == stats.opcode_freq.end()) {
+          stats.opcode_freq[opcode] = 1;
+        } else {
+          op_count->second += 1;
+        }
       }
     }
-
-    // modulus table size
-    stats.modulus_table_size = mt.size();
 
     return stats;
   }
 
   void software_computation() {
-    OpenFHEEvaluator eval;
-    while(m_inst.size() > 0) {
-      // generate instructions
-      auto epoch = InstructionGenerator::generate_instructions(m_inst, modulus_table, vloc);
-      m_inst.erase(m_inst.begin(), m_inst.begin() + epoch.gen_count);
-
-    }
   }
 
   void test_linear_scan() {
@@ -288,9 +276,6 @@ public:
 
 private:
   ValueLoc vloc;
-
-  // modulus table
-  ModulusTable modulus_table;
 
   // symbolic value stuff
   // std::unordered_map<ValueId, size_t> m_symbolic_refcount;

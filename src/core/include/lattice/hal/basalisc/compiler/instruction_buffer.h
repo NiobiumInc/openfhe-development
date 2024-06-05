@@ -23,6 +23,19 @@ struct InstructionBuffer {
     inst_buf_is_inst.insert(inst_buf_is_inst.end(), other.inst_buf_is_inst.begin(), other.inst_buf_is_inst.end());
   }
 
+  size_t size_bytes() {
+    return inst_buf.size() * sizeof(uint64_t);
+  }
+
+  size_t instruction_count() {
+    size_t count = 0;
+    for(bool b : inst_buf_is_inst) {
+      if(b) count++;
+    }
+
+    return count;
+  }
+
   std::vector<uint64_t> inst_buf;
   std::vector<bool> inst_buf_is_inst;
 

@@ -3,18 +3,22 @@
 #include <string>
 #include "utils/exception.h"
 
-const size_t BASALISC_MEMORY_SIZE_GB      = 128 * 100; // XXX
+const size_t BASALISC_MEMORY_SIZE_GB      = 128;
 const size_t BASALISC_REGISTER_COUNT      = 128;
 const size_t BASALISC_MODULUS_TABLE_SIZE  = 32;
 const size_t BASALISC_POLY_LENGTH         = (1 << 16);
+const size_t BASALISC_INSTRUCTION_SIZE_BYTES = 8;
 
-// number of vector-sized blocks the memory contains
 const size_t BASALISC_BLOCK_SIZE  = 8 * BASALISC_POLY_LENGTH;
 const size_t BYTES_PER_GB         = 1024 * 1024 * 1024;
+// number of vector-sized blocks the memory contains
 const size_t BASALISC_MEMORY_SIZE_BLOCKS =
   (BASALISC_MEMORY_SIZE_GB * BYTES_PER_GB) / BASALISC_BLOCK_SIZE;
 
-
+const size_t BASALISC_RESERVED_PROGRAM_SIZE = 128;
+const size_t BASALISC_RESERVED_SIZE = BASALISC_REGISTER_COUNT + BASALISC_RESERVED_PROGRAM_SIZE;
+const size_t BASALISC_RESERVED_PROGRAM_ADDRESS = BASALISC_MEMORY_SIZE_BLOCKS - BASALISC_RESERVED_SIZE;
+const size_t BASALISC_RESERVED_REGISTER_ADDRESS = BASALISC_RESERVED_PROGRAM_ADDRESS + BASALISC_RESERVED_PROGRAM_SIZE;
 
 using Register = uint64_t;
 using Address = uint64_t;

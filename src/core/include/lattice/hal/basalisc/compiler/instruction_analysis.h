@@ -6,7 +6,7 @@ class InstructionAnalysis {
 public:
   struct Eviction {
     Eviction() {
-      freed = true;
+      freed = UNDEF_VALUE_ID;
       slot = 0;
     }
 
@@ -43,7 +43,7 @@ public:
 
   // For a set of values, beginning at SSA 
   // If `avoid` is defined, then we can't evict it.
-  Eviction find_eviction_candidate(std::vector<ValueId> const& vals, size_t ssa_idx, ValueId avoid) {
+  Eviction find_eviction_candidate(std::vector<ValueId> const& vals, size_t ssa_idx, ValueId avoid) const {
     bool first = true;
     size_t candidate_slot = 0;
     size_t candidate_next_use = 0;
@@ -83,23 +83,23 @@ public:
       }
       
       if(first) {
-        candidate_slot = v;
+        candidate_slot = slot;
         candidate_uses = use_count;
         candidate_next_use = next_use;
         first = false;
       } else if(candidate_next_use < ssa_idx + 20 && candidate_next_use < next_use ) {
         // if something is going to be used imminently, try to find an alternative to evicting it
-        candidate_slot = v;
+        candidate_slot = slot;
         candidate_uses = use_count;
         candidate_next_use = next_use;
       } else if(use_count < candidate_uses) {
         // prefer the value that's used the least frequently for eviction
-        candidate_slot = v;
+        candidate_slot = slot;
         candidate_uses = use_count;
         candidate_next_use = next_use;
       } else if(use_count == candidate_uses && next_use < candidate_next_use) {
         // prefer the value that will be used later for eviction
-        candidate_slot = v;
+        candidate_slot = slot;
         candidate_uses = use_count;
         candidate_next_use = next_use;
       }
