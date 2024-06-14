@@ -8,21 +8,21 @@
 
 class AllocationTable {
 public:
-  AllocationTable(size_t size)
+  AllocationTable(AllocationTableSize size)
     : loc_to_value(size, UNDEF_VALUE_ID) {
       unallocated = size;
   }
 
   // Total number of slots
-  size_t total_slots() const { return loc_to_value.size(); }
+  AllocationTableSize total_slots() const { return loc_to_value.size(); }
 
   // How many slots are allocated at the moment.
-  size_t allocated_slots() const { return total_slots() - (free_list.size() + unallocated); }
+  AllocationTableSize allocated_slots() const { return total_slots() - (free_list.size() + unallocated); }
 
   // Get the location for the given value.
   // Returns `true` and updates `rloc` if we have it,
   // otherwise return `false`.
-  bool get_loc(ValueId id, size_t& rloc) const {
+  bool get_loc(ValueId id, Address& rloc) const {
     auto l = value_to_loc.find(id);
     if (l != value_to_loc.end()) {
       rloc = l->second;
@@ -34,7 +34,7 @@ public:
 
 
   // Replace the value in a given slot.
-  void replace_val(size_t slot, ValueId val_old, ValueId val_new) {
+  void replace_val(Address slot, ValueId val_old, ValueId val_new) {
     value_to_loc.erase(val_old);
     value_to_loc.insert({val_new,slot});
     assert(slot >= 0 && slot < loc_to_value.size());
@@ -58,7 +58,7 @@ public:
   }
 
   // Free a location and update value maps, if needed.
-  void free_slot(size_t loc) {
+  void free_slot(Address loc) {
     free_list.push_back(loc);
     auto v = loc_to_value[loc];
     if (v != UNDEF_VALUE_ID) {
@@ -70,7 +70,7 @@ public:
   // Allocate a slot.  If one is available return true and set `loc`.
   // This does not update the value indexes, so the slot may be used
   // for a value or for code.
-  bool alloc_slot(size_t& loc) {
+  bool alloc_slot(Address& loc) {
     if (free_list.size() != 0) {
       loc = free_list.back();
       free_list.pop_back();
@@ -83,7 +83,7 @@ public:
 
   // Allocate a slot for a value.  If one is available return true and set `loc`,
   // and update the value maps.
-  bool alloc_val(ValueId val, size_t& loc) {
+  bool alloc_val(ValueId val, Address& loc) {
     if (!alloc_slot(loc)) return false;
     loc_to_value[loc] = val;
     value_to_loc.insert({val,loc});
@@ -92,7 +92,7 @@ public:
 
   // Allocate a slot that has never been allocated before
   // If a fresh slot is available, set `loc` and return true
-  bool alloc_fresh(size_t& loc) {
+  bool alloc_fresh(Address& loc) {
     if(unallocated <= 0) {
       return false;
     }
@@ -103,7 +103,7 @@ public:
   // Allocate a slot to a value that has never been allocated before
   // If a fresh slot is available, set `loc` and return true, updating the value
   // maps accordingly
-  bool alloc_val_fresh(ValueId val, size_t& loc) {
+  bool alloc_val_fresh(ValueId val, Address& loc) {
     if(alloc_fresh(loc)) {
       loc_to_value[loc] = val;
       value_to_loc[val] = loc;
@@ -114,8 +114,8 @@ public:
   }
 
   // clear this allocation table, merging its value map with the argument
-  void extract_and_clear(std::unordered_map<ValueId, size_t>& map) {
-    size_t size = total_slots();
+  void extract_and_clear(std::unordered_map<ValueId, Address>& map) {
+    AllocationTableSize size = total_slots();
     map.merge(std::move(value_to_loc));
     reset(size);
   }
@@ -126,18 +126,18 @@ public:
   }
 
 private:
-  void reset(size_t size) {
+  void reset(AllocationTableSize size) {
     value_to_loc = {};
     free_list = {};
     unallocated = size;
   }
 
-  std::unordered_map<ValueId, size_t> value_to_loc;
+  std::unordered_map<ValueId, Address> value_to_loc;
 
   // disjoint:
   std::vector<ValueId> loc_to_value;          // allocated
-  std::vector<size_t> free_list;              // unallocated
-  size_t unallocated;                         // slots lower than this have never been allocated before
+  std::vector<Address> free_list;              // unallocated
+  Address unallocated;                         // slots lower than this have never been allocated before
 };
 
 

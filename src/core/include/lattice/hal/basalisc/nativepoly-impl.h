@@ -86,7 +86,7 @@ BasPoly<NativeVector>::BasPoly(const TugType& tug, const std::shared_ptr<BasPoly
 BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const BasPoly& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
-    m_sym_value = std::move(Basalisc.deepcopy(rhs.m_sym_value));
+    m_sym_value = Basalisc.deepcopy(rhs.m_sym_value);
     return *this;
 }
 
@@ -100,7 +100,7 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(std::initializer_list<ui
     for (size_t j = 0; j < vlen; ++j)
         vals[j] = (j < llen) ? *(rhs.begin() + j) : ZERO;
 
-    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vals)));
+    m_sym_value = Basalisc.ConcretePoly(std::move(vals));
     return *this;
 }
 
@@ -121,7 +121,7 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int64_
             (vals)[j] = ZERO;
     }
 
-    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vals)));
+    m_sym_value = Basalisc.ConcretePoly(std::move(vals));
     return *this;
 }
 
@@ -140,7 +140,7 @@ BasPoly<NativeVector>& BasPoly<NativeVector>::operator=(const std::vector<int32_
         else
             vals[j] = ZERO;
     }
-    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vals)));
+    m_sym_value = Basalisc.ConcretePoly(std::move(vals));
     return *this;
 }
 
@@ -170,7 +170,7 @@ void BasPoly<NativeVector>::SetValues(const NativeVector& values, Format format)
         OPENFHE_THROW("Parameter mismatch on SetValues for Polynomial");
     m_format = format;
     auto vec = values;
-    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(vec)));
+    m_sym_value = Basalisc.ConcretePoly(std::move(vec));
 }
 
 void BasPoly<NativeVector>::SetValues(NativeVector&& values, Format format) {
@@ -179,7 +179,7 @@ void BasPoly<NativeVector>::SetValues(NativeVector&& values, Format format) {
     if (m_params->GetRingDimension() != values.GetLength() || m_params->GetModulus() != values.GetModulus())
         OPENFHE_THROW("Parameter mismatch on SetValues for Polynomial");
     m_format = format;
-    m_sym_value = std::move(Basalisc.ConcretePoly(std::move(values)));
+    m_sym_value = Basalisc.ConcretePoly(std::move(values));
 }
 
 
@@ -359,7 +359,7 @@ void BasPoly<NativeVector>::SwitchModulus(const Integer& modulus, const Integer&
     //     auto c{m_params->GetCyclotomicOrder()};
     //     m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     // }
-    m_sym_value = std::move(Basalisc.SwitchModulus(m_sym_value, GetModulus(), modulus));
+    m_sym_value = Basalisc.SwitchModulus(m_sym_value, GetModulus(), modulus);
     auto c{m_params->GetCyclotomicOrder()};
     m_params = std::make_shared<BasPoly::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
 }

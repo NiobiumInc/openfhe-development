@@ -58,7 +58,20 @@ namespace lbcrypto {
 template class ElemParams<NativeInteger>;
 
 MAKE_ILPARAMS_TYPE(NativeInteger)
+/*
+ * src/core/lib/lattice/lattice.cpp:61:1: fatal error: explicit instantiation of 'BasPoly<intnat::NativeVectorT<intnat::NativeIntegerT<unsigned long long>>>' that occurs after an explicit specialization has no effect [-Winstantiation-after-specialization]
 MAKE_POLY_TYPE(NativeVector)
+^
+/Users/brian/source/niobium/openfhe-development/src/core/include/lattice/hal/lat-backend.h:56:50: note: expanded from macro 'MAKE_POLY_TYPE'
+#define MAKE_POLY_TYPE(T)         template class BasPoly<T>;
+                                                 ^
+/Users/brian/source/niobium/openfhe-development/src/core/include/lattice/hal/basalisc/nativepoly.h:62:7: note: previous template specialization is here
+class BasPoly<NativeVector> final : public PolyInterface<BasPoly<NativeVector>, NativeVector, BasPoly> {
+      ^
+1 error generated.
+*
+*/
+// MAKE_POLY_TYPE(NativeVector)
 
 template class Matrix<NativePoly>;
 SPLIT64_FOR_TYPE(NativePoly)

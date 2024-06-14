@@ -105,7 +105,7 @@ public:
              typename std::enable_if_t<std::is_same_v<T, NativeVector>, bool> = true)
         : m_format{rhs.m_format},
           m_params{rhs.m_params} {
-        m_sym_value = std::move(Basalisc.deepcopy(rhs.m_sym_value));
+        m_sym_value = Basalisc.deepcopy(rhs.m_sym_value);
         BasPoly<VecType>::SetFormat(format);
     }
 
@@ -130,7 +130,7 @@ public:
     BasPoly(const PolyType& p) noexcept
         : m_format{p.m_format},
           m_params{p.m_params} {
-        m_sym_value = std::move(Basalisc.deepcopy(p.m_sym_value));
+        m_sym_value = Basalisc.deepcopy(p.m_sym_value);
     }
 
     BasPoly(PolyType&& p) noexcept
@@ -164,14 +164,14 @@ public:
     void SetValuesToZero() override {
         usint r{m_params->GetRingDimension()};
         auto modulus = m_params->GetModulus();
-        m_sym_value = std::move(Basalisc.ConcretePoly({r, modulus}));
+        m_sym_value = Basalisc.ConcretePoly({r, modulus});
     }
 
     void SetValuesToMax() override {
         usint r{m_params->GetRingDimension()};
         auto modulus = m_params->GetModulus();
         auto max{modulus - Integer(1)};
-        m_sym_value = std::move(Basalisc.ConcretePoly({r, modulus, max}));
+        m_sym_value = Basalisc.ConcretePoly({r, modulus, max});
     }
 
     inline Format GetFormat() const final {
@@ -258,13 +258,13 @@ public:
             OPENFHE_THROW("Modulus missmatch");
         if (m_format != Format::EVALUATION || rhs.m_format != Format::EVALUATION)
             OPENFHE_THROW("operator* for BasPoly supported only in Format::EVALUATION");
-        m_sym_value = std::move(Basalisc.Mul(m_sym_value, rhs.m_sym_value, m_params->GetModulus()));
+        m_sym_value = Basalisc.Mul(m_sym_value, rhs.m_sym_value, m_params->GetModulus());
         return *this;
     }
 
     BasPoly Times(const Integer& element) const override;
     BasPoly& operator*=(const Integer& element) override {
-        m_sym_value = std::move(Basalisc.MulI(m_sym_value, element, m_params->GetModulus()));
+        m_sym_value = Basalisc.MulI(m_sym_value, element, m_params->GetModulus());
         return *this;
     }
 

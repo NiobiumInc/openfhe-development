@@ -16,25 +16,25 @@ struct ValueLoc {
   AllocationTable registers { BASALISC_REGISTER_COUNT };
 
   // values stored in the reserved space
-  std::unordered_map<ValueId, size_t> reserved_space_values; 
+  std::unordered_map<ValueId, Address> reserved_space_values; 
 };
 
 // Result of instruction generation.
 struct Epoch {
   InstructionBuffer instructions;                 // the instructions
-  std::unordered_map<ValueId, size_t> input_map;  // a map of the inputs to addresses - values must be moved 
+  std::unordered_map<ValueId, Address> input_map;  // a map of the inputs to addresses - values must be moved 
                                                   // here before executing the epoch
-  std::unordered_map<ValueId, size_t> output_map; // map from values to where they will live after the epoch
+  std::unordered_map<ValueId, Address> output_map; // map from values to where they will live after the epoch
   ModulusTable modulus_table;                     // the modulus table
   std::string end_reason;                         // what ended the epoch
-  size_t gen_idx;                                 // where in the SSA vector we stopped generating instructions
+  Address gen_idx;                                 // where in the SSA vector we stopped generating instructions
 };
 
 class InstructionGenerator {
 public:
 
   static std::vector<Epoch> generate_epochs(std::vector<SSAInst> const& input) {
-    size_t idx = 0;
+    Address idx = 0;
     std::vector<Epoch> epochs;
     InstructionAnalysis analysis { input };
     while(idx < input.size()) {
@@ -49,12 +49,12 @@ public:
 
   // Generate instructions into `dest` until we exceed some limit
   // Transforms `mt` and `vloc` accordingly
-  static Epoch generate_instructions(std::vector<SSAInst> const& input, InstructionAnalysis const& analysis, size_t gen_start = 0) {
+  static Epoch generate_instructions(std::vector<SSAInst> const& input, InstructionAnalysis const& analysis, Address gen_start = 0) {
     Epoch epoch;
     ValueLoc vloc;
     InstructionGenerator ig { input, epoch.modulus_table, vloc, analysis };
     InstructionBuffer dest;
-    size_t idx = gen_start;
+    Address idx = gen_start;
     for(idx = gen_start; idx < input.size(); idx++) {
       if(!ig.generate_instruction(epoch.instructions, input[idx], idx, epoch.end_reason)) {
         break;
@@ -109,7 +109,7 @@ private:
   // register and there are none free.
   // Preloaded is an output argument indicating if the value was already
   // in a register.
-  bool allocate_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& r,
+  bool allocate_reg(InstructionBuffer& buf, ValueId v, Address ssa_idx, Register& r,
                       bool& preloaded, ValueId avoid = UNDEF_VALUE_ID) {
 
     preloaded = false;
@@ -136,13 +136,13 @@ private:
   }
 
   // Allocate a register for reading.  Read it in from memory, if needed.
-  bool src_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& rloc, ValueId avoid = UNDEF_VALUE_ID) {
+  bool src_reg(InstructionBuffer& buf, ValueId v, Address ssa_idx, Register& rloc, ValueId avoid = UNDEF_VALUE_ID) {
     bool preloaded;
     if(!allocate_reg(buf, v, ssa_idx, rloc, preloaded, avoid)) return false;
     if (preloaded) return true;
 
     // load value from memory
-    size_t mloc;
+    Address mloc;
     if (vloc.memory.get_loc(v, mloc) || allocate_input(v, mloc)) {
       buf.push_inst(Instruction {}.into_load(rloc, mloc));
       return true;
@@ -155,7 +155,7 @@ private:
     // TODO: maybe we could allocate this sooner - we could do a pass at the beginning
     // to figure out all the inputs and allocate space for them but we don't know
     // how many instructions we'll be generating
-  bool allocate_input(ValueId v, size_t& mloc) {
+  bool allocate_input(ValueId v, Address& mloc) {
     if (!vloc.memory.alloc_val_fresh(v, mloc)) return false;
     input_map[v] = mloc;
     return true;
@@ -165,8 +165,8 @@ private:
   void complete(InstructionBuffer& buf) {
     auto reg_map = vloc.registers.get_slot_map();
     auto reg_num = reg_map.size();
-    size_t mloc;
-    size_t reserved_loc = BASALISC_RESERVED_REGISTER_ADDRESS;
+    Address mloc;
+    Address reserved_loc = BASALISC_RESERVED_REGISTER_ADDRESS;
     for (Register r = 0; r < reg_num; ++r) {
       if(reg_map[r] != UNDEF_VALUE_ID && !vloc.memory.get_loc(reg_map[r], mloc)) {
         buf.push_inst(Instruction {}.into_store(reserved_loc++, r));
@@ -174,7 +174,7 @@ private:
     }
   }
 
-  bool generate_instruction(InstructionBuffer& buf, SSAInst const& ssa, size_t ssa_idx, std::string& failure_reason) {
+  bool generate_instruction(InstructionBuffer& buf, SSAInst const& ssa, Address ssa_idx, std::string& failure_reason) {
     Instruction inst;  // A temporary instruction
     
     // Temporary buffer for instructions -- 
@@ -289,12 +289,12 @@ private:
   }
 
   // the largest program we can create in the reserved program space, minus the amount we need to write any stores needed at the end
-  const size_t MAX_PROGRAM_SIZE_BYTES = (BASALISC_RESERVED_PROGRAM_SIZE * BASALISC_BLOCK_SIZE) - 
+  const Address MAX_PROGRAM_SIZE_BYTES = (BASALISC_RESERVED_PROGRAM_SIZE * BASALISC_BLOCK_SIZE) - 
                                         (BASALISC_REGISTER_COUNT * BASALISC_INSTRUCTION_SIZE_BYTES);
   ModulusTable& modulus_table;
   ValueLoc& vloc;
   InstructionAnalysis const& analysis;
-  std::unordered_map<ValueId, size_t> input_map;
+  std::unordered_map<ValueId, Address> input_map;
 };
 
 

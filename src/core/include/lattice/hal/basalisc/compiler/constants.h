@@ -27,6 +27,7 @@ using PrimeModulus = uint64_t;
 using PrimeModulusIndex = uint8_t;
 using AutomorphismNumber = uint32_t;
 using RngConfig = uint64_t;
+using AllocationTableSize = uint64_t;
 
 class RegisterOrAddress {
   int64_t value;
