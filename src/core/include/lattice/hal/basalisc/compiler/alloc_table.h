@@ -10,14 +10,14 @@ class AllocationTable {
 public:
   AllocationTable(size_t size)
     : loc_to_value(size, UNDEF_VALUE_ID) {
-      unallocated = size;
+      fresh = size;
   }
 
   // Total number of slots
   size_t total_slots() const { return loc_to_value.size(); }
 
   // How many slots are allocated at the moment.
-  size_t allocated_slots() const { return total_slots() - (free_list.size() + unallocated); }
+  size_t allocated_slots() const { return total_slots() - free_list.size() - fresh; }
 
   // Get the location for the given value.
   // Returns `true` and updates `rloc` if we have it,
@@ -93,10 +93,10 @@ public:
   // Allocate a slot that has never been allocated before
   // If a fresh slot is available, set `loc` and return true
   bool alloc_fresh(size_t& loc) {
-    if(unallocated <= 0) {
+    if(fresh <= 0)
       return false;
-    }
-    loc = --unallocated;
+
+    loc = --fresh;
     return true;
   }
 
@@ -120,7 +120,7 @@ public:
     reset(size);
   }
 
-  // clear this allocation table
+  // reset table to initial state
   void clear() {
     reset(total_slots());
   }
@@ -128,16 +128,18 @@ public:
 private:
   void reset(size_t size) {
     value_to_loc = {};
-    free_list = {};
-    unallocated = size;
+    loc_to_value = std::vector(size, UNDEF_VALUE_ID);
+
+    free_list.clear();
+    fresh = size;
   }
 
   std::unordered_map<ValueId, size_t> value_to_loc;
 
   // disjoint:
   std::vector<ValueId> loc_to_value;          // allocated
-  std::vector<size_t> free_list;              // unallocated
-  size_t unallocated;                         // slots lower than this have never been allocated before
+  std::vector<size_t> free_list;              // fresh
+  size_t fresh;                         // have ever been allocated
 };
 
 

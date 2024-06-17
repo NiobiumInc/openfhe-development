@@ -20,6 +20,7 @@ enable_testing()
 add_executable(
   galois_tests
   src/hello_test.cpp
+  src/allocation_table.cpp
 )
 
 target_link_libraries(
