@@ -20,8 +20,9 @@ const size_t BASALISC_RESERVED_SIZE = BASALISC_REGISTER_COUNT + BASALISC_RESERVE
 const size_t BASALISC_RESERVED_PROGRAM_ADDRESS = BASALISC_MEMORY_SIZE_BLOCKS - BASALISC_RESERVED_SIZE;
 const size_t BASALISC_RESERVED_REGISTER_ADDRESS = BASALISC_RESERVED_PROGRAM_ADDRESS + BASALISC_RESERVED_PROGRAM_SIZE;
 
-using Register = uint64_t;
-using Address = uint64_t;
+using Location = uint64_t;
+using Register = Location;
+using Address = Location;
 using Immediate = uint64_t;
 using PrimeModulus = uint64_t;
 using PrimeModulusIndex = uint8_t;

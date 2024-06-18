@@ -10,11 +10,11 @@ public:
       slot = 0;
     }
 
-    Eviction(size_t slot, ValueId fr): slot { slot }, freed { fr } {
+    Eviction(Location slot, ValueId fr): slot { slot }, freed { fr } {
 
     }
 
-    size_t slot;
+    Location slot;
     ValueId freed;
   };
 
@@ -45,12 +45,12 @@ public:
   // If `avoid` is defined, then we can't evict it.
   Eviction find_eviction_candidate(std::vector<ValueId> const& vals, size_t ssa_idx, ValueId avoid) const {
     bool first = true;
-    size_t candidate_slot = 0;
-    size_t candidate_next_use = 0;
+    Location candidate_slot = 0;
+    Location candidate_next_use = 0;
     int candidate_uses = 0;
 
     auto reg_num = vals.size();
-    for(size_t slot = 0; slot < reg_num; ++slot) {
+    for(Location slot = 0; slot < reg_num; ++slot) {
       ValueId v = vals[slot];
       if (v == UNDEF_VALUE_ID || v == avoid) continue;
 

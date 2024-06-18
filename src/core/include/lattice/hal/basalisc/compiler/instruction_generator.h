@@ -21,20 +21,20 @@ struct ValueLoc {
 
 // Result of instruction generation.
 struct Epoch {
-  InstructionBuffer instructions;                 // the instructions
+  InstructionBuffer instructions;                  // the instructions
   std::unordered_map<ValueId, Address> input_map;  // a map of the inputs to addresses - values must be moved 
-                                                  // here before executing the epoch
+                                                   // here before executing the epoch
   std::unordered_map<ValueId, Address> output_map; // map from values to where they will live after the epoch
-  ModulusTable modulus_table;                     // the modulus table
-  std::string end_reason;                         // what ended the epoch
-  Address gen_idx;                                 // where in the SSA vector we stopped generating instructions
+  ModulusTable modulus_table;                      // the modulus table
+  std::string end_reason;                          // what ended the epoch
+  size_t gen_idx;                                  // where in the SSA vector we stopped generating instructions
 };
 
 class InstructionGenerator {
 public:
 
   static std::vector<Epoch> generate_epochs(std::vector<SSAInst> const& input) {
-    Address idx = 0;
+    size_t idx = 0;
     std::vector<Epoch> epochs;
     InstructionAnalysis analysis { input };
     while(idx < input.size()) {
@@ -109,7 +109,7 @@ private:
   // register and there are none free.
   // Preloaded is an output argument indicating if the value was already
   // in a register.
-  bool allocate_reg(InstructionBuffer& buf, ValueId v, Address ssa_idx, Register& r,
+  bool allocate_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& r,
                       bool& preloaded, ValueId avoid = UNDEF_VALUE_ID) {
 
     preloaded = false;
@@ -136,7 +136,7 @@ private:
   }
 
   // Allocate a register for reading.  Read it in from memory, if needed.
-  bool src_reg(InstructionBuffer& buf, ValueId v, Address ssa_idx, Register& rloc, ValueId avoid = UNDEF_VALUE_ID) {
+  bool src_reg(InstructionBuffer& buf, ValueId v, size_t ssa_idx, Register& rloc, ValueId avoid = UNDEF_VALUE_ID) {
     bool preloaded;
     if(!allocate_reg(buf, v, ssa_idx, rloc, preloaded, avoid)) return false;
     if (preloaded) return true;
@@ -151,7 +151,7 @@ private:
     return false;
   }
 
-    // if we don't have a value memory, this must be an input
+    // if we don't have a value in memory, this must be an input
     // TODO: maybe we could allocate this sooner - we could do a pass at the beginning
     // to figure out all the inputs and allocate space for them but we don't know
     // how many instructions we'll be generating
@@ -289,8 +289,8 @@ private:
   }
 
   // the largest program we can create in the reserved program space, minus the amount we need to write any stores needed at the end
-  const Address MAX_PROGRAM_SIZE_BYTES = (BASALISC_RESERVED_PROGRAM_SIZE * BASALISC_BLOCK_SIZE) - 
-                                        (BASALISC_REGISTER_COUNT * BASALISC_INSTRUCTION_SIZE_BYTES);
+  const uint64_t MAX_PROGRAM_SIZE_BYTES = (BASALISC_RESERVED_PROGRAM_SIZE * BASALISC_BLOCK_SIZE) - 
+                                          (BASALISC_REGISTER_COUNT * BASALISC_INSTRUCTION_SIZE_BYTES);
   ModulusTable& modulus_table;
   ValueLoc& vloc;
   InstructionAnalysis const& analysis;

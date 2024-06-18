@@ -33,7 +33,6 @@
   implementation of the integer lattice
  */
 
-
 #include "lattice/hal/basalisc/poly.h"
 
 #include "utils/debug.h"
