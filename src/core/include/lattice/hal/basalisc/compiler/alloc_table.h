@@ -93,9 +93,9 @@ public:
   // Allocate a slot that has never been allocated before
   // If a fresh slot is available, set `loc` and return true
   bool alloc_fresh(Location& loc) {
-    if(unallocated <= 0) {
+    if(unallocated <= 0)
       return false;
-    }
+
     loc = --unallocated;
     return true;
   }
@@ -120,7 +120,7 @@ public:
     reset(size);
   }
 
-  // clear this allocation table
+  // reset table to initial state
   void clear() {
     reset(total_slots());
   }
@@ -128,7 +128,9 @@ public:
 private:
   void reset(AllocationTableSize size) {
     value_to_loc = {};
-    free_list = {};
+    loc_to_value = std::vector(size, UNDEF_VALUE_ID);
+
+    free_list.clear();
     unallocated = size;
   }
 
