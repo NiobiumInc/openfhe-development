@@ -34,39 +34,39 @@ public:
     return ConcretePoly(std::move(*v));
   }
 
-  SymbolicValue Add(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
+  SymbolicValue Add(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger m) {
     return emit_instruction({SSAInstOp::ADD, a1, a2, m});
   }
 
-  SymbolicValue AddI(SymbolicValue const& a1, NativeInteger const& i, NativeInteger const& m) {
+  SymbolicValue AddI(SymbolicValue const& a1, NativeInteger i, NativeInteger m) {
     return emit_instruction({SSAInstOp::ADDI, a1, i, m});
   }
 
-  SymbolicValue Sub(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
+  SymbolicValue Sub(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger m) {
     return emit_instruction({SSAInstOp::SUB, a1, a2, m});
   }
 
-  SymbolicValue SubI(SymbolicValue a1, NativeInteger const& i, NativeInteger const& m) {
+  SymbolicValue SubI(SymbolicValue a1, NativeInteger i, NativeInteger m) {
     return emit_instruction({SSAInstOp::SUBI, a1, i, m});
   }
 
-  SymbolicValue Mul(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger const& m) {
+  SymbolicValue Mul(SymbolicValue const& a1, SymbolicValue const& a2, NativeInteger m) {
     return emit_instruction({SSAInstOp::MUL, a1, a2, m});
   }
 
-  SymbolicValue MulI(SymbolicValue const& a1, NativeInteger const& i, NativeInteger const& m) {
+  SymbolicValue MulI(SymbolicValue const& a1, NativeInteger i, NativeInteger m) {
     return emit_instruction({SSAInstOp::MULI, a1, i, m});
   }
 
-  SymbolicValue Morph(SymbolicValue const& a1, AutomorphismNumber n, NativeInteger const& m) {
+  SymbolicValue Morph(SymbolicValue const& a1, AutomorphismNumber n, NativeInteger m) {
     return emit_instruction({SSAInstOp::MORPH, a1, n, m});
   }
 
-  SymbolicValue NTT(SymbolicValue const& a1, NativeInteger const& m) {
+  SymbolicValue NTT(SymbolicValue const& a1, NativeInteger m) {
     return emit_instruction({SSAInstOp::NTT, a1, m});
   }
 
-  SymbolicValue INTT(SymbolicValue const& a1, NativeInteger const& m) {
+  SymbolicValue INTT(SymbolicValue const& a1, NativeInteger m) {
     return emit_instruction({SSAInstOp::INTT, a1, m});
   }
 

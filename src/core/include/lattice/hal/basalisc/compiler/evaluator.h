@@ -8,7 +8,7 @@ class OpenFHEEvaluator {
 public:
 
 
-  void loadvec(NativeVector& v, std::array<uint64_t, BASALISC_POLY_LENGTH> const& reg, NativeInteger const& modulus) {
+  void loadvec(NativeVector& v, std::array<uint64_t, BASALISC_POLY_LENGTH> const& reg, NativeInteger modulus) {
     for(size_t i = 0; i < BASALISC_POLY_LENGTH; i++) {
       v[i] = reg[i];
     }

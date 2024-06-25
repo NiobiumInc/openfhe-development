@@ -22,11 +22,11 @@ enum SSAInstOp {
 };
 
 struct SSAInst {
-    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& i, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger const& i, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger const& m);
-    SSAInst(SSAInstOp op, SymbolicValue const& arg, AutomorphismNumber n, NativeInteger const& m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger i, NativeInteger m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg1, SymbolicValue const& arg2, NativeInteger i, NativeInteger m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, NativeInteger m);
+    SSAInst(SSAInstOp op, SymbolicValue const& arg, AutomorphismNumber n, NativeInteger m);
     SSAInst(SSAInstOp op, SymbolicValue const& arg);
     SSAInst(SSAInstOp op, ValueId const& arg)
     : op { op }, arg1 { arg } { }

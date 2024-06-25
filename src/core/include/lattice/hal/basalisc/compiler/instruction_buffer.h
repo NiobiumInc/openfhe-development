@@ -13,7 +13,7 @@ struct InstructionBuffer {
     inst_buf_is_inst.push_back(true);
   }
 
-  void push_imm(NativeInteger const& c) {
+  void push_imm(NativeInteger c) {
     inst_buf.push_back(uint64_t { c });
     inst_buf_is_inst.push_back(false);
   }
