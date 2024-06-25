@@ -30,7 +30,7 @@ esac
 
 BUILD="build-$MODE"
 
-g++ \
+clang++ \
   -I src/pke/include \
   -I src/core/include \
   -I src/math/include \
@@ -43,5 +43,6 @@ g++ \
   -L $BUILD/lib \
   -lOPENFHEpke_static \
   -lOPENFHEcore_static \
-  -lOPENFHEbinfhe_static
+  -lOPENFHEbinfhe_static \
+  --std=c++17
 

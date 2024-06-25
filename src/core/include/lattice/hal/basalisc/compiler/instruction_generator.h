@@ -27,61 +27,134 @@ struct Epoch {
   std::unordered_map<ValueId, Address> output_map; // map from values to where they will live after the epoch
   ModulusTable modulus_table;                      // the modulus table
   std::string end_reason;                          // what ended the epoch
-  size_t gen_idx;                                  // where in the SSA vector we stopped generating instructions
+
+  void reset() {
+    instructions = {};
+    input_map = {};
+    output_map = {};
+    modulus_table = {};
+    end_reason = {};
+  }
 };
+
+struct GenerationIndex {
+
+  std::vector<bool> generated;
+  size_t start;
+  size_t current;
+
+  GenerationIndex(size_t size) {
+    generated = std::vector<bool>(size, false);
+    start = 0;
+    current = 0;
+  }
+
+  size_t current_idx() {
+    return current;
+  }
+
+  size_t next_idx() {
+    while(current < generated.size() && generated[current]) {
+      if(current == start)
+        start++;
+      current++;
+    }
+    
+    return current;
+  }
+
+  void record_gen() {
+    if(current == start)
+      start++;
+
+    generated[current++] = true;
+  }
+
+  void record_skip() {
+    current++;
+  }
+
+  bool complete() {
+    return start == generated.size();
+  }
+
+  void reset() {
+    current = start;
+  }
+};
+
+enum InstructionGenerationResult {
+  CONTINUE,
+  SKIP,
+  STOP,
+};
+
 
 class InstructionGenerator {
 public:
+  InstructionGenerator(std::vector<SSAInst> const& program)
+  : program { program }, analysis { program }, gen_idx {program.size()}
+  {
+  }
 
-  static std::vector<Epoch> generate_epochs(std::vector<SSAInst> const& input) {
-    size_t idx = 0;
+  static std::vector<Epoch> generate_epochs(std::vector<SSAInst> const& program) {
+    Epoch e;
     std::vector<Epoch> epochs;
-    InstructionAnalysis analysis { input };
-    while(idx < input.size()) {
-      Epoch e = generate_instructions(input, analysis, idx);
-      assert(e.gen_idx > idx);
-      idx = e.gen_idx;
-      epochs.push_back(std::move(e));
+    InstructionGenerator gen { program };
+    while(gen.generate_epoch(e)) {
+      epochs.push_back(e);
     }
 
     return epochs;
   }
 
-  // Generate instructions into `dest` until we exceed some limit
-  // Transforms `mt` and `vloc` accordingly
-  static Epoch generate_instructions(std::vector<SSAInst> const& input, InstructionAnalysis const& analysis, Address gen_start = 0) {
-    Epoch epoch;
-    ValueLoc vloc;
-    InstructionGenerator ig { input, epoch.modulus_table, vloc, analysis };
-    InstructionBuffer dest;
-    Address idx = gen_start;
-    for(idx = gen_start; idx < input.size(); idx++) {
-      if(!ig.generate_instruction(epoch.instructions, input[idx], idx, epoch.end_reason)) {
-        break;
+  bool generate_epoch(Epoch& epoch) {
+    if(gen_idx.complete())
+      return false;
+    
+    InstructionBuffer buf;
+    size_t idx;
+    std::string stop_reason;
+    while((idx = gen_idx.next_idx()) < program.size()) {
+      switch(generate_instruction(buf, idx, stop_reason)) {
+        case InstructionGenerationResult::CONTINUE:
+          gen_idx.record_gen();
+          break;
+        case InstructionGenerationResult::SKIP:
+          gen_idx.record_skip();
+          break;
+        case InstructionGenerationResult::STOP:
+          goto end;
+
       }
     }
-    epoch.gen_idx = idx;
+  end:
+    complete_epoch(buf);
 
-    if(idx == input.size()) {
-      epoch.end_reason = "execution complete";
+    if(gen_idx.complete()) {
+      stop_reason = "generation complete.";
     }
 
-    // move anything live from registers to memory
-    ig.complete(epoch.instructions);
-
-    // compute input/output maps
-    epoch.input_map = std::move(ig.input_map);
+    epoch.end_reason = stop_reason;
+    epoch.modulus_table = modulus_table;
+    epoch.instructions = std::move(buf);
+    epoch.input_map = std::move(input_map);
     vloc.memory.extract_and_clear(epoch.output_map);
-    epoch.output_map.merge(vloc.reserved_space_values);
-
-    return epoch;
+    vloc.reserved_space_values.merge(epoch.output_map);
+    
+    epoch_reset();
+    return true;
   }
 
 private:
-  InstructionGenerator(std::vector<SSAInst> const& ssa, ModulusTable& mt, ValueLoc& loc, InstructionAnalysis const& analysis)
-  : modulus_table { mt }, vloc { loc }, analysis { analysis } 
-  {
 
+  // reset state between epochs
+  void epoch_reset() {
+    modulus_table = {};
+    vloc = {};
+    input_map = {};
+    outside_modulus_table = {};
+    gen_idx.reset();
   }
 
   // Remove a value from the registers and memory.
@@ -162,7 +235,7 @@ private:
   }
 
   // copy all registers to memory (presumably every register is live)
-  void complete(InstructionBuffer& buf) {
+  void complete_epoch(InstructionBuffer& buf) {
     auto reg_map = vloc.registers.get_slot_map();
     auto reg_num = reg_map.size();
     Address mloc;
@@ -174,7 +247,8 @@ private:
     }
   }
 
-  bool generate_instruction(InstructionBuffer& buf, SSAInst const& ssa, Address ssa_idx, std::string& failure_reason) {
+  InstructionGenerationResult generate_instruction(InstructionBuffer& buf, size_t ssa_idx, std::string& failure_reason) {
+    SSAInst const& ssa = program[ssa_idx];
     Instruction inst;  // A temporary instruction
     
     // Temporary buffer for instructions -- 
@@ -187,33 +261,38 @@ private:
     Register rd;
     PrimeModulusIndex modidx = 0;
     
-    // get index for modulus or 
     if(ssa.modulus != 0 && !modulus_table.try_get_modulus_index(ssa.modulus, modidx)) {
-      failure_reason = "at limit for modulus table size";
-      return false;
+      outside_modulus_table.insert(ssa.dest);
+      return InstructionGenerationResult::STOP;
+    }
+
+    if(outside_modulus_table.find(ssa.arg1) != outside_modulus_table.end() ||
+       outside_modulus_table.find(ssa.arg2) != outside_modulus_table.end()) {
+      outside_modulus_table.insert(ssa.dest);
+      return InstructionGenerationResult::STOP;
     }
 
     // special case for FREE
     if(ssa.op == SSAInstOp::FREE) {
       free_value(ssa.arg1);
-      return true;
+      return InstructionGenerationResult::CONTINUE;
     }
 
     // allocate any needed registers
     if(ssa.arg1 != UNDEF_VALUE_ID && !src_reg(insts, ssa.arg1, ssa_idx, rs1)) {
       failure_reason = "at memory limit (src_reg returned false)";
-      return false;
+      return InstructionGenerationResult::STOP;
     }
 
     if(ssa.arg2 != UNDEF_VALUE_ID && !src_reg(insts, ssa.arg2, ssa_idx, rs2, ssa.arg1)) {
       failure_reason = "at memory limit (src_reg returned false)";
-      return false;
+      return InstructionGenerationResult::STOP;
     }
 
     bool preload;
     if(ssa.dest != UNDEF_VALUE_ID && !allocate_reg(insts, ssa.dest, ssa_idx, rd, preload)) {
       failure_reason = "at memory limit (allocate_reg returned false)";
-      return false;
+      return InstructionGenerationResult::STOP;
     }
 
     // generate instructions an immediates
@@ -282,19 +361,25 @@ private:
     // append temp instructions to buf - or fail if we're out of space for instructions
     if(buf.size_bytes() + insts.size_bytes() > MAX_PROGRAM_SIZE_BYTES) {
       failure_reason = "at limit for program space";
-      return false;
+      return InstructionGenerationResult::STOP;
     }
     buf.append(insts);
-    return true;
+    return InstructionGenerationResult::CONTINUE;
   }
 
   // the largest program we can create in the reserved program space, minus the amount we need to write any stores needed at the end
   const uint64_t MAX_PROGRAM_SIZE_BYTES = (BASALISC_RESERVED_PROGRAM_SIZE * BASALISC_BLOCK_SIZE) - 
                                           (BASALISC_REGISTER_COUNT * BASALISC_INSTRUCTION_SIZE_BYTES);
-  ModulusTable& modulus_table;
-  ValueLoc& vloc;
-  InstructionAnalysis const& analysis;
+
+  
+  std::vector<SSAInst> const& program;
+  InstructionAnalysis analysis;
+  GenerationIndex gen_idx;
+
+  ModulusTable modulus_table;
+  ValueLoc vloc;
   std::unordered_map<ValueId, Address> input_map;
+  std::set<ValueId> outside_modulus_table;
 };
 
 

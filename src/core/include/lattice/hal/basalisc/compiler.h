@@ -190,13 +190,11 @@ public:
   }
 
   void display_program(std::ostream& os = std::cout) const {
-    // make copies of context stuff
-    std::vector<SSAInst> inst = m_inst;
-    ValueLoc vl { vloc };
-
     // generate instructions
     size_t epoch_count = 0;
-    for(auto epoch : InstructionGenerator::generate_epochs(inst)) {
+    Epoch epoch;
+    InstructionGenerator gen { m_inst };
+    while(gen.generate_epoch(epoch)) {
       os << "-------------------------------------------- " << std::endl;
       os << "Epoch: " << epoch_count << std::endl;
       os << "Reason: " << epoch.end_reason << std::endl;
@@ -208,6 +206,7 @@ public:
       epoch.instructions.display(os);
       os << std::endl;
       os << "-------------------------------------------- " << std::endl;
+      os << std::flush;
 
       epoch_count++;
     }
@@ -248,6 +247,23 @@ public:
     return stats;
   }
 
+
+  void write_ssa_with_mod_depth(std::filesystem::path const& path) const {
+    std::ofstream f { path };
+    if(!f) {
+      not_available("could not open file: '" + path.string() + "' " );
+    }
+    display_ssa_with_modulus_depth(m_inst, f);
+  }
+
+  void write_ssa_graph(std::filesystem::path const& path) const {
+    std::ofstream f { path };
+    if(!f) {
+      not_available("could not open file: '" + path.string() + "' " );
+    }
+    display_ssa_graph(m_inst, f);
+  }
+
   void software_computation() {
   }
 
@@ -260,6 +276,10 @@ public:
       if (x.second.is_address()) ++addresses;
     }
     std::cout << addresses << " spilled out of " << value_location.size() << "\n";
+  }
+
+  std::vector<SSAInst> const& get_program() {
+    return m_inst;
   }
 
 

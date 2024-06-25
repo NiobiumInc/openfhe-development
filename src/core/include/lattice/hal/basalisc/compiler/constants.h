@@ -55,9 +55,6 @@ public:
 
 };
 
-
-
-
 /* Exceptions */
 
 [[noreturn]]
@@ -105,5 +102,3 @@ inline std::string pp_autonum(AutomorphismNumber const& n) {
 inline std::string pp_rng_sram(uint64_t i) {
   return "o" + std::to_string(i);
 }
-
-
