@@ -38,31 +38,55 @@
 
 #define ILPARAMS_IMPLEMENTATION     "lattice/hal/default/ilparams.h"
 #define ILDCRTPARAMS_IMPLEMENTATION "lattice/hal/default/ildcrtparams.h"
+
+#ifndef BASALISC_USE_OPENFHE_DEFAULT 
+#define POLY_IMPLEMENTATION         "lattice/hal/basalisc/poly-impl.h"
+#define DCRTPOLY_IMPLEMENTATION     "lattice/hal/basalisc/dcrtpoly-impl.h"
+#else
 #define POLY_IMPLEMENTATION         "lattice/hal/default/poly-impl.h"
 #define DCRTPOLY_IMPLEMENTATION     "lattice/hal/default/dcrtpoly-impl.h"
+#endif
+
+
 
 #define MAKE_ILPARAMS_TYPE(T)     template class ILParamsImpl<T>;
 #define MAKE_ILDCRTPARAMS_TYPE(T) template class ILDCRTParams<T>;
+
+#ifndef BASALISC_USE_OPENFHE_DEFAULT 
+#define MAKE_POLY_TYPE(T)         template class BasPoly<T>;
+#else
 #define MAKE_POLY_TYPE(T)         template class PolyImpl<T>;
+#endif
 #define MAKE_DCRTPOLY_TYPE(T)     template class DCRTPolyImpl<T>;
 
 #include "lattice/hal/default/ilparams.h"
 #include "lattice/hal/default/ildcrtparams.h"
+
+#ifndef BASALISC_USE_OPENFHE_DEFAULT 
+#include "lattice/hal/basalisc/poly.h"
+#include "lattice/hal/basalisc/dcrtpoly.h"
+#else
 #include "lattice/hal/default/poly.h"
 #include "lattice/hal/default/dcrtpoly.h"
+#endif
 
 namespace lbcrypto {
 
 using ILNativeParams = ILParamsImpl<NativeInteger>;
 using ILParams       = ILParamsImpl<BigInteger>;
+#ifndef BASALISC_USE_OPENFHE_DEFAULT
+using Poly           = BasPoly<BigVector>;
+using NativePoly     = BasPoly<NativeVector>;
+#else
 using Poly           = PolyImpl<BigVector>;
 using NativePoly     = PolyImpl<NativeVector>;
+#endif
 using DCRTPoly       = DCRTPolyImpl<BigVector>;
 
 #ifdef WITH_BE2
 using M2Params     = ILParamsImpl<M2Integer>;
 using M2DCRTParams = ILDCRTParams<M2Integer>;
-using M2Poly       = PolyImpl<M2Vector>;
+using M2Poly       = BasPoly<M2Vector>;
 using M2DCRTPoly   = DCRTPolyImpl<M2Vector>;
 #else
 using M2Params     = void;
@@ -74,7 +98,13 @@ using M2DCRTPoly   = void;
 #ifdef WITH_BE4
 using M4Params     = ILParamsImpl<M4Integer>;
 using M4DCRTParams = ILDCRTParams<M4Integer>;
+
+#ifndef BASALISC_USE_OPENFHE_DEFAULT
+using M4Poly       = BasPoly<M4Vector>;
+#else
 using M4Poly       = PolyImpl<M4Vector>;
+#endif
+
 using M4DCRTPoly   = DCRTPolyImpl<M4Vector>;
 #else
 using M4Params     = void;
@@ -86,7 +116,7 @@ using M4DCRTPoly   = void;
 #ifdef WITH_NTL
 using M6Params     = ILParamsImpl<M6Integer>;
 using M6DCRTParams = ILDCRTParams<M6Integer>;
-using M6Poly       = PolyImpl<M6Vector>;
+using M6Poly       = BasPoly<M6Vector>;
 using M6DCRTPoly   = DCRTPolyImpl<M6Vector>;
 #else
 using M6Params     = void;

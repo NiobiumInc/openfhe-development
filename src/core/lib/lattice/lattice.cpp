@@ -58,7 +58,8 @@ namespace lbcrypto {
 template class ElemParams<NativeInteger>;
 
 MAKE_ILPARAMS_TYPE(NativeInteger)
-MAKE_POLY_TYPE(NativeVector)
+// XXX: this causes an error when built with clang because NativePoly has been explicitly instantiated via specialization, so it's commented out for now
+// MAKE_POLY_TYPE(NativeVector)
 
 template class Matrix<NativePoly>;
 SPLIT64_FOR_TYPE(NativePoly)

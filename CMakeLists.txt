@@ -79,6 +79,9 @@ option( WITH_COVTEST "Turn on to enable coverage testing"                       
 option( WITH_NOISE_DEBUG "Use only when running lattice estimator; not for production" OFF )
 option( USE_MACPORTS "Use MacPorts installed packages"                               OFF )
 
+option( WITH_BASALISC "Enable Basalisc"                                       ON )
+option( WITH_PROFILING "Enable gprof profiling"                                OFF )
+
 # Set required number of bits for native integer in build by setting NATIVE_SIZE to 64 or 128
 if( NOT NATIVE_SIZE )
     set( NATIVE_SIZE 64 )
@@ -107,6 +110,8 @@ message( STATUS "WITH_NATIVEOPT:   ${WITH_NATIVEOPT}")
 message( STATUS "WITH_COVTEST:     ${WITH_COVTEST}")
 message( STATUS "WITH_NOISE_DEBUG: ${WITH_NOISE_DEBUG}")
 message( STATUS "USE_MACPORTS:     ${USE_MACPORTS}")
+message( STATUS "WITH_BASALISC:    ${WITH_BASALISC}")
+message( STATUS "WITH_PROFILING:   ${WITH_PROFILING}")
 
 #--------------------------------------------------------------------
 # Compiler logic
@@ -381,6 +386,18 @@ if(WITH_TCM OR WITH_NTL)
     endif()
 endif()
 
+
+add_compile_options(-Wfatal-errors)
+
+if (NOT WITH_BASALISC)
+  add_definitions(-DBASALISC_USE_OPENFHE_DEFAULT)
+endif()
+
+if (WITH_PROFILING)
+  set(CMAKE_CXX_FLAGS "-pg")
+  set(CMAKE_CXX_FLAGS_DEBUG "-pg")
+endif()
+
 #--------------------------------------------------------------------
 # OpenMP logic
 #--------------------------------------------------------------------
@@ -543,6 +560,8 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-test/googlet
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-test/googletest/include )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/src/core/include )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/src/binfhe/include )
+
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../../src/core/include )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR}/src/core )
 
