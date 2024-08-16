@@ -62,6 +62,16 @@ void RingGSWAccumulator::SignedDigitDecompose(const std::shared_ptr<RingGSWCrypt
     uint32_t digitsG2{(params->GetDigitsG() - 1) << 1};
     uint32_t N{params->GetN()};
 
+    std::cout << "SignedDigitDecompose ciphertext" << std::endl;
+    std::cout << "QHalf: " << QHalf << std::endl;
+    std::cout << "Q_int: " << Q_int << std::endl;
+    std::cout << "gBits: " << gBits << std::endl;
+    std::cout << "gBitsMaxBits: " << gBitsMaxBits << std::endl;
+    std::cout << "digitsG2: " << digitsG2 << std::endl;
+    std::cout << "N: " << N << std::endl;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     for (uint32_t k{0}; k < N; ++k) {
         auto t0{input[0][k].ConvertToInt<BasicInteger>()};
         auto d0{static_cast<NativeInteger::SignedNativeInt>(t0 < QHalf ? t0 : t0 - Q_int)};
@@ -88,6 +98,10 @@ void RingGSWAccumulator::SignedDigitDecompose(const std::shared_ptr<RingGSWCrypt
             output[d + 1][k] += r1;
         }
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> operation_time = end - start;
+    std::cout << std::endl << "SDD Time: " << operation_time.count() << " ms." << std::endl;
 }
 
 // Decompose a ring element, not ciphertext
@@ -100,6 +114,8 @@ void RingGSWAccumulator::SignedDigitDecompose(const std::shared_ptr<RingGSWCrypt
     // approximate gadget decomposition is used; the first digit is ignored
     uint32_t digitsG{params->GetDigitsG() - 1};
     uint32_t N{params->GetN()};
+
+    std::cout << "SignedDigitDecompose ring element" << std::endl;
 
     for (uint32_t k{0}; k < N; ++k) {
         auto t0{input[k].ConvertToInt<BasicInteger>()};
