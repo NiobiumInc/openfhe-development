@@ -561,7 +561,9 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-test/googlet
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/src/core/include )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/src/binfhe/include )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../../src/core/include )
+# For Basalisc
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../../src/compiler-base )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../../src/compiler-open-fhe/core/include )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR}/src/core )
 
