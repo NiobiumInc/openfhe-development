@@ -123,6 +123,7 @@ message(STATUS "WITH_COVTEST:       ${WITH_COVTEST}")
 message(STATUS "WITH_NOISE_DEBUG:   ${WITH_NOISE_DEBUG}")
 message(STATUS "WITH_REDUCED_NOISE: ${WITH_REDUCED_NOISE}")
 message(STATUS "USE_MACPORTS:       ${USE_MACPORTS}")
+message( STATUS "WITH_CPROBES:     ${WITH_CPROBES}")
 
 #--------------------------------------------------------------------
 # Compiler logic
@@ -421,6 +422,13 @@ if(WITH_TCM OR WITH_NTL)
     if(${AUTOCONF_VER_LEN} EQUAL 0)
         message(SEND_ERROR "Autoconf is not installed.")
     endif()
+
+endif()
+
+add_compile_options(-Wfatal-errors)
+
+if (WITH_CPROBES)
+  add_definitions(-DOPENFHE_CPROBES)
 endif()
 
 #--------------------------------------------------------------------
