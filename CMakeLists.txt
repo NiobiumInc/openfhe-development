@@ -107,6 +107,7 @@ message( STATUS "WITH_NATIVEOPT:   ${WITH_NATIVEOPT}")
 message( STATUS "WITH_COVTEST:     ${WITH_COVTEST}")
 message( STATUS "WITH_NOISE_DEBUG: ${WITH_NOISE_DEBUG}")
 message( STATUS "USE_MACPORTS:     ${USE_MACPORTS}")
+message( STATUS "WITH_CPROBES:     ${WITH_CPROBES}")
 
 #--------------------------------------------------------------------
 # Compiler logic
@@ -187,6 +188,12 @@ if(WITH_COVTEST)
     link_libraries(gcov)
     set( BUILDDIR ${CMAKE_CURRENT_SOURCE_DIR}/build/)
     set( COVDIR ${BUILDDIR}coverage/)
+endif()
+
+if(APPLE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
+elseif(UNIX)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--allow-shlib-undefined")
 endif()
 
 if(BUILD_STATIC)
@@ -379,6 +386,13 @@ if(WITH_TCM OR WITH_NTL)
     if( ${AUTOCONF_VER_LEN} EQUAL 0 )
         message(SEND_ERROR "Autoconf is not installed.")
     endif()
+
+endif()
+
+add_compile_options(-Wfatal-errors)
+
+if (WITH_CPROBES)
+  add_definitions(-DOPENFHE_CPROBES)
 endif()
 
 #--------------------------------------------------------------------
