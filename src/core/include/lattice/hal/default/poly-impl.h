@@ -42,6 +42,10 @@
 #include "utils/exception.h"
 #include "utils/inttypes.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -214,6 +218,13 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
         tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
     else
         tmp.SetValues((*m_values).ModAdd(element), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_addi(1,  // tmp
+                        2,  // m_values
+                        3); // element
+#endif
+
     return tmp;
 }
 
