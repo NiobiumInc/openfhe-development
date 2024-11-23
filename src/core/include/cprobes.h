@@ -7,7 +7,20 @@
 extern "C" {
 #endif
 
-void openfhe_cprobe_addi(uintptr_t, uint64_t, uint64_t);
+void openfhe_cprobe_add(uintptr_t, uintptr_t, uintptr_t, uint64_t);
+void openfhe_cprobe_sub(uintptr_t, uintptr_t, uintptr_t, uint64_t);
+void openfhe_cprobe_mul(uintptr_t, uintptr_t, uintptr_t, uint64_t);
+
+void openfhe_cprobe_addi(uintptr_t, uintptr_t, uint64_t, uint64_t);
+void openfhe_cprobe_subi(uintptr_t, uintptr_t, uint64_t, uint64_t);
+void openfhe_cprobe_muli(uintptr_t, uintptr_t, uint64_t, uint64_t);
+
+void openfhe_cprobe_automorphism(uintptr_t, uintptr_t, uint64_t);
+
+void openfhe_cprobe_switchmodulus(uintptr_t, uintptr_t, uint64_t, uint64_t);
+
+void openfhe_cprobe_ntt(uintptr_t, uintptr_t, uint64_t);
+void openfhe_cprobe_intt(uintptr_t, uintptr_t, uint64_t);
 
 #ifdef __cplusplus
 }
