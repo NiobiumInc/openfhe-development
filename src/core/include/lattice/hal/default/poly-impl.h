@@ -220,9 +220,10 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
         tmp.SetValues((*m_values).ModAdd(element), m_format);
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_addi(1,  // tmp
+    openfhe_cprobe_addi(1,  // result
                         2,  // m_values
-                        3); // element
+                        3,  // element
+                        4); // mod
 #endif
 
     return tmp;
@@ -232,6 +233,14 @@ template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& element) const {
     PolyImpl<VecType> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModSub(element), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_subi(11,  // tmp
+                        22,  // m_values
+                        33,  // element
+                        44); // mod
+#endif
+
     return tmp;
 }
 
@@ -239,6 +248,14 @@ template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& element) const {
     PolyImpl<VecType> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModMul(element), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_mul(5,  // result
+                       6,  // a m_values
+                       7,  // b m_valeus
+                       8); // mod
+#endif
+
     return tmp;
 }
 
@@ -251,12 +268,28 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         if (elementReduced > q)
             elementReduced.ModEq(q);
         tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_muli(5,  // result
+                        6,  // a m_values
+                        7,  // b m_valeus
+                        8); // mod
+#endif
+
     }
     else {
         Integer elementReduced{NativeInteger::Integer(element)};
         if (elementReduced > q)
             elementReduced.ModEq(q);
         tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_muli(5,  // result
+                        6,  // a m_values
+                        7,  // b m_valeus
+                        8); // mod
+#endif
+
     }
     return tmp;
 }
@@ -297,6 +330,14 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
     if (!m_values)
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModAddEq(*element.m_values);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_add(5,  // result
+                       6,  // a m_values
+                       7,  // b m_valeus
+                       8); // mod
+#endif
+
     return *this;
 }
 
@@ -364,6 +405,13 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
             auto&& idxrev{lbcrypto::ReverseBits((jk >> 1) & mask, logn)};
             (*result.m_values)[jrev] = (*m_values)[idxrev];
         }
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_automorphism(5,  // result
+                                6,  // a m_values
+                                7); // rot index
+#endif
+
         return result;
     }
 
@@ -379,6 +427,13 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_automorphism(5,  // result
+                                6,  // a m_values
+                                7); // rot index
+#endif
+
     PolyImpl<VecType> tmp(m_params, m_format, true);
     uint32_t n = m_params->GetRingDimension();
     for (uint32_t j = 0; j < n; ++j)
@@ -408,13 +463,20 @@ PolyImpl<VecType> PolyImpl<VecType>::Mod(const Integer& modulus) const {
 }
 
 template <typename VecType>
-void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
-                                      const Integer& rootOfUnityArb) {
+void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb, const Integer& rootOfUnityArb) {
     if (m_values != nullptr) {
         m_values->SwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
         m_params = std::make_shared<PolyImpl::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     }
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_switchmodulus(5,  // result
+                                 6,  // src
+                                 7,  // old m
+                                 8); // new m
+#endif
+
 }
 
 template <typename VecType>
@@ -434,10 +496,24 @@ void PolyImpl<VecType>::SwitchFormat() {
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;
         ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_intt(5,  // result
+                        6,  // a m_values
+                        7); // mod
+#endif
+
         return;
     }
     m_format = Format::EVALUATION;
     ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_ntt(5,  // result
+                       6,  // a m_values
+                       7); // mod
+#endif
+
 }
 
 template <typename VecType>
