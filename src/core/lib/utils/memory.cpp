@@ -1,7 +1,7 @@
 //==================================================================================
 // BSD 2-Clause License
 //
-// Copyright (c) 2014-2022, NJIT, Duality Technologies Inc. and other contributors
+// Copyright (c) 2014-2024, NJIT, Duality Technologies Inc. and other contributors
 //
 // All rights reserved.
 //
@@ -28,40 +28,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
-
-#ifndef _LWE_KEYTRIPLE_H_
-#define _LWE_KEYTRIPLE_H_
-
-#include "lwe-privatekey.h"
-#include "lwe-publickey.h"
-#include "lwe-keyswitchkey.h"
-#include "lwe-keypair-fwd.h"
-
-#include "math/math-hal.h"
-#include "utils/serializable.h"
-
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+#include "utils/memory.h"
 
 namespace lbcrypto {
-/**
- * @brief Class that stores the LWE scheme secret key, public key pair; ((A, b), s)
- */
-class LWEKeyPairImpl {
-public:
-    LWEPublicKey publicKey{nullptr};
-    LWEPrivateKey secretKey{nullptr};
 
-    LWEKeyPairImpl(const LWEPublicKey& Av, const LWEPrivateKey& s) : publicKey(Av), secretKey(s) {}
-    LWEKeyPairImpl(LWEPublicKey&& Av, LWEPrivateKey&& s) noexcept : publicKey(std::move(Av)), secretKey(std::move(s)) {}
-
-    bool good() {
-        return publicKey && secretKey;
-    }
-};
+void secure_memset(volatile void* mem, uint8_t c, size_t len) {
+    volatile uint8_t* ptr = (volatile uint8_t*)mem;
+    for (size_t i = 0; i < len; ++i)
+        *(ptr + i) = c;
+}
 
 }  // namespace lbcrypto
-
-#endif  // _LWE_KEYPAIR_H_

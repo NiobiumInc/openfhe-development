@@ -1,7 +1,7 @@
 //==================================================================================
 // BSD 2-Clause License
 //
-// Copyright (c) 2014-2022, NJIT, Duality Technologies Inc. and other contributors
+// Copyright (c) 2014-2024, NJIT, Duality Technologies Inc. and other contributors
 //
 // All rights reserved.
 //
@@ -29,39 +29,28 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
 
-#ifndef _LWE_KEYTRIPLE_H_
-#define _LWE_KEYTRIPLE_H_
+#ifndef __UNIT_TEST_EXCEPTION_H__
+#define __UNIT_TEST_EXCEPTION_H__
 
-#include "lwe-privatekey.h"
-#include "lwe-publickey.h"
-#include "lwe-keyswitchkey.h"
-#include "lwe-keypair-fwd.h"
-
-#include "math/math-hal.h"
-#include "utils/serializable.h"
-
-#include <memory>
+#include "gtest/gtest.h"
+#include "utils/demangle.h"
+#include <iostream>
 #include <string>
-#include <utility>
-#include <vector>
 
-namespace lbcrypto {
-/**
- * @brief Class that stores the LWE scheme secret key, public key pair; ((A, b), s)
- */
-class LWEKeyPairImpl {
-public:
-    LWEPublicKey publicKey{nullptr};
-    LWEPrivateKey secretKey{nullptr};
+// TODO (dsuponit): demangle separately for linux, MacOS and Windows. see some links below
+// https://stackoverflow.com/questions/142508/how-do-i-check-os-with-a-preprocessor-directive
+// https://docs.microsoft.com/en-us/windows/win32/debug/retrieving-undecorated-symbol-names
+#if defined(__EMSCRIPTEN__)
+    #define UNIT_TEST_EXCEPTION_TYPE_NAME "EMSCRIPTEN_UNKNOWN";
+#else
+    #define UNIT_TEST_EXCEPTION_TYPE_NAME demangle(__cxxabiv1::__cxa_current_exception_type()->name())
+#endif
 
-    LWEKeyPairImpl(const LWEPublicKey& Av, const LWEPrivateKey& s) : publicKey(Av), secretKey(s) {}
-    LWEKeyPairImpl(LWEPublicKey&& Av, LWEPrivateKey&& s) noexcept : publicKey(std::move(Av)), secretKey(std::move(s)) {}
+// UNIT_TEST_HANDLE_ALL_EXCEPTIONS must always fail
+#define UNIT_TEST_HANDLE_ALL_EXCEPTIONS                                                                        \
+    std::string name(UNIT_TEST_EXCEPTION_TYPE_NAME);                                                           \
+    std::cerr << "Unknown exception of type \"" << name << "\" thrown from " << __func__ << "()" << std::endl; \
+    EXPECT_TRUE(0 == 1) << failmsg;
 
-    bool good() {
-        return publicKey && secretKey;
-    }
-};
+#endif  // __UNIT_TEST_EXCEPTION_H__
 
-}  // namespace lbcrypto
-
-#endif  // _LWE_KEYPAIR_H_
