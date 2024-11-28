@@ -109,7 +109,8 @@ void RingGSWAccumulatorCGGI::AddToAccCGGI(const std::shared_ptr<RingGSWCryptoPar
     uint32_t digitsG2{(params->GetDigitsG() - 1) << 1};
     std::vector<NativePoly> dct(digitsG2, NativePoly(params->GetPolyParams(), Format::COEFFICIENT, true));
 
-    SignedDigitDecompose(params, ct, dct);
+    Basalisc.Sdd(SymbolicValue(), SymbolicValue(), 0);
+    // SignedDigitDecompose(params, ct, dct);
 
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(digitsG2))
     for (uint32_t i = 0; i < digitsG2; ++i)

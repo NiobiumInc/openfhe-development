@@ -69,7 +69,7 @@ void SimpleBootstrapExample() {
     * you do not need to set the ring dimension.
     */
     parameters.SetSecurityLevel(HEStd_NotSet);
-    parameters.SetRingDim(1 << 12);
+    parameters.SetRingDim(1 << 16);
 
     /*  A3) Scaling parameters.
     * By default, we set the modulus sizes and rescaling technique to the following values
@@ -142,12 +142,14 @@ void SimpleBootstrapExample() {
     // for HE computation.
     auto ciphertextAfter = cryptoContext->EvalBootstrap(ciph);
 
+    Basalisc.instruction_stats().display();
+
     std::cout << "Number of levels remaining after bootstrapping: "
               << depth - ciphertextAfter->GetLevel() - (ciphertextAfter->GetNoiseScaleDeg() - 1) << std::endl
               << std::endl;
 
-    Plaintext result;
-    cryptoContext->Decrypt(keyPair.secretKey, ciphertextAfter, &result);
-    result->SetLength(encodedLength);
-    std::cout << "Output after bootstrapping \n\t" << result << std::endl;
+    // Plaintext result;
+    // cryptoContext->Decrypt(keyPair.secretKey, ciphertextAfter, &result);
+    // result->SetLength(encodedLength);
+    // std::cout << "Output after bootstrapping \n\t" << result << std::endl;
 }

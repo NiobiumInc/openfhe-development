@@ -358,12 +358,14 @@ LWECiphertext LWEEncryptionScheme::KeySwitch(const std::shared_ptr<LWECryptoPara
     for (size_t i = 0; i < N; ++i) {
         auto& refA = K->GetElementsA()[i];
         auto& refB = K->GetElementsB()[i];
-        NativeInteger::Integer atmp(ctQN->GetA(i).ConvertToInt());
+        // NativeInteger::Integer atmp(ctQN->GetA(i).ConvertToInt());
         for (size_t j = 0; j < digitCount; ++j) {
-            const auto a0 = (atmp % baseKS);
-            atmp /= baseKS;
-            b.ModSubFastEq(refB[a0][j], Q);
-            auto& refAj = refA[a0][j];
+            // const auto a0 = (atmp % baseKS);
+            // atmp /= baseKS;
+            // b.ModSubFastEq(refB[a0][j], Q);
+            b.ModSubFastEq(refB[0][j], Q);
+            // auto& refAj = refA[a0][j];
+            auto& refAj = refA[0][j];
             for (size_t k = 0; k < n; ++k)
                 a[k].ModSubFastEq(refAj[k], Q);
         }

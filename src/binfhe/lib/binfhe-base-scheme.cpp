@@ -101,10 +101,11 @@ LWECiphertext BinFHEScheme::EvalBinGate(const std::shared_ptr<BinFHECryptoParams
     // we add Q/8 to "b" to to map back to Q/4 (i.e., mod 2) arithmetic.
     const auto& LWEParams = params->GetLWEParams();
     NativeInteger Q{LWEParams->GetQ()};
-    NativeInteger b{(Q >> 3) + 1};
-    b.ModAddFastEq(accVec[1][0], Q);
+    // NativeInteger b{(Q >> 3) + 1};
+    // b.ModAddFastEq(accVec[1][0], Q);
 
-    auto ctExt = std::make_shared<LWECiphertextImpl>(std::move(accVec[0].GetValues()), std::move(b));
+    // auto ctExt = std::make_shared<LWECiphertextImpl>(std::move(accVec[0].GetValues()), std::move(b));
+    auto ctExt = std::make_shared<LWECiphertextImpl>();
     // Modulus switching to a middle step Q'
     auto ctMS = LWEscheme->ModSwitch(LWEParams->GetqKS(), ctExt);
     // Key switching
