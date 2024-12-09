@@ -56,6 +56,8 @@
 
 namespace lbcrypto {
 
+static uintptr_t poly_ids = 0;
+
 /**
  * @class PolyImpl
  * @file poly.h
@@ -80,19 +82,19 @@ public:
 
     PolyImpl(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
-        : m_format{format}, m_params{params} {
+        : m_format{format}, m_params{params}, m_id{++poly_ids} {
         if (initializeElementToZero)
             PolyImpl::SetValuesToZero();
     }
     PolyImpl(const std::shared_ptr<ILDCRTParams<Integer>>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
-        : m_format(format), m_params(std::make_shared<Params>(params->GetCyclotomicOrder(), params->GetModulus(), 1)) {
+        : m_format(format), m_params(std::make_shared<Params>(params->GetCyclotomicOrder(), params->GetModulus(), 1)), m_id{++poly_ids} {
         if (initializeElementToZero)
             this->SetValuesToZero();
     }
 
     PolyImpl(bool initializeElementToMax, const std::shared_ptr<Params>& params, Format format = Format::EVALUATION)
-        : m_format{format}, m_params{params} {
+        : m_format{format}, m_params{params}, m_id{++poly_ids} {
         if (initializeElementToMax)
             PolyImpl::SetValuesToMax();
     }
@@ -107,14 +109,15 @@ public:
              typename std::enable_if_t<std::is_same_v<T, NativeVector>, bool> = true)
         : m_format{rhs.m_format},
           m_params{rhs.m_params},
-          m_values{rhs.m_values ? std::make_unique<VecType>(*rhs.m_values) : nullptr} {
+          m_values{rhs.m_values ? std::make_unique<VecType>(*rhs.m_values) : nullptr},
+          m_id{++poly_ids} {
         PolyImpl<VecType>::SetFormat(format);
     }
 
     template <typename T = VecType>
     PolyImpl(const PolyNative& rhs, Format format,
              typename std::enable_if_t<!std::is_same_v<T, NativeVector>, bool> = true)
-        : m_format{rhs.GetFormat()} {
+        : m_format{rhs.GetFormat()}, m_id{++poly_ids} {
         auto c{rhs.GetParams()->GetCyclotomicOrder()};
         auto m{rhs.GetParams()->GetModulus().ConvertToInt()};
         auto r{rhs.GetParams()->GetRootOfUnity().ConvertToInt()};
@@ -133,16 +136,19 @@ public:
     PolyImpl(const PolyType& p) noexcept
         : m_format{p.m_format},
           m_params{p.m_params},
-          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {}
+          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr},
+          m_id{++poly_ids} {}
 
     PolyImpl(PolyType&& p) noexcept
-        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {}
+        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)},
+          m_id{++poly_ids} {}
 
     PolyType& operator=(const PolyType& rhs) noexcept override;
     PolyType& operator=(PolyType&& rhs) noexcept override {
         m_format = std::move(rhs.m_format);
         m_params = std::move(rhs.m_params);
         m_values = std::move(rhs.m_values);
+        m_id = ++poly_ids;
         return *this;
     }
     PolyType& operator=(const std::vector<int32_t>& rhs);
@@ -175,6 +181,10 @@ public:
         usint r{m_params->GetRingDimension()};
         auto max{m_params->GetModulus() - Integer(1)};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
+    }
+
+    inline uintptr_t GetId() const {
+        return m_id;
     }
 
     inline Format GetFormat() const final {
@@ -358,6 +368,7 @@ protected:
     Format m_format{Format::EVALUATION};
     std::shared_ptr<Params> m_params{nullptr};
     std::unique_ptr<VecType> m_values{nullptr};
+    uintptr_t m_id{0};
     void ArbitrarySwitchFormat();
 };
 
