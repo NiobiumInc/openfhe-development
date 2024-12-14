@@ -47,6 +47,10 @@
 #include "utils/exception.h"
 #include "utils/inttypes.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <functional>
 #include <limits>
 #include <memory>
@@ -238,11 +242,23 @@ public:
             OPENFHE_THROW("Format missmatch");
         auto tmp(*this);
         tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl PlusNoCheck(const PolyImpl& rhs) const {
         auto tmp(*this);
         tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl& operator+=(const PolyImpl& element) override;
@@ -257,8 +273,16 @@ public:
 
     PolyImpl Minus(const Integer& element) const override;
     PolyImpl& operator-=(const Integer& element) override {
-        m_values->ModSubEq(element);
-        return *this;
+      m_values->ModSubEq(element);
+
+#ifdef OPENFHE_CPROBES
+      auto src = GetId();
+      m_id = ++poly_ids;
+      openfhe_cprobe_subi(GetId(), src,
+            element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
+      return *this;
     }
 
     PolyImpl Times(const PolyImpl& rhs) const override {
@@ -270,11 +294,23 @@ public:
             OPENFHE_THROW("operator* for PolyImpl supported only in Format::EVALUATION");
         auto tmp(*this);
         tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl TimesNoCheck(const PolyImpl& rhs) const {
         auto tmp(*this);
         tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl& operator*=(const PolyImpl& rhs) override {
@@ -289,12 +325,28 @@ public:
             return *this;
         }
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
+
+#ifdef OPENFHE_CPROBES
+        auto src = GetId();
+        m_id = ++poly_ids;
+        openfhe_cprobe_mul(GetId(), src, rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return *this;
     }
 
     PolyImpl Times(const Integer& element) const override;
     PolyImpl& operator*=(const Integer& element) override {
         m_values->ModMulEq(element);
+
+#ifdef OPENFHE_CPROBES
+        auto src = GetId();
+        m_id = ++poly_ids;
+        openfhe_cprobe_muli(GetId(), src,
+            element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
         return *this;
     }
 
