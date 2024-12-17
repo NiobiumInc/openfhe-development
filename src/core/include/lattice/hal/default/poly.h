@@ -60,7 +60,7 @@
 
 namespace lbcrypto {
 
-static uintptr_t poly_ids = 0;
+uintptr_t allocate_id();
 
 /**
  * @class PolyImpl
@@ -86,19 +86,19 @@ public:
 
     PolyImpl(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
-        : m_format{format}, m_params{params}, m_id{++poly_ids} {
+        : m_format{format}, m_params{params} {
         if (initializeElementToZero)
             PolyImpl::SetValuesToZero();
     }
     PolyImpl(const std::shared_ptr<ILDCRTParams<Integer>>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
-        : m_format(format), m_params(std::make_shared<Params>(params->GetCyclotomicOrder(), params->GetModulus(), 1)), m_id{++poly_ids} {
+        : m_format(format), m_params(std::make_shared<Params>(params->GetCyclotomicOrder(), params->GetModulus(), 1)) {
         if (initializeElementToZero)
             this->SetValuesToZero();
     }
 
     PolyImpl(bool initializeElementToMax, const std::shared_ptr<Params>& params, Format format = Format::EVALUATION)
-        : m_format{format}, m_params{params}, m_id{++poly_ids} {
+        : m_format{format}, m_params{params} {
         if (initializeElementToMax)
             PolyImpl::SetValuesToMax();
     }
@@ -113,15 +113,14 @@ public:
              typename std::enable_if_t<std::is_same_v<T, NativeVector>, bool> = true)
         : m_format{rhs.m_format},
           m_params{rhs.m_params},
-          m_values{rhs.m_values ? std::make_unique<VecType>(*rhs.m_values) : nullptr},
-          m_id{++poly_ids} {
+          m_values{rhs.m_values ? std::make_unique<VecType>(*rhs.m_values) : nullptr} {
         PolyImpl<VecType>::SetFormat(format);
     }
 
     template <typename T = VecType>
     PolyImpl(const PolyNative& rhs, Format format,
              typename std::enable_if_t<!std::is_same_v<T, NativeVector>, bool> = true)
-        : m_format{rhs.GetFormat()}, m_id{++poly_ids} {
+        : m_format{rhs.GetFormat()} {
         auto c{rhs.GetParams()->GetCyclotomicOrder()};
         auto m{rhs.GetParams()->GetModulus().ConvertToInt()};
         auto r{rhs.GetParams()->GetRootOfUnity().ConvertToInt()};
@@ -140,19 +139,17 @@ public:
     PolyImpl(const PolyType& p) noexcept
         : m_format{p.m_format},
           m_params{p.m_params},
-          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr},
-          m_id{++poly_ids} {}
+          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {}
 
     PolyImpl(PolyType&& p) noexcept
-        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)},
-          m_id{++poly_ids} {}
+        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {}
 
     PolyType& operator=(const PolyType& rhs) noexcept override;
     PolyType& operator=(PolyType&& rhs) noexcept override {
         m_format = std::move(rhs.m_format);
         m_params = std::move(rhs.m_params);
         m_values = std::move(rhs.m_values);
-        m_id = ++poly_ids;
+        m_id = rhs.m_id;
         return *this;
     }
     PolyType& operator=(const std::vector<int32_t>& rhs);
@@ -276,9 +273,7 @@ public:
       m_values->ModSubEq(element);
 
 #ifdef OPENFHE_CPROBES
-      auto src = GetId();
-      m_id = ++poly_ids;
-      openfhe_cprobe_subi(GetId(), src,
+      openfhe_cprobe_subi(GetId(), GetId(),
             element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
 
@@ -327,9 +322,7 @@ public:
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
 
 #ifdef OPENFHE_CPROBES
-        auto src = GetId();
-        m_id = ++poly_ids;
-        openfhe_cprobe_mul(GetId(), src, rhs.GetId(),
+        openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #endif
 
@@ -341,9 +334,7 @@ public:
         m_values->ModMulEq(element);
 
 #ifdef OPENFHE_CPROBES
-        auto src = GetId();
-        m_id = ++poly_ids;
-        openfhe_cprobe_muli(GetId(), src,
+        openfhe_cprobe_muli(GetId(), GetId(),
             element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
 
@@ -420,7 +411,7 @@ protected:
     Format m_format{Format::EVALUATION};
     std::shared_ptr<Params> m_params{nullptr};
     std::unique_ptr<VecType> m_values{nullptr};
-    uintptr_t m_id{0};
+    uintptr_t m_id{allocate_id()};
     void ArbitrarySwitchFormat();
 };
 
