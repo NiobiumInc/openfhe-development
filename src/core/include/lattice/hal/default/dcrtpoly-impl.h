@@ -47,6 +47,10 @@
 #include "utils/utilities.h"
 #include "utils/utilities-int.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <algorithm>
 #include <ostream>
 #include <memory>
@@ -334,23 +338,35 @@ std::vector<DCRTPolyImpl<VecType>> DCRTPolyImpl<VecType>::PowersOfBase(usint bas
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::AutomorphismTransform(uint32_t i) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Automorphism");
+#endif
     DCRTPolyImpl<VecType> result;
     result.m_params = m_params;
     result.m_format = m_format;
     result.m_vectors.reserve(m_vectors.size());
     for (const auto& v : m_vectors)
         result.m_vectors.emplace_back(v.AutomorphismTransform(i));
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Automorphism");
+#endif
     return result;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::AutomorphismTransform(uint32_t i, const std::vector<uint32_t>& vec) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Automorphism");
+#endif
     DCRTPolyImpl<VecType> result;
     result.m_params = m_params;
     result.m_format = m_format;
     result.m_vectors.reserve(m_vectors.size());
     for (const auto& v : m_vectors)
         result.m_vectors.emplace_back(v.AutomorphismTransform(i, vec));
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Automorphism");
+#endif
     return result;
 }
 
@@ -367,11 +383,17 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::MultiplicativeInverse() const {
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Negate() const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Negate");
+#endif
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Negate();
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Negate");
+#endif
     return tmp;
 }
 
@@ -382,6 +404,9 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::operator-() const {
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const DCRTPolyImpl& rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Minus vector");
+#endif
     if (m_vectors.size() != rhs.m_vectors.size())
         OPENFHE_THROW("tower size mismatch; cannot subtract");
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
@@ -389,6 +414,9 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const DCRTPolyImpl& rhs) cons
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Minus(rhs.m_vectors[i]);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Minus vector");
+#endif
     return tmp;
 }
 
@@ -529,79 +557,124 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator=(const std::vector<int32_
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Plus(const Integer& rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Plus integer");
+#endif
     NativeInteger val{rhs};
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Plus(val);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Plus integer");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Plus(const std::vector<Integer>& crtElement) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Plus vector");
+#endif
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Plus(NativeInteger(crtElement[i]));
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Plus vector");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const Integer& rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Minus integer");
+#endif
     NativeInteger val{rhs};
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Minus(val);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Minus integer");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const std::vector<Integer>& crtElement) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Minus vector");
+#endif
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Minus(NativeInteger(crtElement[i]));
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Minus vector");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const Integer& rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Times integer");
+#endif
     NativeInteger val{rhs};
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(val);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Times integer");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(NativeInteger::SignedNativeInt rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Times signed integer");
+#endif
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(rhs);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Times signed integer");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<Integer>& crtElement) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Times vector");
+#endif
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(NativeInteger(crtElement[i]));
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Times vector");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<NativeInteger>& rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Times vector");
+#endif
     if (m_vectors.size() != rhs.size())
         OPENFHE_THROW("tower size mismatch; cannot multiply");
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
@@ -609,16 +682,25 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<NativeInteg
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(rhs[i]);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Times vector");
+#endif
     return tmp;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::TimesNoCheck(const std::vector<NativeInteger>& rhs) const {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("enter DCRTPoly::Times vector");
+#endif
     size_t vecSize = m_vectors.size() < rhs.size() ? m_vectors.size() : rhs.size();
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(vecSize))
     for (size_t i = 0; i < vecSize; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(rhs[i]);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("exit DCRTPoly::Times vector");
+#endif
     return tmp;
 }
 
