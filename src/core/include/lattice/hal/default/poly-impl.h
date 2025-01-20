@@ -59,6 +59,9 @@ namespace lbcrypto {
 
 uintptr_t allocate_id() {
   static std::atomic<uintptr_t> value_id{1};
+#ifdef OPENFHE_CPROBES
+  openfhe_cprobe_id(value_id);
+#endif
   return value_id.fetch_add(1, std::memory_order_relaxed);
 }
 

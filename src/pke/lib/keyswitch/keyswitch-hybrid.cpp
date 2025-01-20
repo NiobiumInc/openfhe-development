@@ -41,6 +41,10 @@
 #include "keyswitch/keyswitch-hybrid.h"
 #include "scheme/ckksrns/ckksrns-cryptoparameters.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 namespace lbcrypto {
 
 EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPoly> oldKey,
@@ -126,6 +130,23 @@ EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPol
     ek->SetAVector(std::move(av));
     ek->SetBVector(std::move(bv));
     ek->SetKeyTag(newKey->GetKeyTag());
+
+#ifdef OPENFHE_CPROBES
+    const auto& a = ek->GetAVector();
+    for (const auto& c : a) {
+      for (const auto& p : c.GetAllElements()) {
+        openfhe_cprobe_key(p.GetId());
+      }
+    }
+
+    const auto& b = ek->GetBVector();
+    for (const auto& c : b) {
+      for (const auto& p : c.GetAllElements()) {
+        openfhe_cprobe_key(p.GetId());
+      }
+    }
+#endif
+
     return ek;
 }
 
