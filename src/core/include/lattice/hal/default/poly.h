@@ -139,16 +139,29 @@ public:
     PolyImpl(const PolyType& p) noexcept
         : m_format{p.m_format},
           m_params{p.m_params},
-          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {}
+          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {
+#ifdef OPENFHE_CPROBES
+            openfhe_cprobe_copy(GetId(), p.GetId());
+#endif
+          }
 
     PolyImpl(PolyType&& p) noexcept
-        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {}
+        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {
+#ifdef OPENFHE_CPROBES
+            openfhe_cprobe_copy(GetId(), p.GetId());
+#endif
+        }
 
     PolyType& operator=(const PolyType& rhs) noexcept override;
     PolyType& operator=(PolyType&& rhs) noexcept override {
         m_format = std::move(rhs.m_format);
         m_params = std::move(rhs.m_params);
         m_values = std::move(rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_move(m_id, rhs.m_id);
+#endif
+
         m_id = rhs.m_id;
         return *this;
     }
@@ -174,11 +187,17 @@ public:
     void SetValues(VecType&& values, Format format) override;
 
     void SetValuesToZero() override {
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_zero(GetId());
+#endif
         usint r{m_params->GetRingDimension()};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
     }
 
     void SetValuesToMax() override {
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_max(GetId());
+#endif
         usint r{m_params->GetRingDimension()};
         auto max{m_params->GetModulus() - Integer(1)};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
@@ -317,6 +336,12 @@ public:
             OPENFHE_THROW("operator* for PolyImpl supported only in Format::EVALUATION");
         if (m_values) {
             m_values->ModMulNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
             return *this;
         }
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
