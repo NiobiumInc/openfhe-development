@@ -657,7 +657,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(NativeInteger::SignedNativeIn
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<Integer>& crtElement) const {
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_annotate("enter DCRTPoly::Times vector");
+    openfhe_cprobe_annotate("enter DCRTPoly::Times vector Integer");
 #endif
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
     size_t size{m_vectors.size()};
@@ -665,7 +665,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<Integer>& c
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(NativeInteger(crtElement[i]));
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_annotate("exit DCRTPoly::Times vector");
+    openfhe_cprobe_annotate("exit DCRTPoly::Times vector Integer");
 #endif
     return tmp;
 }
@@ -673,7 +673,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<Integer>& c
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<NativeInteger>& rhs) const {
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_annotate("enter DCRTPoly::Times vector");
+    openfhe_cprobe_annotate("enter DCRTPoly::Times vector NativeInteger");
 #endif
     if (m_vectors.size() != rhs.size())
         OPENFHE_THROW("tower size mismatch; cannot multiply");
@@ -683,7 +683,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<NativeInteg
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(rhs[i]);
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_annotate("exit DCRTPoly::Times vector");
+    openfhe_cprobe_annotate("exit DCRTPoly::Times vector NativeInteger");
 #endif
     return tmp;
 }
@@ -691,7 +691,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Times(const std::vector<NativeInteg
 template <typename VecType>
 DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::TimesNoCheck(const std::vector<NativeInteger>& rhs) const {
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_annotate("enter DCRTPoly::Times vector");
+    openfhe_cprobe_annotate("enter DCRTPoly::TimesNoCheck vector NativeInteger");
 #endif
     size_t vecSize = m_vectors.size() < rhs.size() ? m_vectors.size() : rhs.size();
     DCRTPolyImpl<VecType> tmp(m_params, m_format);
@@ -699,7 +699,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::TimesNoCheck(const std::vector<Nati
     for (size_t i = 0; i < vecSize; ++i)
         tmp.m_vectors[i] = m_vectors[i].Times(rhs[i]);
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_annotate("exit DCRTPoly::Times vector");
+    openfhe_cprobe_annotate("exit DCRTPoly::TimesNoCheck vector NativeInteger");
 #endif
     return tmp;
 }

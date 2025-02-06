@@ -11,6 +11,11 @@ void openfhe_cprobe_annotate(const char*);
 
 void openfhe_cprobe_id(uintptr_t);
 
+void openfhe_cprobe_discrete_gaussian(uintptr_t);
+void openfhe_cprobe_discrete_uniform(uintptr_t);
+void openfhe_cprobe_binary_uniform(uintptr_t);
+void openfhe_cprobe_ternary_uniform(uintptr_t);
+
 void openfhe_cprobe_zero(uintptr_t);
 void openfhe_cprobe_max(uintptr_t);
 
