@@ -71,6 +71,9 @@ PolyImpl<VecType>::PolyImpl(const DggType& dgg, const std::shared_ptr<PolyImpl::
       m_params{params},
       m_values{std::make_unique<VecType>(dgg.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
     PolyImpl<VecType>::SetFormat(format);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_discrete_gaussian(GetId());
+#endif
 }
 
 template <typename VecType>
@@ -78,6 +81,9 @@ PolyImpl<VecType>::PolyImpl(DugType& dug, const std::shared_ptr<PolyImpl::Params
     : m_format{format},
       m_params{params},
       m_values{std::make_unique<VecType>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_discrete_uniform(GetId());
+#endif
       }
 
 template <typename VecType>
@@ -86,6 +92,9 @@ PolyImpl<VecType>::PolyImpl(const BugType& bug, const std::shared_ptr<PolyImpl::
       m_params{params},
       m_values{std::make_unique<VecType>(bug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
     PolyImpl<VecType>::SetFormat(format);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_binary_uniform(GetId());
+#endif
 }
 
 template <typename VecType>
@@ -95,6 +104,9 @@ PolyImpl<VecType>::PolyImpl(const TugType& tug, const std::shared_ptr<PolyImpl::
       m_params{params},
       m_values{std::make_unique<VecType>(tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h))} {
     PolyImpl<VecType>::SetFormat(format);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_ternary_uniform(GetId());
+#endif
 }
 
 template <typename VecType>
@@ -102,6 +114,9 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
     m_id = rhs.m_id;
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_copy(m_id, rhs.m_id);
+#endif
     if (!rhs.m_values) {
         m_values = nullptr;
         return *this;
