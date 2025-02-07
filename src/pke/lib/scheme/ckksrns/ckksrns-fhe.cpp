@@ -49,6 +49,10 @@
 #include "utils/utilities.h"
 #include "scheme/ckksrns/ckksrns-utils.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <cmath>
 #include <memory>
 #include <vector>
@@ -207,7 +211,25 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
         }
         else {
             precom->m_U0hatTPreFFT = EvalCoeffsToSlotsPrecompute(cc, ksiPows, rotGroup, false, scaleEnc, lEnc);
+#ifdef OPENFHE_CPROBES
+            for (const auto& a : precom->m_U0hatTPreFFT) {
+              for (const auto& b : a) {
+                for (const auto& v : b.get()->GetElement<DCRTPoly>().GetAllElements()) {
+                  openfhe_cprobe_precompute(v.GetId());
+                }
+              }
+            }
+#endif
             precom->m_U0PreFFT     = EvalSlotsToCoeffsPrecompute(cc, ksiPows, rotGroup, false, scaleDec, lDec);
+#ifdef OPENFHE_CPROBES
+            for (const auto& a : precom->m_U0PreFFT) {
+              for (const auto& b : a) {
+                for (const auto& v : b.get()->GetElement<DCRTPoly>().GetAllElements()) {
+                  openfhe_cprobe_precompute(v.GetId());
+                }
+              }
+            }
+#endif
         }
     }
 }

@@ -16,6 +16,8 @@ void openfhe_cprobe_discrete_uniform(uintptr_t);
 void openfhe_cprobe_binary_uniform(uintptr_t);
 void openfhe_cprobe_ternary_uniform(uintptr_t);
 
+void openfhe_cprobe_precompute(uintptr_t);
+
 void openfhe_cprobe_zero(uintptr_t);
 void openfhe_cprobe_max(uintptr_t);
 
