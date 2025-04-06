@@ -57,6 +57,7 @@ Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PrivateKey<DCRTPo
     for (const auto& cv : ciphertext->GetElements()) {
       for (const auto& v : cv.GetAllElements()) {
         openfhe_cprobe_input(v.GetId());
+        v.CopyValues(openfhe_cprobe_address(v.GetId()));
       }
     }
 #endif
@@ -81,6 +82,7 @@ Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PublicKey<DCRTPol
     for (const auto& cv : ciphertext->GetElements()) {
       for (const auto& v : cv.GetAllElements()) {
         openfhe_cprobe_input(v.GetId());
+        v.CopyValues(openfhe_cprobe_address(v.GetId()));
       }
     }
 #endif
@@ -220,6 +222,7 @@ DCRTPoly PKERNS::DecryptCore(const std::vector<DCRTPoly>& cv, const PrivateKey<D
     for (const auto& v : cv) {
       for (const auto& p : v.GetAllElements()) {
         openfhe_cprobe_output(p.GetId());
+        p.CopyValues(openfhe_cprobe_address(p.GetId()));
       }
     }
 #endif

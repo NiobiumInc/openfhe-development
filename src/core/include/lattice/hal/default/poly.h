@@ -249,6 +249,15 @@ public:
         return (*m_values)[i];
     }
 
+#ifdef OPENFHE_CPROBES
+    inline const void CopyValues(uintptr_t* base) const {
+      const size_t n = m_params->GetRingDimension();
+      for(size_t i = 0; i < n; i++) {
+        base[i++] = m_values->at(i).ConvertToInt();
+      }
+    }
+#endif
+
     PolyImpl Plus(const PolyImpl& rhs) const override {
         if (m_params->GetRingDimension() != rhs.m_params->GetRingDimension())
             OPENFHE_THROW("RingDimension missmatch");

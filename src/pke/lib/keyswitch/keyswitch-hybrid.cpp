@@ -141,6 +141,7 @@ EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPol
     for (const auto& c : a) {
       for (const auto& p : c.GetAllElements()) {
         openfhe_cprobe_key(p.GetId());
+        p.CopyValues(openfhe_cprobe_address(p.GetId()));
       }
     }
 
@@ -148,6 +149,7 @@ EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPol
     for (const auto& c : b) {
       for (const auto& p : c.GetAllElements()) {
         openfhe_cprobe_key(p.GetId());
+        p.CopyValues(openfhe_cprobe_address(p.GetId()));
       }
     }
 #endif
