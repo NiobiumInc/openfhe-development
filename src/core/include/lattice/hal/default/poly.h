@@ -253,7 +253,7 @@ public:
     inline const void CopyValues(uintptr_t* base) const {
       const size_t n = m_params->GetRingDimension();
       for(size_t i = 0; i < n; i++) {
-        base[i++] = m_values->at(i).ConvertToInt();
+        base[i] = m_values->at(i).ConvertToInt();
       }
     }
 #endif
