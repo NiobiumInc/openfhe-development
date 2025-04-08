@@ -162,7 +162,9 @@ public:
         openfhe_cprobe_move(m_id, rhs.m_id);
 #endif
 
-        m_id = rhs.m_id;
+        // Preserve the identity of the new value despite overwriting its
+        // data.
+        // m_id = rhs.m_id;
         return *this;
     }
     PolyType& operator=(const std::vector<int32_t>& rhs);
