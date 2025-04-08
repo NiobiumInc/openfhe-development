@@ -428,6 +428,7 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
     uint32_t logm{lbcrypto::GetMSB(m) - 1};
     uint32_t logn{logm - 1};
     uint32_t mask{(uint32_t(1) << logn) - 1};
+    auto q{m_params->GetModulus()};
 
     if (bf) {
         for (uint32_t j{0}, jk{k}; j < n; ++j, jk += (2 * k)) {
@@ -437,18 +438,17 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
         }
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_automorphism(result.GetId(), GetId(), k);
+    openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
 #endif
 
         return result;
     }
 
-    auto q{m_params->GetModulus()};
     for (uint32_t j{0}, jk{0}; j < n; ++j, jk += k)
         (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_automorphism(result.GetId(), GetId(), k);
+    openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
 #endif
 
     return result;
@@ -467,7 +467,12 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std
         (*tmp.m_values)[j] = (*m_values)[precomp[j]];
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_automorphism(tmp.GetId(), GetId(), k);
+    uint32_t m{m_params->GetCyclotomicOrder()};
+    uint32_t logm{lbcrypto::GetMSB(m) - 1};
+    uint32_t logn{logm - 1};
+    uint32_t mask{(uint32_t(1) << logn) - 1};
+    auto q{m_params->GetModulus()};
+    openfhe_cprobe_automorphism(tmp.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
 #endif
 
     return tmp;
