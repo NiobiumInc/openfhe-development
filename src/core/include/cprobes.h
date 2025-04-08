@@ -38,7 +38,7 @@ void openfhe_cprobe_addi(uintptr_t, uintptr_t, uint64_t, uint64_t);
 void openfhe_cprobe_subi(uintptr_t, uintptr_t, uint64_t, uint64_t);
 void openfhe_cprobe_muli(uintptr_t, uintptr_t, uint64_t, uint64_t);
 
-void openfhe_cprobe_automorphism(uintptr_t, uintptr_t, uint64_t);
+void openfhe_cprobe_automorphism(uintptr_t, uintptr_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
 void openfhe_cprobe_switchmodulus(uintptr_t, uintptr_t, uint64_t, uint64_t);
 
