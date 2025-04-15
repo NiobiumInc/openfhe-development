@@ -221,7 +221,7 @@ DCRTPoly PKERNS::DecryptCore(const std::vector<DCRTPoly>& cv, const PrivateKey<D
 #ifdef OPENFHE_CPROBES
     for (const auto& v : cv) {
       for (const auto& p : v.GetAllElements()) {
-        p.CopyValues(openfhe_cprobe_address(p.GetId()));
+        p.CopyValues(openfhe_cprobe_result(p.GetId()));
         openfhe_cprobe_output(p.GetId());
       }
     }
