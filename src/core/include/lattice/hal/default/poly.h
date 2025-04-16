@@ -258,6 +258,13 @@ public:
         base[i] = m_values->at(i).ConvertToInt();
       }
     }
+
+    inline void SetComputedValues(uintptr_t* base) {
+      const size_t n = m_params->GetRingDimension();
+      for(size_t i = 0; i < n; i++) {
+        (*m_values)[i] = NativeInteger(base[i]);
+      }
+    }
 #endif
 
     PolyImpl Plus(const PolyImpl& rhs) const override {

@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+void openfhe_cprobe_execute();
+
 void openfhe_cprobe_annotate(const char*);
 
 void openfhe_cprobe_id(uintptr_t);
