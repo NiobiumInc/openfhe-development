@@ -15,20 +15,20 @@ void openfhe_cprobe_id(uintptr_t);
 uintptr_t* openfhe_cprobe_address(uintptr_t);
 uintptr_t* openfhe_cprobe_result(uintptr_t);
 
-void openfhe_cprobe_discrete_gaussian(uintptr_t);
-void openfhe_cprobe_discrete_uniform(uintptr_t);
-void openfhe_cprobe_binary_uniform(uintptr_t);
-void openfhe_cprobe_ternary_uniform(uintptr_t);
+void openfhe_cprobe_discrete_gaussian(uintptr_t, int);
+void openfhe_cprobe_discrete_uniform(uintptr_t, int);
+void openfhe_cprobe_binary_uniform(uintptr_t, int);
+void openfhe_cprobe_ternary_uniform(uintptr_t, int);
 
-void openfhe_cprobe_precompute(uintptr_t);
+void openfhe_cprobe_precompute(uintptr_t, int);
 
-void openfhe_cprobe_zero(uintptr_t);
-void openfhe_cprobe_max(uintptr_t);
+void openfhe_cprobe_zero(uintptr_t, int);
+void openfhe_cprobe_max(uintptr_t, int);
 
-void openfhe_cprobe_input(uintptr_t);
-void openfhe_cprobe_output(uintptr_t);
+void openfhe_cprobe_input(uintptr_t, int);
+void openfhe_cprobe_output(uintptr_t, int);
 
-void openfhe_cprobe_key(uintptr_t);
+void openfhe_cprobe_key(uintptr_t, int);
 
 void openfhe_cprobe_copy(uintptr_t, uintptr_t);
 void openfhe_cprobe_move(uintptr_t, uintptr_t);

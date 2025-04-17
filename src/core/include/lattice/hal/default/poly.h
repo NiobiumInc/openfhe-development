@@ -189,20 +189,22 @@ public:
     void SetValues(VecType&& values, Format format) override;
 
     void SetValuesToZero() override {
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_zero(GetId());
-#endif
         usint r{m_params->GetRingDimension()};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_address(GetId()));
+        openfhe_cprobe_zero(GetId(), m_format);
+#endif
     }
 
     void SetValuesToMax() override {
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_max(GetId());
-#endif
         usint r{m_params->GetRingDimension()};
         auto max{m_params->GetModulus() - Integer(1)};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_address(GetId()));
+        openfhe_cprobe_max(GetId(), m_format);
+#endif
     }
 
     inline uintptr_t GetId() const {

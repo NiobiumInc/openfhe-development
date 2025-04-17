@@ -216,7 +216,7 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
               for (const auto& b : a) {
                 for (const auto& v : b.get()->GetElement<DCRTPoly>().GetAllElements()) {
                   v.CopyValues(openfhe_cprobe_address(v.GetId()));
-                  openfhe_cprobe_precompute(v.GetId());
+                  openfhe_cprobe_precompute(v.GetId(), v.GetFormat());
                 }
               }
             }
@@ -227,7 +227,7 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
               for (const auto& b : a) {
                 for (const auto& v : b.get()->GetElement<DCRTPoly>().GetAllElements()) {
                   v.CopyValues(openfhe_cprobe_address(v.GetId()));
-                  openfhe_cprobe_precompute(v.GetId());
+                  openfhe_cprobe_precompute(v.GetId(), v.GetFormat());
                 }
               }
             }
