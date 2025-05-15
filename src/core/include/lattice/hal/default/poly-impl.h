@@ -548,7 +548,7 @@ void PolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
         ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt());
+    openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
 #endif
 
         return;
@@ -557,7 +557,7 @@ void PolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
     ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt());
+    openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
 #endif
 }
 
