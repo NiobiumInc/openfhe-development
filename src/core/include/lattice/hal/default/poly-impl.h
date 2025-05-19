@@ -129,6 +129,7 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_params = rhs.m_params;
     m_id = rhs.m_id;
 #ifdef OPENFHE_CPROBES
+    WriteValues();
     openfhe_cprobe_copy(m_id, rhs.m_id);
 #endif
     if (!rhs.m_values) {
@@ -260,7 +261,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
         tmp.SetValues((*m_values).ModAdd(element), m_format);
 
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     tmp.WriteValues();
     openfhe_cprobe_addi(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
@@ -275,7 +276,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& elem
     tmp.SetValues((*m_values).ModSub(element), m_format);
 
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     tmp.WriteValues();
     openfhe_cprobe_subi(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
@@ -290,7 +291,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& elem
     tmp.SetValues((*m_values).ModMul(element), m_format);
 
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     tmp.WriteValues();
     openfhe_cprobe_muli(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
@@ -310,7 +311,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
 
 #ifdef OPENFHE_CPROBES
-        this->WriteValues();
+        WriteValues();
         tmp.WriteValues();
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
             (q - elementReduced).ConvertToInt(), m_params->GetModulus().ConvertToInt());
@@ -323,7 +324,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
 
 #ifdef OPENFHE_CPROBES
-        this->WriteValues();
+        WriteValues();
         tmp.WriteValues();
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
             elementReduced.ConvertToInt(), m_params->GetModulus().ConvertToInt());
@@ -339,7 +340,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Minus(const PolyImpl& rhs) const {
     tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
 
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     rhs.WriteValues();
     tmp.WriteValues();
     openfhe_cprobe_sub(tmp.GetId(), GetId(), rhs.GetId(),
@@ -376,7 +377,7 @@ PolyImpl<VecType> PolyImpl<VecType>::Negate() const {
 template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     element.WriteValues();
 #endif
     if (!m_values)
@@ -384,7 +385,7 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
     m_values->ModAddEq(*element.m_values);
 
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
 #endif
@@ -395,7 +396,7 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
 template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator-=(const PolyImpl& element) {
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     element.WriteValues();
 #endif
     if (!m_values)
@@ -403,7 +404,7 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator-=(const PolyImpl& element) {
     m_values->ModSubEq(*element.m_values);
 
 #ifdef OPENFHE_CPROBES
-    this->WriteValues();
+    WriteValues();
     openfhe_cprobe_sub(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
 #endif
@@ -476,6 +477,8 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
         }
 
 #ifdef OPENFHE_CPROBES
+    WriteValues();
+    result.WriteValues();
     openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
 #endif
 
@@ -486,6 +489,8 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
         (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
 
 #ifdef OPENFHE_CPROBES
+    WriteValues();
+    result.WriteValues();
     openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
 #endif
 
@@ -510,6 +515,8 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std
     uint32_t logn{logm - 1};
     uint32_t mask{(uint32_t(1) << logn) - 1};
     auto q{m_params->GetModulus()};
+    WriteValues();
+    tmp.WriteValues();
     openfhe_cprobe_automorphism(tmp.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
 #endif
 
@@ -539,6 +546,9 @@ PolyImpl<VecType> PolyImpl<VecType>::Mod(const Integer& modulus) const {
 
 template <typename VecType>
 void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb, const Integer& rootOfUnityArb) {
+#ifdef OPENFHE_CPROBES
+    WriteValues();
+#endif
     if (m_values != nullptr) {
         m_values->SwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
@@ -546,6 +556,7 @@ void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& roo
     }
 
 #ifdef OPENFHE_CPROBES
+    WriteValues();
     openfhe_cprobe_switchmodulus(GetId(), GetId(),
         m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
         m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
@@ -567,11 +578,16 @@ void PolyImpl<VecType>::SwitchFormat() {
     if (!m_values)
         OPENFHE_THROW("Poly switch format to empty values");
 
+#ifdef OPENFHE_CPROBES
+    WriteValues();
+#endif
+
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;
         ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
 
 #ifdef OPENFHE_CPROBES
+    WriteValues();
     openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
 #endif
 
@@ -581,6 +597,7 @@ void PolyImpl<VecType>::SwitchFormat() {
     ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
 
 #ifdef OPENFHE_CPROBES
+    WriteValues();
     openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
 #endif
 }

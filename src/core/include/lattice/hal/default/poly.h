@@ -141,6 +141,7 @@ public:
           m_params{p.m_params},
           m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {
 #ifdef OPENFHE_CPROBES
+            WriteValues();
             openfhe_cprobe_copy(GetId(), p.GetId());
 #endif
           }
@@ -148,6 +149,7 @@ public:
     PolyImpl(PolyType&& p) noexcept
         : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {
 #ifdef OPENFHE_CPROBES
+            WriteValues();
             openfhe_cprobe_copy(GetId(), p.GetId());
 #endif
         }
@@ -159,12 +161,9 @@ public:
         m_values = std::move(rhs.m_values);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
         openfhe_cprobe_move(m_id, rhs.m_id);
 #endif
-
-        // Preserve the identity of the new value despite overwriting its
-        // data.
-        // m_id = rhs.m_id;
         return *this;
     }
     PolyType& operator=(const std::vector<int32_t>& rhs);
@@ -192,6 +191,7 @@ public:
         usint r{m_params->GetRingDimension()};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
 #ifdef OPENFHE_CPROBES
+        WriteValues();
         CopyValues(openfhe_cprobe_address(GetId()));
         openfhe_cprobe_zero(GetId(), m_format);
 #endif
@@ -202,6 +202,7 @@ public:
         auto max{m_params->GetModulus() - Integer(1)};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
 #ifdef OPENFHE_CPROBES
+        WriteValues();
         CopyValues(openfhe_cprobe_address(GetId()));
         openfhe_cprobe_max(GetId(), m_format);
 #endif
@@ -280,6 +281,9 @@ public:
         tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
+        rhs.WriteValues();
+        tmp.WriteValues();
         openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #endif
@@ -291,6 +295,9 @@ public:
         tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
+        rhs.WriteValues();
+        tmp.WriteValues();
         openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #endif
@@ -309,9 +316,13 @@ public:
 
     PolyImpl Minus(const Integer& element) const override;
     PolyImpl& operator-=(const Integer& element) override {
+#ifdef OPENFHE_CPROBES
+      WriteValues();
+#endif
       m_values->ModSubEq(element);
 
 #ifdef OPENFHE_CPROBES
+      WriteValues();
       openfhe_cprobe_subi(GetId(), GetId(),
             element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
@@ -330,6 +341,9 @@ public:
         tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
+        rhs.WriteValues();
+        tmp.WriteValues();
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #endif
@@ -341,6 +355,9 @@ public:
         tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
+        rhs.WriteValues();
+        tmp.WriteValues();
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #endif
@@ -348,6 +365,10 @@ public:
         return tmp;
     }
     PolyImpl& operator*=(const PolyImpl& rhs) override {
+#ifdef OPENFHE_CPROBES
+        WriteValues();
+        rhs.WriteValues();
+#endif
         if (m_params->GetRingDimension() != rhs.m_params->GetRingDimension())
             OPENFHE_THROW("RingDimension missmatch");
         if (m_params->GetModulus() != rhs.m_params->GetModulus())
@@ -358,6 +379,7 @@ public:
             m_values->ModMulNoCheckEq(*rhs.m_values);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
         openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #endif
@@ -367,8 +389,8 @@ public:
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
 
 #ifdef OPENFHE_CPROBES
-        openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
-            m_params->GetModulus().ConvertToInt());
+        WriteValues();
+        openfhe_cprobe_annotate("Operator *= called by no operation performed");
 #endif
 
         return *this;
@@ -376,9 +398,13 @@ public:
 
     PolyImpl Times(const Integer& element) const override;
     PolyImpl& operator*=(const Integer& element) override {
+#ifdef OPENFHE_CPROBES
+        WriteValues();
+#endif
         m_values->ModMulEq(element);
 
 #ifdef OPENFHE_CPROBES
+        WriteValues();
         openfhe_cprobe_muli(GetId(), GetId(),
             element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
