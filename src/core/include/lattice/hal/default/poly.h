@@ -452,6 +452,8 @@ public:
         return 1;
     }
 
+    void WriteValues() const;
+
 protected:
     Format m_format{Format::EVALUATION};
     std::shared_ptr<Params> m_params{nullptr};

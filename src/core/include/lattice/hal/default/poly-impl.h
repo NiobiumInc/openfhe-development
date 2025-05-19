@@ -46,6 +46,8 @@
 #include "cprobes.h"
 #endif
 
+#include <filesystem>
+#include <fstream>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -63,6 +65,18 @@ uintptr_t allocate_id() {
   openfhe_cprobe_id(value_id);
 #endif
   return value_id.fetch_add(1, std::memory_order_relaxed);
+}
+
+template <typename VecType>
+void PolyImpl<VecType>::WriteValues() const {
+  static std::filesystem::path const path { "openfhe_volues.txt" };
+  static std::ofstream strm { path };
+
+  strm << GetId();
+  for(size_t i = 0; i < 10; ++i) {
+    strm << "," << (*m_values)[i];
+  }
+  strm << std::endl;
 }
 
 template <typename VecType>
@@ -246,6 +260,8 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
         tmp.SetValues((*m_values).ModAdd(element), m_format);
 
 #ifdef OPENFHE_CPROBES
+    this->WriteValues();
+    tmp.WriteValues();
     openfhe_cprobe_addi(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
@@ -259,6 +275,8 @@ PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& elem
     tmp.SetValues((*m_values).ModSub(element), m_format);
 
 #ifdef OPENFHE_CPROBES
+    this->WriteValues();
+    tmp.WriteValues();
     openfhe_cprobe_subi(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
@@ -272,6 +290,8 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& elem
     tmp.SetValues((*m_values).ModMul(element), m_format);
 
 #ifdef OPENFHE_CPROBES
+    this->WriteValues();
+    tmp.WriteValues();
     openfhe_cprobe_muli(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
@@ -290,6 +310,8 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
 
 #ifdef OPENFHE_CPROBES
+        this->WriteValues();
+        tmp.WriteValues();
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
             (q - elementReduced).ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
@@ -301,6 +323,8 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
 
 #ifdef OPENFHE_CPROBES
+        this->WriteValues();
+        tmp.WriteValues();
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
             elementReduced.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #endif
@@ -315,6 +339,9 @@ PolyImpl<VecType> PolyImpl<VecType>::Minus(const PolyImpl& rhs) const {
     tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
 
 #ifdef OPENFHE_CPROBES
+    this->WriteValues();
+    rhs.WriteValues();
+    tmp.WriteValues();
     openfhe_cprobe_sub(tmp.GetId(), GetId(), rhs.GetId(),
         m_params->GetModulus().ConvertToInt());
 #endif
@@ -348,11 +375,16 @@ PolyImpl<VecType> PolyImpl<VecType>::Negate() const {
 
 template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
+#ifdef OPENFHE_CPROBES
+    this->WriteValues();
+    element.WriteValues();
+#endif
     if (!m_values)
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModAddEq(*element.m_values);
 
 #ifdef OPENFHE_CPROBES
+    this->WriteValues();
     openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
 #endif
@@ -362,11 +394,16 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
 
 template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator-=(const PolyImpl& element) {
+#ifdef OPENFHE_CPROBES
+    this->WriteValues();
+    element.WriteValues();
+#endif
     if (!m_values)
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModSubEq(*element.m_values);
 
 #ifdef OPENFHE_CPROBES
+    this->WriteValues();
     openfhe_cprobe_sub(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
 #endif
