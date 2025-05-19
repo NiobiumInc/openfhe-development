@@ -548,7 +548,8 @@ void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& roo
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_switchmodulus(GetId(), GetId(),
         m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
-        m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt());
+        m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
+        m_format);
 #endif
 }
 
