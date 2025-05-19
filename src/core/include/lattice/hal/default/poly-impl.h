@@ -556,6 +556,10 @@ template <typename VecType>
 void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb, const Integer& rootOfUnityArb) {
 #ifdef OPENFHE_CPROBES
     WriteValues();
+    openfhe_cprobe_switchmodulus(GetId(), GetId(),
+        m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
+        m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
+        m_format);
 #endif
     if (m_values != nullptr) {
         m_values->SwitchModulus(modulus);
@@ -565,10 +569,6 @@ void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& roo
 
 #ifdef OPENFHE_CPROBES
     WriteValues();
-    openfhe_cprobe_switchmodulus(GetId(), GetId(),
-        m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
-        m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
-        m_format);
 #endif
 }
 
