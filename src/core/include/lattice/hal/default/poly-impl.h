@@ -502,10 +502,6 @@ PolyImpl<VecType> PolyImpl<VecType>::Mod(const Integer& modulus) const {
 
 template <typename VecType>
 void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb, const Integer& rootOfUnityArb) {
-#ifdef OPENFHE_CPROBES
-    CopyValues(openfhe_cprobe_result(GetId()));
-#endif
-
     if (m_values != nullptr) {
         m_values->SwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
@@ -513,9 +509,9 @@ void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& roo
     }
 
 #ifdef OPENFHE_CPROBES
-    // CopyValues(openfhe_cprobe_result(GetId()));
     openfhe_cprobe_switchmodulus(GetId(), GetId(),
-        m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt());
+        m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
+        m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt());
 #endif
 }
 
