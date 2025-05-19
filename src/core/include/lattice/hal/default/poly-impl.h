@@ -72,6 +72,8 @@ void PolyImpl<VecType>::WriteValues() const {
   static std::filesystem::path const path { "openfhe_volues.txt" };
   static std::ofstream strm { path };
 
+  if(!m_values) return;
+
   strm << GetId();
   for(size_t i = 0; i < 10; ++i) {
     strm << "," << (*m_values)[i];
