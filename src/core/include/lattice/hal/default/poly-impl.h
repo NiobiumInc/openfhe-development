@@ -67,10 +67,16 @@ uintptr_t allocate_id() {
   return value_id.fetch_add(1, std::memory_order_relaxed);
 }
 
+static std::ofstream& GetStream() {
+  static std::filesystem::path const path { "openfhe_values.txt" };
+  static std::ofstream strm { path };
+
+  return strm;
+}
+
 template <typename VecType>
 void PolyImpl<VecType>::WriteValues() const {
-  static std::filesystem::path const path { "openfhe_volues.txt" };
-  static std::ofstream strm { path };
+  std::ofstream& strm = GetStream();
 
   if(!m_values) return;
 
