@@ -113,10 +113,10 @@ template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
-    m_id = rhs.m_id;
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_copy(m_id, rhs.m_id);
-#endif
+#endif    
+    m_id = rhs.m_id;
     if (!rhs.m_values) {
         m_values = nullptr;
         return *this;
