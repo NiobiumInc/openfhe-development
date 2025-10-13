@@ -189,7 +189,7 @@ public:
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
 #ifdef OPENFHE_CPROBES
         CopyValues(openfhe_cprobe_address(GetId()));
-        openfhe_cprobe_zero(GetId(), m_format);
+        openfhe_cprobe_zero(GetId(), m_format, m_params->GetModulus().ConvertToInt());
 #endif
     }
 
@@ -199,7 +199,7 @@ public:
         m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
 #ifdef OPENFHE_CPROBES
         CopyValues(openfhe_cprobe_address(GetId()));
-        openfhe_cprobe_max(GetId(), m_format);
+        openfhe_cprobe_max(GetId(), m_format, m_params->GetModulus().ConvertToInt());
 #endif
     }
 
