@@ -114,8 +114,25 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> copy_counter{0};
+    uint64_t call_num = copy_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_copy(m_id, rhs.m_id);
-#endif    
+
+    // Debug: Print m_id and first 4 values of m_values in hex
+    std::cerr << "[POLY_DEBUG] openfhe_cprobe_copy call#" << call_num << " m_id=" << rhs.m_id;
+    if (rhs.m_values && rhs.m_values->GetLength() > 0) {
+        std::cerr << " values[0..3]={";
+        for (size_t i = 0; i < std::min(size_t(4), size_t(rhs.m_values->GetLength())); ++i) {
+            if (i > 0) std::cerr << ", ";
+            std::cerr << "0x" << std::hex << (*rhs.m_values)[i].ConvertToInt() << std::dec;
+        }
+        std::cerr << "}";
+    } else {
+        std::cerr << " values=(null or empty)";
+    }
+    std::cerr << std::endl;
+#endif
     m_id = rhs.m_id;
     if (!rhs.m_values) {
         m_values = nullptr;
@@ -353,8 +370,26 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
     m_values->ModAddEq(*element.m_values);
 
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> add_counter{0};
+    uint64_t call_num = add_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
+
+    // Debug: Print IP, m_id and first 4 values of m_values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    std::cerr << "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_add call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl;
+    if (m_values && m_values->GetLength() > 0) {
+        std::cerr << " values[0..3]={";
+        for (size_t i = 0; i < std::min(size_t(4), size_t(m_values->GetLength())); ++i) {
+            if (i > 0) std::cerr << ", ";
+            std::cerr << "0x" << std::hex << (*m_values)[i].ConvertToInt() << std::dec;
+        }
+        std::cerr << "}";
+    } else {
+        std::cerr << " values=(null or empty)";
+    }
+    std::cerr << std::endl;
 #endif
 
     return *this;
