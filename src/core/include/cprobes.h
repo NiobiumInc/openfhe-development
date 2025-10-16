@@ -53,8 +53,15 @@ void openfhe_cprobe_intt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 void openfhe_cprobe_set_ip(int ip);
 int openfhe_cprobe_get_ip();
 
+// Data tracking control functions
+void openfhe_cprobe_enable_data_tracking();
+void openfhe_cprobe_disable_data_tracking();
+
 #ifdef __cplusplus
 }
+
+// Global flag to control debug data tracking
+extern bool g_sim_data_tracking;
 #endif
 
 #endif
