@@ -62,7 +62,7 @@ extern bool g_sim_data_tracking;
 
 // Helper function to get debug file for dual output
 inline std::ofstream& get_poly_debug_file() {
-    static std::ofstream debug_file("record_ops.txt", std::ios::app);
+    static std::ofstream debug_file("record_ops.txt");
     return debug_file;
 }
 
