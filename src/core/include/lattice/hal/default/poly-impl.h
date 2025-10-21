@@ -73,10 +73,17 @@ namespace lbcrypto {
 
 uintptr_t allocate_id() {
   static std::atomic<uintptr_t> value_id{1};
+  uintptr_t current_id = value_id.fetch_add(1, std::memory_order_relaxed);
+
 #ifdef OPENFHE_CPROBES
-  openfhe_cprobe_id(value_id);
+  openfhe_cprobe_id(current_id);
+
+  // Debug: Print IP and allocated ID
+  int current_ip = openfhe_cprobe_get_ip();
+  POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_id m_id=" << current_id << std::endl);
 #endif
-  return value_id.fetch_add(1, std::memory_order_relaxed);
+
+  return current_id;
 }
 
 template <typename VecType>
@@ -86,7 +93,24 @@ PolyImpl<VecType>::PolyImpl(const DggType& dgg, const std::shared_ptr<PolyImpl::
       m_values{std::make_unique<VecType>(dgg.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
     PolyImpl<VecType>::SetFormat(format);
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> dgg_counter{0};
+    uint64_t call_num = dgg_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_discrete_gaussian(GetId(), format);
+
+    // Debug: Print IP, m_id and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_discrete_gaussian call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl);
+    if (m_values && m_values->GetLength() > 0) {
+        size_t len = m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
 }
 
@@ -96,9 +120,26 @@ PolyImpl<VecType>::PolyImpl(DugType& dug, const std::shared_ptr<PolyImpl::Params
       m_params{params},
       m_values{std::make_unique<VecType>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
 #ifdef OPENFHE_CPROBES
-        openfhe_cprobe_discrete_uniform(GetId(), format);
+    static std::atomic<uint64_t> dug_counter{0};
+    uint64_t call_num = dug_counter.fetch_add(1, std::memory_order_relaxed);
+
+    openfhe_cprobe_discrete_uniform(GetId(), format);
+
+    // Debug: Print IP, m_id and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_discrete_uniform call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl);
+    if (m_values && m_values->GetLength() > 0) {
+        size_t len = m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
-      }
+}
 
 template <typename VecType>
 PolyImpl<VecType>::PolyImpl(const BugType& bug, const std::shared_ptr<PolyImpl::Params>& params, Format format)
@@ -107,7 +148,24 @@ PolyImpl<VecType>::PolyImpl(const BugType& bug, const std::shared_ptr<PolyImpl::
       m_values{std::make_unique<VecType>(bug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
     PolyImpl<VecType>::SetFormat(format);
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> bug_counter{0};
+    uint64_t call_num = bug_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_binary_uniform(GetId(), format);
+
+    // Debug: Print IP, m_id and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_binary_uniform call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl);
+    if (m_values && m_values->GetLength() > 0) {
+        size_t len = m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
 }
 
@@ -119,7 +177,24 @@ PolyImpl<VecType>::PolyImpl(const TugType& tug, const std::shared_ptr<PolyImpl::
       m_values{std::make_unique<VecType>(tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h))} {
     PolyImpl<VecType>::SetFormat(format);
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> tug_counter{0};
+    uint64_t call_num = tug_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_ternary_uniform(GetId(), format);
+
+    // Debug: Print IP, m_id and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_ternary_uniform call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl);
+    if (m_values && m_values->GetLength() > 0) {
+        size_t len = m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
 }
 
@@ -622,7 +697,24 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
         }
 
 #ifdef OPENFHE_CPROBES
-    openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+        static std::atomic<uint64_t> automorphism_eval_counter{0};
+        uint64_t call_num = automorphism_eval_counter.fetch_add(1, std::memory_order_relaxed);
+
+        openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+
+        // Debug: Print IP, m_id, automorphism parameter k, and first and last values in hex
+        int current_ip = openfhe_cprobe_get_ip();
+        POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_automorphism call#" << call_num << " m_id=" << result.m_id << " k=" << k << " mod=0x" << std::hex << q.ConvertToInt() << std::dec << std::endl);
+        if (result.m_values && result.m_values->GetLength() > 0) {
+            size_t len = result.m_values->GetLength();
+            POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*result.m_values)[0].ConvertToInt() << std::dec << "}");
+            if (len > 1) {
+                POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*result.m_values)[len - 1].ConvertToInt() << std::dec << "}");
+            }
+        } else {
+            POLY_DEBUG_OUT( " values=(null or empty)");
+        }
+        POLY_DEBUG_OUT( std::endl);
 #endif
 
         return result;
@@ -632,7 +724,24 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
         (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
 
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> automorphism_coeff_counter{0};
+    uint64_t call_num = automorphism_coeff_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+
+    // Debug: Print IP, m_id, automorphism parameter k, and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_automorphism call#" << call_num << " m_id=" << result.m_id << " k=" << k << " mod=0x" << std::hex << q.ConvertToInt() << std::dec << std::endl);
+    if (result.m_values && result.m_values->GetLength() > 0) {
+        size_t len = result.m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*result.m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*result.m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
 
     return result;
@@ -651,12 +760,29 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std
         (*tmp.m_values)[j] = (*m_values)[precomp[j]];
 
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> automorphism_precomp_counter{0};
+    uint64_t call_num = automorphism_precomp_counter.fetch_add(1, std::memory_order_relaxed);
+
     uint32_t m{m_params->GetCyclotomicOrder()};
     uint32_t logm{lbcrypto::GetMSB(m) - 1};
     uint32_t logn{logm - 1};
     uint32_t mask{(uint32_t(1) << logn) - 1};
     auto q{m_params->GetModulus()};
     openfhe_cprobe_automorphism(tmp.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+
+    // Debug: Print IP, m_id, automorphism parameter k, and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_automorphism(precomp) call#" << call_num << " m_id=" << tmp.m_id << " k=" << k << " mod=0x" << std::hex << q.ConvertToInt() << std::dec << std::endl);
+    if (tmp.m_values && tmp.m_values->GetLength() > 0) {
+        size_t len = tmp.m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*tmp.m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*tmp.m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
 
     return tmp;
@@ -686,6 +812,9 @@ PolyImpl<VecType> PolyImpl<VecType>::Mod(const Integer& modulus) const {
 template <typename VecType>
 void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb, const Integer& rootOfUnityArb) {
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> switchmodulus_counter{0};
+    uint64_t call_num = switchmodulus_counter.fetch_add(1, std::memory_order_relaxed);
+
     openfhe_cprobe_switchmodulus(GetId(), GetId(),
         m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
         m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
@@ -695,6 +824,22 @@ void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& roo
         m_values->SwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
         m_params = std::make_shared<PolyImpl::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
+
+#ifdef OPENFHE_CPROBES
+        // Debug: Print IP, m_id, old and new modulus, and first and last values in hex
+        int current_ip = openfhe_cprobe_get_ip();
+        POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_switchmodulus call#" << call_num << " m_id=" << m_id << " new_mod=0x" << std::hex << modulus.ConvertToInt() << std::dec << std::endl);
+        if (m_values && m_values->GetLength() > 0) {
+            size_t len = m_values->GetLength();
+            POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+            if (len > 1) {
+                POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+            }
+        } else {
+            POLY_DEBUG_OUT( " values=(null or empty)");
+        }
+        POLY_DEBUG_OUT( std::endl);
+#endif
     }
 }
 
@@ -728,8 +873,25 @@ void PolyImpl<VecType>::SwitchFormat() {
         ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
 
 #ifdef OPENFHE_CPROBES
+        static std::atomic<uint64_t> intt_counter{0};
+        uint64_t call_num = intt_counter.fetch_add(1, std::memory_order_relaxed);
+
         CopyValues(openfhe_cprobe_cache());
         openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+
+        // Debug: Print IP, m_id and first and last values in hex
+        int current_ip = openfhe_cprobe_get_ip();
+        POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_intt call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl);
+        if (m_values && m_values->GetLength() > 0) {
+            size_t len = m_values->GetLength();
+            POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+            if (len > 1) {
+                POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+            }
+        } else {
+            POLY_DEBUG_OUT( " values=(null or empty)");
+        }
+        POLY_DEBUG_OUT( std::endl);
 #endif
         return;
     }
@@ -737,8 +899,25 @@ void PolyImpl<VecType>::SwitchFormat() {
     ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
 
 #ifdef OPENFHE_CPROBES
+    static std::atomic<uint64_t> ntt_counter{0};
+    uint64_t call_num = ntt_counter.fetch_add(1, std::memory_order_relaxed);
+
     CopyValues(openfhe_cprobe_cache());
     openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+
+    // Debug: Print IP, m_id and first and last values in hex
+    int current_ip = openfhe_cprobe_get_ip();
+    POLY_DEBUG_OUT( "[POLY_DEBUG] IP: " << current_ip << " openfhe_cprobe_ntt call#" << call_num << " m_id=" << m_id << " mod=0x" << std::hex << m_params->GetModulus().ConvertToInt() << std::dec << std::endl);
+    if (m_values && m_values->GetLength() > 0) {
+        size_t len = m_values->GetLength();
+        POLY_DEBUG_OUT( " values[0]={0x" << std::hex << (*m_values)[0].ConvertToInt() << std::dec << "}");
+        if (len > 1) {
+            POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
+        }
+    } else {
+        POLY_DEBUG_OUT( " values=(null or empty)");
+    }
+    POLY_DEBUG_OUT( std::endl);
 #endif
 }
 
