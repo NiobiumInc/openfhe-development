@@ -888,6 +888,18 @@ void PolyImpl<VecType>::SwitchFormat() {
             if (len > 1) {
                 POLY_DEBUG_OUT( " values[" << (len - 1) << "]={0x" << std::hex << (*m_values)[len - 1].ConvertToInt() << std::dec << "}");
             }
+
+            // Dump all values for IP 126 to record_126.dat
+            if (current_ip == 126) {
+                std::ofstream dat_file("record_126.dat");
+                if (dat_file.is_open()) {
+                    for (size_t i = 0; i < len; ++i) {
+                        dat_file << "0x" << std::hex << (*m_values)[i].ConvertToInt() << std::dec << std::endl;
+                    }
+                    dat_file.close();
+                    std::cerr << "[DEBUG] Wrote " << len << " values to record_126.dat" << std::endl;
+                }
+            }
         } else {
             POLY_DEBUG_OUT( " values=(null or empty)");
         }
