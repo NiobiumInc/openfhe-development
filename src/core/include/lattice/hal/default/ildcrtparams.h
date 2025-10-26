@@ -80,7 +80,7 @@ public:
         if (corder == 0)
             return;
 
-        // Use hardware-format primes; will break for non-power-of-two corder values
+        // Use hardware-format primes
         auto q{LastPrimeHardwareFormat<NativeInteger>(MAX_MODULUS_SIZE, corder)};
         m_params.reserve(32);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
@@ -105,6 +105,7 @@ public:
         if (bits > MAX_MODULUS_SIZE)
             OPENFHE_THROW("Invalid bits for ILDCRTParams");
 
+        // Use hardware-format primes
         auto q{LastPrimeHardwareFormat<NativeInteger>(bits, corder)};
         m_params.reserve(depth);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));

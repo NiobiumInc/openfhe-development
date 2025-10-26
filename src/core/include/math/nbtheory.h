@@ -307,8 +307,6 @@ IntType LastPrime(uint32_t nBits, uint64_t m);
 /**
  * Hardware-format version: Finds the largest prime less than 2^nBits
  * that satisfies q = 1 mod m AND has lower 17 bits = 0x00001
- * Note that the hardware (and thus this function) only supports
- * m that are powers of two.
  *
  * @param nBits the number of bits needed.
  * @param m the ring parameter (cyclotomic order).
@@ -316,6 +314,17 @@ IntType LastPrime(uint32_t nBits, uint64_t m);
  */
 template <typename IntType>
 IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m);
+
+/**
+ * Hardware-format version: Finds the previous prime less than q
+ * that satisfies q = 1 mod m AND has lower 17 bits = 0x00001
+ *
+ * @param &q the starting point.
+ * @param m the ring parameter (cyclotomic order).
+ * @return the previous prime in hardware format.
+ */
+template <typename IntType>
+IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m);
 
 /**
  * Finds the next prime that satisfies q = 1 mod m
