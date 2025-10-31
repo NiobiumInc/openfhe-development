@@ -45,6 +45,7 @@
 #include "utils/exception.h"
 #include "utils/inttypes.h"
 
+#include <cassert>
 #include <cmath>
 #include <limits>
 #include <set>
@@ -347,6 +348,23 @@ IntType FirstPrime(uint32_t nBits, uint64_t m) {
 }
 
 template <typename IntType>
+IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
+    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+
+    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
+    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+
+    IntType M(m);
+
+    if (M >= (IntType(1) << 17)) {
+        return FirstPrime<IntType>(nBits, m);
+    } else {
+        return FirstPrime<IntType>(nBits, static_cast<uint64_t>(1) << 17);
+    }
+}
+
+template <typename IntType>
 IntType LastPrime(uint32_t nBits, uint64_t m) {
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
         if (nBits > MAX_MODULUS_SIZE)
@@ -373,6 +391,23 @@ IntType LastPrime(uint32_t nBits, uint64_t m) {
 }
 
 template <typename IntType>
+IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
+    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+
+    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
+    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+
+    IntType M(m);
+
+    if (M >= (IntType(1) << 17)) {
+        return LastPrime<IntType>(nBits, m);
+    } else {
+        return LastPrime<IntType>(nBits, static_cast<uint64_t>(1) << 17);
+    }
+}
+
+template <typename IntType>
 IntType NextPrime(const IntType& q, uint64_t m) {
     IntType M(m), qNew(q + M);
     while (!MillerRabinPrimalityTest(qNew)) {
@@ -383,6 +418,23 @@ IntType NextPrime(const IntType& q, uint64_t m) {
 }
 
 template <typename IntType>
+IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
+    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+
+    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
+    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+
+    IntType M(m);
+
+    if (M >= (IntType(1) << 17)) {
+        return NextPrime<IntType>(q, m);
+    } else {
+        return NextPrime<IntType>(q, static_cast<uint64_t>(1) << 17);
+    }
+}
+
+template <typename IntType>
 IntType PreviousPrime(const IntType& q, uint64_t m) {
     IntType M(m), qNew(q - M);
     while (!MillerRabinPrimalityTest(qNew)) {
@@ -390,6 +442,23 @@ IntType PreviousPrime(const IntType& q, uint64_t m) {
             OPENFHE_THROW("Overflow shrinking candidate");
     }
     return qNew;
+}
+
+template <typename IntType>
+IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
+    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+
+    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
+    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+
+    IntType M(m);
+
+    if (M >= (IntType(1) << 17)) {
+        return PreviousPrime<IntType>(q, m);
+    } else {
+        return PreviousPrime<IntType>(q, static_cast<uint64_t>(1) << 17);
+    }
 }
 
 template <typename IntType>

@@ -80,19 +80,20 @@ public:
         if (corder == 0)
             return;
 
-        auto q{LastPrime<NativeInteger>(MAX_MODULUS_SIZE, corder)};
+        // Use hardware-format primes; will break for non-power-of-two corder values
+        auto q{LastPrimeHardwareFormat<NativeInteger>(MAX_MODULUS_SIZE, corder)};
         m_params.reserve(32);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
 
         IntType compositeModulus(1);
         while ((compositeModulus *= IntType(q.template ConvertToInt<BasicInteger>())) < modulus)
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrime(q, corder))));
+            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrimeHardwareFormat(q, corder))));
         ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
     }
 
     /**
    * @brief Constructor with basic parameter set.
-   * q is selected as LastPrime(bits, order)
+   * q is selected as LastPrimeHardwareFormat(bits, order)
    * @param corder the order of the ciphertext.
    * @param depth is the size of the tower.
    * @param bits is the number of bits of each tower's moduli.
@@ -104,13 +105,13 @@ public:
         if (bits > MAX_MODULUS_SIZE)
             OPENFHE_THROW("Invalid bits for ILDCRTParams");
 
-        auto q{LastPrime<NativeInteger>(bits, corder)};
+        auto q{LastPrimeHardwareFormat<NativeInteger>(bits, corder)};
         m_params.reserve(depth);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
 
         IntType compositeModulus(q.template ConvertToInt<BasicInteger>());
         for (uint32_t _ = 1; _ < depth; ++_) {
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrime(q, corder))));
+            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrimeHardwareFormat(q, corder))));
             compositeModulus *= IntType(q.template ConvertToInt<BasicInteger>());
         }
         ElemParams<IntType>::m_ciphertextModulus = compositeModulus;

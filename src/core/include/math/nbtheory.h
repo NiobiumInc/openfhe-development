@@ -281,6 +281,19 @@ template <typename IntType>
 IntType FirstPrime(uint32_t nBits, uint64_t m);
 
 /**
+ * Hardware-format version: Finds the first prime q with at least (nBits + 1) bits.
+ * that satisfies q = 1 mod m AND has lower 17 bits = 0x00001
+ * Note that the hardware (and thus this function) only supports
+ * m that are powers of two.
+ *
+ * @param nBits the number of bits needed.
+ * @param m the ring parameter (cyclotomic order).
+ * @return the largest prime in hardware format.
+ */
+template <typename IntType>
+IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m);
+
+/**
  * Finds the max prime q that satisfies q = 1 mod m with at most nBits bits.
  *
  * @param nBits the bit parameter.
@@ -290,6 +303,19 @@ IntType FirstPrime(uint32_t nBits, uint64_t m);
  */
 template <typename IntType>
 IntType LastPrime(uint32_t nBits, uint64_t m);
+
+/**
+ * Hardware-format version: Finds the largest prime less than 2^nBits
+ * that satisfies q = 1 mod m AND has lower 17 bits = 0x00001
+ * Note that the hardware (and thus this function) only supports
+ * m that are powers of two.
+ *
+ * @param nBits the number of bits needed.
+ * @param m the ring parameter (cyclotomic order).
+ * @return the largest prime in hardware format.
+ */
+template <typename IntType>
+IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m);
 
 /**
  * Finds the next prime that satisfies q = 1 mod m
@@ -304,6 +330,18 @@ template <typename IntType>
 IntType NextPrime(const IntType& q, uint64_t m);
 
 /**
+ * Hardware-format version: Finds the next prime that satisfies
+ * q = 1 mod m AND has lower 17 bits = 0x00001. Note that the
+ * hardware (and thus this function) only supports m that are
+ * powers of two.
+ *
+ * @param &q the starting point.
+ * @param m the ring parameter (cyclotomic order).
+ * @return the previous prime in hardware format.
+ */
+template <typename IntType>
+IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m);
+/**
  * Finds the previous prime that satisfies q = 1 mod m
  *
  * @param &q is the prime number to start from (the number itself is not
@@ -314,6 +352,19 @@ IntType NextPrime(const IntType& q, uint64_t m);
  */
 template <typename IntType>
 IntType PreviousPrime(const IntType& q, uint64_t m);
+
+/**
+ * Hardware-format version: Finds the previous prime less than q
+ * that satisfies q = 1 mod m AND has lower 17 bits = 0x00001
+ * Note that the hardware (and thus this function) only supports
+ * m that are powers of two.
+ *
+ * @param &q the starting point.
+ * @param m the ring parameter (cyclotomic order).
+ * @return the previous prime in hardware format.
+ */
+template <typename IntType>
+IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m);
 
 /**
  * Multiplicative inverse for primitive unsigned integer data types
