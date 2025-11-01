@@ -49,10 +49,6 @@ void openfhe_cprobe_switchmodulus(uintptr_t, uintptr_t, uint64_t, uint64_t, uint
 void openfhe_cprobe_ntt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 void openfhe_cprobe_intt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 
-// IP tracking functions
-void openfhe_cprobe_set_ip(int ip);
-int openfhe_cprobe_get_ip();
-
 #ifdef __cplusplus
 }
 #endif
