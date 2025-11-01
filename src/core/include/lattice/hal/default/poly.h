@@ -251,17 +251,17 @@ public:
 
 #ifdef OPENFHE_CPROBES
     inline const void CopyValues(uintptr_t* base) const {
-      const size_t n = m_params->GetRingDimension();
-      for(size_t i = 0; i < n; i++) {
-        base[i] = m_values->at(i).ConvertToInt();
-      }
+     // const size_t n = m_params->GetRingDimension();
+     // for(size_t i = 0; i < n; i++) {
+     //   base[i] = m_values->at(i).ConvertToInt();
+     // }
     }
 
     inline void SetComputedValues(uintptr_t* base) {
-      const size_t n = m_params->GetRingDimension();
-      for(size_t i = 0; i < n; i++) {
-        (*m_values)[i] = NativeInteger(base[i]);
-      }
+     // const size_t n = m_params->GetRingDimension();
+     // for(size_t i = 0; i < n; i++) {
+     //   (*m_values)[i] = NativeInteger(base[i]);
+     // }
     }
 #endif
 
