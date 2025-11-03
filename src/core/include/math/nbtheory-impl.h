@@ -349,7 +349,7 @@ IntType FirstPrime(uint32_t nBits, uint64_t m) {
 
 template <typename IntType>
 IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
-    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+    assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
     // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
@@ -392,7 +392,7 @@ IntType LastPrime(uint32_t nBits, uint64_t m) {
 
 template <typename IntType>
 IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
-    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+    assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
     // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
@@ -419,7 +419,7 @@ IntType NextPrime(const IntType& q, uint64_t m) {
 
 template <typename IntType>
 IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
-    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+    assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
     // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
@@ -446,7 +446,7 @@ IntType PreviousPrime(const IntType& q, uint64_t m) {
 
 template <typename IntType>
 IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
-    assert(m & (m - 1) == 0); // Hardware can only support power-of-two cyclotomic orders
+    assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
     // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
