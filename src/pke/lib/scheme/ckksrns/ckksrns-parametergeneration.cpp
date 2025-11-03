@@ -219,14 +219,12 @@ void ParameterGenerationCKKSRNS::CompositePrimeModuliGen(std::vector<NativeInteg
 
     for (uint32_t d = 1, remBits = dcrtBits; d <= compositeDegree; ++d) {
         uint32_t qBitSize = std::ceil(static_cast<double>(remBits) / (compositeDegree - d + 1));
-        std::cerr << "[CKKS_DEBUG] Loop d=" << d << ", qBitSize=" << qBitSize << ", cyclOrder=" << cyclOrder << std::endl;
-        NativeInteger q   = LastPrimeHardwareFormat<NativeInteger>(qBitSize, cyclOrder);
-        q                 = PreviousPrimeHardwareFormat<NativeInteger>(q, cyclOrder);
+        NativeInteger q   = FirstPrime<NativeInteger>(qBitSize, cyclOrder);
+        q                 = PreviousPrime<NativeInteger>(q, cyclOrder);
         while (std::log2(q.ConvertToDouble()) > registerWordSize || std::log2(q.ConvertToDouble()) > qBitSize ||
                moduliQRecord.find(q.ConvertToInt()) != moduliQRecord.end()) {
-            q = PreviousPrimeHardwareFormat<NativeInteger>(q, cyclOrder);
+            q = PreviousPrime<NativeInteger>(q, cyclOrder);
         }
-        std::cerr << "[CKKS_DEBUG] Selected modulus[" << (numPrimes - d) << "] = 0x" << std::hex << q.ConvertToInt() << std::dec << std::endl;
         moduliQ[numPrimes - d] = q;
         rootsQ[numPrimes - d]  = RootOfUnity(cyclOrder, moduliQ[numPrimes - d]);
         moduliQRecord.emplace(q.ConvertToInt());
@@ -430,11 +428,11 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
             NativeInteger qNext = q;
             for (size_t i = numPrimes - 2, cnt = 0; i >= 1; --i, ++cnt) {
                 if ((cnt % 2) == 0) {
-                    qPrev      = PreviousPrimeHardwareFormat(qPrev, cyclOrder);
+                    qPrev      = PreviousPrime(qPrev, cyclOrder);
                     moduliQ[i] = qPrev;
                 }
                 else {
-                    qNext      = NextPrimeHardwareFormat(qNext, cyclOrder);
+                    qNext      = NextPrime(qNext, cyclOrder);
                     moduliQ[i] = qNext;
                 }
 
@@ -465,7 +463,7 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
                     NativeInteger qPrev = sfInt - NativeInteger(cyclOrder) - sfRem + NativeInteger(1);
                     while (hasSameMod) {
                         hasSameMod = false;
-                        qPrev      = PreviousPrimeHardwareFormat(qPrev, cyclOrder);
+                        qPrev      = PreviousPrime(qPrev, cyclOrder);
                         for (size_t j = i + 1; j < numPrimes; j++) {
                             if (qPrev == moduliQ[j]) {
                                 hasSameMod = true;
@@ -479,7 +477,7 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
                     NativeInteger qNext = sfInt + NativeInteger(cyclOrder) - sfRem + NativeInteger(1);
                     while (hasSameMod) {
                         hasSameMod = false;
-                        qNext      = NextPrimeHardwareFormat(qNext, cyclOrder);
+                        qNext      = NextPrime(qNext, cyclOrder);
                         for (size_t j = i + 1; j < numPrimes; j++) {
                             if (qNext == moduliQ[j]) {
                                 hasSameMod = true;
@@ -521,7 +519,7 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
         // moduliQ[numPrimes] must still be 0, so it has to be populated now
 
         // no need for extra checking as extraModSize is automatically chosen by the library
-        auto tempMod = FirstPrimeHardwareFormat<NativeInteger>(extraModSize - 1, cyclOrder);
+        auto tempMod = FirstPrime<NativeInteger>(extraModSize - 1, cyclOrder);
         // check if tempMod has a duplicate in the vector (exclude moduliQ[numPrimes] from this operation):
         const auto endPos = moduliQ.end() - 1;
         auto pos          = std::find(moduliQ.begin(), endPos, tempMod);

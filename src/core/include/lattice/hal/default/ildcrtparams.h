@@ -87,7 +87,7 @@ public:
 
         IntType compositeModulus(1);
         while ((compositeModulus *= IntType(q.template ConvertToInt<BasicInteger>())) < modulus)
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrimeHardwareFormat(q, corder))));
+            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrime(q, corder))));
         ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
     }
 
@@ -105,14 +105,13 @@ public:
         if (bits > MAX_MODULUS_SIZE)
             OPENFHE_THROW("Invalid bits for ILDCRTParams");
 
-        // Use hardware-format primes
-        auto q{LastPrimeHardwareFormat<NativeInteger>(bits, corder)};
+        auto q{LastPrime<NativeInteger>(bits, corder)};
         m_params.reserve(depth);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
 
         IntType compositeModulus(q.template ConvertToInt<BasicInteger>());
         for (uint32_t _ = 1; _ < depth; ++_) {
-            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrimeHardwareFormat(q, corder))));
+            m_params.push_back(std::make_shared<ILNativeParams>(corder, (q = PreviousPrime(q, corder))));
             compositeModulus *= IntType(q.template ConvertToInt<BasicInteger>());
         }
         ElemParams<IntType>::m_ciphertextModulus = compositeModulus;
