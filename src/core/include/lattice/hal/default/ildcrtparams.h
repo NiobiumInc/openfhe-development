@@ -80,7 +80,8 @@ public:
         if (corder == 0)
             return;
 
-        auto q{LastPrime<NativeInteger>(MAX_MODULUS_SIZE, corder)};
+        // Use hardware-format primes; will break for non-power-of-two corder values
+        auto q{LastPrimeHardwareFormat<NativeInteger>(MAX_MODULUS_SIZE, corder)};
         m_params.reserve(32);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
 
@@ -92,7 +93,7 @@ public:
 
     /**
    * @brief Constructor with basic parameter set.
-   * q is selected as LastPrime(bits, order)
+   * q is selected as LastPrimeHardwareFormat(bits, order)
    * @param corder the order of the ciphertext.
    * @param depth is the size of the tower.
    * @param bits is the number of bits of each tower's moduli.
