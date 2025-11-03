@@ -47,6 +47,10 @@
 #include "utils/exception.h"
 #include "utils/inttypes.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <functional>
 #include <limits>
 #include <memory>
@@ -55,6 +59,8 @@
 #include <vector>
 
 namespace lbcrypto {
+
+uintptr_t allocate_id();
 
 /**
  * @class PolyImpl
@@ -133,16 +139,28 @@ public:
     PolyImpl(const PolyType& p) noexcept
         : m_format{p.m_format},
           m_params{p.m_params},
-          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {}
+          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {
+#ifdef OPENFHE_CPROBES
+            openfhe_cprobe_copy(GetId(), p.GetId());
+#endif
+          }
 
     PolyImpl(PolyType&& p) noexcept
-        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {}
+        : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {
+#ifdef OPENFHE_CPROBES
+            openfhe_cprobe_copy(GetId(), p.GetId());
+#endif
+        }
 
     PolyType& operator=(const PolyType& rhs) noexcept override;
     PolyType& operator=(PolyType&& rhs) noexcept override {
         m_format = std::move(rhs.m_format);
         m_params = std::move(rhs.m_params);
         m_values = std::move(rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_move(m_id, rhs.m_id);
+#endif
         return *this;
     }
     PolyType& operator=(const std::vector<int32_t>& rhs);
@@ -169,12 +187,24 @@ public:
     void SetValuesToZero() override {
         usint r{m_params->GetRingDimension()};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_address(GetId()));
+        openfhe_cprobe_zero(GetId(), m_format, m_params->GetModulus().ConvertToInt());
+#endif
     }
 
     void SetValuesToMax() override {
         usint r{m_params->GetRingDimension()};
         auto max{m_params->GetModulus() - Integer(1)};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus(), max);
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_address(GetId()));
+        openfhe_cprobe_max(GetId(), m_format, m_params->GetModulus().ConvertToInt());
+#endif
+    }
+
+    inline uintptr_t GetId() const {
+        return m_id;
     }
 
     inline Format GetFormat() const final {
@@ -219,6 +249,22 @@ public:
         return (*m_values)[i];
     }
 
+#ifdef OPENFHE_CPROBES
+    inline const void CopyValues(uintptr_t* base) const {
+     // const size_t n = m_params->GetRingDimension();
+     // for(size_t i = 0; i < n; i++) {
+     //   base[i] = m_values->at(i).ConvertToInt();
+     // }
+    }
+
+    inline void SetComputedValues(uintptr_t* base) {
+     // const size_t n = m_params->GetRingDimension();
+     // for(size_t i = 0; i < n; i++) {
+     //   (*m_values)[i] = NativeInteger(base[i]);
+     // }
+    }
+#endif
+
     PolyImpl Plus(const PolyImpl& rhs) const override {
         if (m_params->GetRingDimension() != rhs.m_params->GetRingDimension())
             OPENFHE_THROW("RingDimension missmatch");
@@ -228,11 +274,23 @@ public:
             OPENFHE_THROW("Format missmatch");
         auto tmp(*this);
         tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl PlusNoCheck(const PolyImpl& rhs) const {
         auto tmp(*this);
         tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl& operator+=(const PolyImpl& element) override;
@@ -247,8 +305,14 @@ public:
 
     PolyImpl Minus(const Integer& element) const override;
     PolyImpl& operator-=(const Integer& element) override {
-        m_values->ModSubEq(element);
-        return *this;
+      m_values->ModSubEq(element);
+
+#ifdef OPENFHE_CPROBES
+      openfhe_cprobe_subi(GetId(), GetId(),
+            element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
+      return *this;
     }
 
     PolyImpl Times(const PolyImpl& rhs) const override {
@@ -260,11 +324,23 @@ public:
             OPENFHE_THROW("operator* for PolyImpl supported only in Format::EVALUATION");
         auto tmp(*this);
         tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl TimesNoCheck(const PolyImpl& rhs) const {
         auto tmp(*this);
         tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
         return tmp;
     }
     PolyImpl& operator*=(const PolyImpl& rhs) override {
@@ -276,15 +352,32 @@ public:
             OPENFHE_THROW("operator* for PolyImpl supported only in Format::EVALUATION");
         if (m_values) {
             m_values->ModMulNoCheckEq(*rhs.m_values);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
+            m_params->GetModulus().ConvertToInt());
+#endif
+
             return *this;
         }
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_annotate("Operator *= called by no operation performed");
+#endif
+
         return *this;
     }
 
     PolyImpl Times(const Integer& element) const override;
     PolyImpl& operator*=(const Integer& element) override {
         m_values->ModMulEq(element);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_muli(GetId(), GetId(),
+            element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
         return *this;
     }
 
@@ -366,6 +459,7 @@ protected:
     Format m_format{Format::EVALUATION};
     std::shared_ptr<Params> m_params{nullptr};
     std::unique_ptr<VecType> m_values{nullptr};
+    uintptr_t m_id{allocate_id()};
     void ArbitrarySwitchFormat();
 };
 

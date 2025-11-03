@@ -45,6 +45,10 @@
 #include "utils/parallel.h"
 #include "utils/utilities.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <algorithm>
 #include <cmath>
 #ifdef BOOTSTRAPTIMING
@@ -232,7 +236,27 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
         }
         else {
             precom->m_U0hatTPreFFT = EvalCoeffsToSlotsPrecompute(cc, ksiPows, rotGroup, false, scaleEnc, lEnc);
+#ifdef OPENFHE_CPROBES
+            for (const auto& a : precom->m_U0hatTPreFFT) {
+              for (const auto& b : a) {
+                for (const auto& v : b.get()->GetElement<DCRTPoly>().GetAllElements()) {
+                  v.CopyValues(openfhe_cprobe_address(v.GetId()));
+                  openfhe_cprobe_precompute(v.GetId(), v.GetFormat());
+                }
+              }
+            }
+#endif
             precom->m_U0PreFFT     = EvalSlotsToCoeffsPrecompute(cc, ksiPows, rotGroup, false, scaleDec, lDec);
+#ifdef OPENFHE_CPROBES
+            for (const auto& a : precom->m_U0PreFFT) {
+              for (const auto& b : a) {
+                for (const auto& v : b.get()->GetElement<DCRTPoly>().GetAllElements()) {
+                  v.CopyValues(openfhe_cprobe_address(v.GetId()));
+                  openfhe_cprobe_precompute(v.GetId(), v.GetFormat());
+                }
+              }
+            }
+#endif
         }
     }
 }

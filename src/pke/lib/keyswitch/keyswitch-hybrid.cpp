@@ -43,6 +43,10 @@
 #include "scheme/ckksrns/ckksrns-cryptoparameters.h"
 #include "ciphertext.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 namespace lbcrypto {
 
 EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPoly> oldKey,
@@ -131,6 +135,25 @@ EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPol
     ek->SetAVector(std::move(av));
     ek->SetBVector(std::move(bv));
     ek->SetKeyTag(newKey->GetKeyTag());
+
+#ifdef OPENFHE_CPROBES
+    const auto& a = ek->GetAVector();
+    for (const auto& c : a) {
+      for (const auto& p : c.GetAllElements()) {
+        p.CopyValues(openfhe_cprobe_address(p.GetId()));
+        openfhe_cprobe_key(p.GetId(), p.GetFormat());
+      }
+    }
+
+    const auto& b = ek->GetBVector();
+    for (const auto& c : b) {
+      for (const auto& p : c.GetAllElements()) {
+        p.CopyValues(openfhe_cprobe_address(p.GetId()));
+        openfhe_cprobe_key(p.GetId(), p.GetFormat());
+      }
+    }
+#endif
+
     return ek;
 }
 

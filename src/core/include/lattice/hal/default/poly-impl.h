@@ -42,6 +42,10 @@
 #include "utils/exception.h"
 #include "utils/inttypes.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -49,8 +53,17 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <atomic>
 
 namespace lbcrypto {
+
+uintptr_t allocate_id() {
+  static std::atomic<uintptr_t> value_id{1};
+#ifdef OPENFHE_CPROBES
+  openfhe_cprobe_id(value_id);
+#endif
+  return value_id.fetch_add(1, std::memory_order_relaxed);
+}
 
 template <typename VecType>
 PolyImpl<VecType>::PolyImpl(const DggType& dgg, const std::shared_ptr<PolyImpl::Params>& params, Format format)
@@ -58,13 +71,20 @@ PolyImpl<VecType>::PolyImpl(const DggType& dgg, const std::shared_ptr<PolyImpl::
       m_params{params},
       m_values{std::make_unique<VecType>(dgg.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
     PolyImpl<VecType>::SetFormat(format);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_discrete_gaussian(GetId(), format);
+#endif
 }
 
 template <typename VecType>
 PolyImpl<VecType>::PolyImpl(DugType& dug, const std::shared_ptr<PolyImpl::Params>& params, Format format)
     : m_format{format},
       m_params{params},
-      m_values{std::make_unique<VecType>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {}
+      m_values{std::make_unique<VecType>(dug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_discrete_uniform(GetId(), format);
+#endif
+      }
 
 template <typename VecType>
 PolyImpl<VecType>::PolyImpl(const BugType& bug, const std::shared_ptr<PolyImpl::Params>& params, Format format)
@@ -72,6 +92,9 @@ PolyImpl<VecType>::PolyImpl(const BugType& bug, const std::shared_ptr<PolyImpl::
       m_params{params},
       m_values{std::make_unique<VecType>(bug.GenerateVector(params->GetRingDimension(), params->GetModulus()))} {
     PolyImpl<VecType>::SetFormat(format);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_binary_uniform(GetId(), format);
+#endif
 }
 
 template <typename VecType>
@@ -81,12 +104,19 @@ PolyImpl<VecType>::PolyImpl(const TugType& tug, const std::shared_ptr<PolyImpl::
       m_params{params},
       m_values{std::make_unique<VecType>(tug.GenerateVector(params->GetRingDimension(), params->GetModulus(), h))} {
     PolyImpl<VecType>::SetFormat(format);
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_ternary_uniform(GetId(), format);
+#endif
 }
 
 template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_format = rhs.m_format;
     m_params = rhs.m_params;
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_copy(m_id, rhs.m_id);
+#endif    
+    m_id = rhs.m_id;
     if (!rhs.m_values) {
         m_values = nullptr;
         return *this;
@@ -214,6 +244,12 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
         tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
     else
         tmp.SetValues((*m_values).ModAdd(element), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_addi(tmp.GetId(), GetId(),
+        element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
     return tmp;
 }
 
@@ -221,6 +257,12 @@ template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& element) const {
     PolyImpl<VecType> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModSub(element), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_subi(tmp.GetId(), GetId(),
+        element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
     return tmp;
 }
 
@@ -228,6 +270,12 @@ template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& element) const {
     PolyImpl<VecType> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModMul(element), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_muli(tmp.GetId(), GetId(),
+        element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
+
     return tmp;
 }
 
@@ -240,13 +288,24 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         if (elementReduced > q)
             elementReduced.ModEq(q);
         tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_muli(tmp.GetId(), GetId(),
+            (q - elementReduced).ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
     }
     else {
         Integer elementReduced{NativeInteger::Integer(element)};
         if (elementReduced > q)
             elementReduced.ModEq(q);
         tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
+
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_muli(tmp.GetId(), GetId(),
+            elementReduced.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
     }
+
     return tmp;
 }
 
@@ -254,6 +313,12 @@ template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Minus(const PolyImpl& rhs) const {
     PolyImpl<VecType> tmp(m_params, m_format);
     tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_sub(tmp.GetId(), GetId(), rhs.GetId(),
+        m_params->GetModulus().ConvertToInt());
+#endif
+
     return tmp;
 }
 
@@ -286,6 +351,12 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
     if (!m_values)
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModAddEq(*element.m_values);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
+        m_params->GetModulus().ConvertToInt());
+#endif
+
     return *this;
 }
 
@@ -294,6 +365,12 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator-=(const PolyImpl& element) {
     if (!m_values)
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
     m_values->ModSubEq(*element.m_values);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_sub(GetId(), GetId(), element.GetId(),
+        m_params->GetModulus().ConvertToInt());
+#endif
+
     return *this;
 }
 
@@ -303,7 +380,13 @@ void PolyImpl<VecType>::AddILElementOne() {
     usint vlen{m_params->GetRingDimension()};
     const auto& m{m_params->GetModulus()};
     for (usint i = 0; i < vlen; ++i)
-        (*m_values)[i].ModAddFastEq(ONE, m);
+      (*m_values)[i].ModAddFastEq(ONE, m);
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_annotate("AddILElementOne");
+    openfhe_cprobe_addi(GetId(), GetId(),
+        ONE.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#endif
 }
 
 template <typename VecType>
@@ -346,6 +429,7 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
     uint32_t logm{lbcrypto::GetMSB(m) - 1};
     uint32_t logn{logm - 1};
     uint32_t mask{(uint32_t(1) << logn) - 1};
+    auto q{m_params->GetModulus()};
 
     if (bf) {
         for (uint32_t j{0}, jk{k}; j < n; ++j, jk += (2 * k)) {
@@ -353,12 +437,21 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
             auto&& idxrev{lbcrypto::ReverseBits((jk >> 1) & mask, logn)};
             (*result.m_values)[jrev] = (*m_values)[idxrev];
         }
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+#endif
+
         return result;
     }
 
-    auto q{m_params->GetModulus()};
     for (uint32_t j{0}, jk{0}; j < n; ++j, jk += k)
         (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
+
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+#endif
+
     return result;
 }
 
@@ -368,10 +461,21 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std
         OPENFHE_THROW("Automorphism Poly Format not EVALUATION or not power-of-two");
     if (k % 2 == 0)
         OPENFHE_THROW("Automorphism index not odd\n");
+
     PolyImpl<VecType> tmp(m_params, m_format, true);
     uint32_t n = m_params->GetRingDimension();
     for (uint32_t j = 0; j < n; ++j)
         (*tmp.m_values)[j] = (*m_values)[precomp[j]];
+
+#ifdef OPENFHE_CPROBES
+    uint32_t m{m_params->GetCyclotomicOrder()};
+    uint32_t logm{lbcrypto::GetMSB(m) - 1};
+    uint32_t logn{logm - 1};
+    uint32_t mask{(uint32_t(1) << logn) - 1};
+    auto q{m_params->GetModulus()};
+    openfhe_cprobe_automorphism(tmp.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
+#endif
+
     return tmp;
 }
 
@@ -397,8 +501,13 @@ PolyImpl<VecType> PolyImpl<VecType>::Mod(const Integer& modulus) const {
 }
 
 template <typename VecType>
-void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
-                                      const Integer& rootOfUnityArb) {
+void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb, const Integer& rootOfUnityArb) {
+#ifdef OPENFHE_CPROBES
+    openfhe_cprobe_switchmodulus(GetId(), GetId(),
+        m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
+        m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
+        m_format);
+#endif
     if (m_values != nullptr) {
         m_values->SwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
@@ -432,11 +541,22 @@ void PolyImpl<VecType>::SwitchFormat() {
 
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;
+
         ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
+
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_cache());
+        openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+#endif
         return;
     }
     m_format = Format::EVALUATION;
     ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
+
+#ifdef OPENFHE_CPROBES
+    CopyValues(openfhe_cprobe_cache());
+    openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+#endif
 }
 
 template <typename VecType>

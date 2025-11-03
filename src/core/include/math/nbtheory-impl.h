@@ -366,6 +366,8 @@ IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
 
 template <typename IntType>
 IntType LastPrime(uint32_t nBits, uint64_t m) {
+    std::cerr << "[OLD_PRIME_DEBUG] LastPrime called: nBits=" << nBits << ", m=" << m << std::endl;
+
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
         if (nBits > MAX_MODULUS_SIZE)
             OPENFHE_THROW(std::string(__func__) + ": Requested bit length " + std::to_string(nBits) +
@@ -387,6 +389,7 @@ IntType LastPrime(uint32_t nBits, uint64_t m) {
         OPENFHE_THROW(std::string(__func__) + ": Requested " + std::to_string(nBits) + " bits, but returned " +
                       std::to_string(qNew.GetMSB()) + ". Please adjust parameters.");
 
+    std::cerr << "[OLD_PRIME_DEBUG] LastPrime returned: 0x" << std::hex << qNew.ConvertToInt() << std::dec << std::endl;
     return qNew;
 }
 

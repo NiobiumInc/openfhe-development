@@ -34,6 +34,10 @@
 #include "key/publickey.h"
 #include "cryptocontext.h"
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 namespace lbcrypto {
 
 Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PrivateKey<DCRTPoly> privateKey) const {
@@ -48,6 +52,15 @@ Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PrivateKey<DCRTPo
 
     ciphertext->SetElements({std::move((*ba)[0]), std::move((*ba)[1])});
     ciphertext->SetNoiseScaleDeg(1);
+
+#ifdef OPENFHE_CPROBES
+    for (const auto& cv : ciphertext->GetElements()) {
+      for (const auto& v : cv.GetAllElements()) {
+        v.CopyValues(openfhe_cprobe_address(v.GetId()));
+        openfhe_cprobe_input(v.GetId(), v.GetFormat());
+      }
+    }
+#endif
 
     return ciphertext;
 }
@@ -64,6 +77,15 @@ Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PublicKey<DCRTPol
 
     ciphertext->SetElements({std::move((*ba)[0]), std::move((*ba)[1])});
     ciphertext->SetNoiseScaleDeg(1);
+
+#ifdef OPENFHE_CPROBES
+    for (const auto& cv : ciphertext->GetElements()) {
+      for (const auto& v : cv.GetAllElements()) {
+        v.CopyValues(openfhe_cprobe_address(v.GetId()));
+        openfhe_cprobe_input(v.GetId(), v.GetFormat());
+      }
+    }
+#endif
 
     return ciphertext;
 }
@@ -196,6 +218,30 @@ std::shared_ptr<std::vector<DCRTPoly>> PKERNS::EncryptZeroCore(const PublicKey<D
 }
 
 DCRTPoly PKERNS::DecryptCore(const std::vector<DCRTPoly>& cv, const PrivateKey<DCRTPoly> privateKey) const {
+#ifdef OPENFHE_CPROBES
+    // Copy computed RNS polynomials to compiler memory
+    for (const auto& v : cv) {
+      for (const auto& p : v.GetAllElements()) {
+        p.CopyValues(openfhe_cprobe_address(p.GetId()));
+        p.CopyValues(openfhe_cprobe_result(p.GetId()));
+        openfhe_cprobe_output(p.GetId(), p.GetFormat());
+      }
+    }
+
+    // Execute the compiler
+    openfhe_cprobe_execute();
+
+    // Copy the compiler-computed values to the ciphertext.
+    // Yes, this is extremely dangerous, but it's done correctly and enables
+    // an agnostic check that would otherwise entail significant code changes.
+    auto& cv_mut = const_cast<std::vector<DCRTPoly>&>(cv);
+    for (auto& v : cv_mut) {
+      for (auto& p : v.GetAllElements()) {
+        p.SetComputedValues(openfhe_cprobe_address(p.GetId()));
+      }
+    }
+#endif
+
     const DCRTPoly& s = privateKey->GetPrivateElement();
 
     size_t sizeQ  = s.GetParams()->GetParams().size();

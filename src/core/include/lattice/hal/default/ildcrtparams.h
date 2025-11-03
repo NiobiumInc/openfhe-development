@@ -105,6 +105,7 @@ public:
         if (bits > MAX_MODULUS_SIZE)
             OPENFHE_THROW("Invalid bits for ILDCRTParams");
 
+        // Use hardware-format primes
         auto q{LastPrimeHardwareFormat<NativeInteger>(bits, corder)};
         m_params.reserve(depth);
         m_params.push_back(std::make_shared<ILNativeParams>(corder, q));
