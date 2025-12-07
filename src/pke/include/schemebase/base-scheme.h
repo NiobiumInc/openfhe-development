@@ -145,6 +145,13 @@ public:
         return flag;
     }
 
+#ifdef OPENFHE_CPROBES
+    // Getter for FHE component (for Niobium compiler bootstrap precompute serialization)
+    const std::shared_ptr<FHEBase<Element>>& GetFHE() const {
+        return m_FHE;
+    }
+#endif
+
     bool IsFeatureEnabled(PKESchemeFeature feature) {
         switch (feature) {
             case PKE:
