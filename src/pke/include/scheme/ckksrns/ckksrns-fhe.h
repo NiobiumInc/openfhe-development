@@ -328,6 +328,13 @@ public:
     static Ciphertext<DCRTPoly> Conjugate(ConstCiphertext<DCRTPoly> ciphertext,
                                           const std::map<uint32_t, EvalKey<DCRTPoly>>& evalKeys);
 
+#ifdef OPENFHE_CPROBES
+    // Getter for bootstrap precompute map (for Niobium compiler serialization)
+    const std::map<uint32_t, std::shared_ptr<CKKSBootstrapPrecom>>& GetBootPrecomMap() const {
+        return m_bootPrecomMap;
+    }
+#endif
+
 private:
     CKKSBootstrapPrecom& GetBootPrecom(uint32_t slots) const {
         auto pair = m_bootPrecomMap.find(slots);
