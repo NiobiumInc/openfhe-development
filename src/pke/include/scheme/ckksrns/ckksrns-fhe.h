@@ -219,6 +219,13 @@ public:
         return "FHECKKSRNS";
     }
 
+#ifdef OPENFHE_CPROBES
+    // Getter for bootstrap precompute map (for Niobium compiler serialization)
+    const std::map<uint32_t, std::shared_ptr<CKKSBootstrapPrecom>>& GetBootPrecomMap() const {
+        return m_bootPrecomMap;
+    }
+#endif
+
 private:
     //------------------------------------------------------------------------------
     // Find Rotation Indices
