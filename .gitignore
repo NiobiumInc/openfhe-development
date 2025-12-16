@@ -73,6 +73,6 @@ test_detail.xml
 # Visual Studio Code
 .vscode
 
-# Niobium specfici build artifacts
+# Niobium specific build artifacts
 dbuild/
 build/
