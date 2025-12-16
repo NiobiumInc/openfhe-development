@@ -473,6 +473,17 @@ bool CKKSPackedEncoding::Decode(size_t noiseScaleDeg, double scalingFactor, Scal
 
         double scale = (ckksDataType == REAL) ? 0.5 * powP : powP;
 
+        // Check if noise should be disabled via environment variable
+        // NB_NO_DECODE_NOISE: Set to disable random noise addition during decode (for testing only!)
+        static bool noiseDisabled = []() {
+            const char* env = std::getenv("NB_NO_DECODE_NOISE");
+            bool disabled = (env != nullptr && std::strlen(env) > 0);
+            if (disabled) {
+                std::cerr << "[CKKS_DECODE] WARNING: NB_NO_DECODE_NOISE is set - disabling security noise!" << std::endl;
+            }
+            return disabled;
+        }();
+
         // TODO temporary removed errors
         std::normal_distribution<> d(0, stddev);
         PRNG& g = PseudoRandomNumberGenerator::GetPRNG();
@@ -486,10 +497,16 @@ bool CKKSPackedEncoding::Decode(size_t noiseScaleDeg, double scalingFactor, Scal
             double real = scale * curValues[i].real();
             double imag = scale * curValues[i].imag();
             if (ckksDataType == REAL) {
-                real += scale * conjugate[i].real() + powP * d(g);
-                // real += powP * dgg.GenerateIntegerKarney(0.0, stddev);
-                imag += scale * conjugate[i].imag() + powP * d(g);
-                // imag += powP * dgg.GenerateIntegerKarney(0.0, stddev);
+                if (!noiseDisabled) {
+                    real += scale * conjugate[i].real() + powP * d(g);
+                    // real += powP * dgg.GenerateIntegerKarney(0.0, stddev);
+                    imag += scale * conjugate[i].imag() + powP * d(g);
+                    // imag += powP * dgg.GenerateIntegerKarney(0.0, stddev);
+                } else {
+                    // No noise added - deterministic decode for testing
+                    real += scale * conjugate[i].real();
+                    imag += scale * conjugate[i].imag();
+                }
             }
             realValues[i].real(real);
             realValues[i].imag(imag);
