@@ -142,7 +142,6 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
         std::vector<NativeInteger> moduliP(sizeP);
         std::vector<NativeInteger> rootsP(sizeP);
         // firstP contains a prime whose size is PModSize.
-        std::cerr << "[HW_DEBUG] FirstPrimeHardwareFormat called from PrecomputeCRTTables inside rns-cryptoparameters.cpp" << std::endl;
         NativeInteger firstP = FirstPrimeHardwareFormat<NativeInteger>(auxBits, primeStep);
         NativeInteger pPrev  = firstP;
         BigInteger modulusP(1);
@@ -151,7 +150,6 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
             // P and Q are different
             bool foundInQ = false;
             do {
-                std::cerr << "[HW_DEBUG] PreviousPrimeHardwareFormat called from PrecomputeCRTTables inside rns-cryptoparameters.cpp" << std::endl;
                 moduliP[i] = PreviousPrimeHardwareFormat<NativeInteger>(pPrev, primeStep);
                 foundInQ   = false;
                 for (usint j = 0; j < sizeQ; j++)
