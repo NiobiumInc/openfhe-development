@@ -215,8 +215,6 @@ void ParameterGenerationCKKSRNS::CompositePrimeModuliGen(std::vector<NativeInteg
         OPENFHE_THROW("firstModSize must be > scalingModSize.");
     }
 
-    std::cerr << "[HW_DEBUG] Entering CompositePrimeModuliGen inside ckksrns-parametergeneration.cpp" << std::endl;
-
     std::unordered_set<uint64_t> moduliQRecord;
 
     for (uint32_t d = 1, remBits = dcrtBits; d <= compositeDegree; ++d) {
@@ -418,7 +416,6 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
                                                       std::vector<NativeInteger>& rootsQ, ScalingTechnique scalTech,
                                                       uint32_t numPrimes, uint32_t firstModSize, uint32_t dcrtBits,
                                                       uint32_t cyclOrder, uint32_t extraModSize) const {
-    std::cerr << "[HW_DEBUG] Entering SinglePrimeModuliGen inside ckksrns-parametergeneration.cpp" << std::endl;
     NativeInteger q        = FirstPrimeHardwareFormat<NativeInteger>(dcrtBits, cyclOrder);
     moduliQ[numPrimes - 1] = q;
     rootsQ[numPrimes - 1]  = RootOfUnity(cyclOrder, moduliQ[numPrimes - 1]);
