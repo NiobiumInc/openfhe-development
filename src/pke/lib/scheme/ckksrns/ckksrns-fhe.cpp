@@ -268,6 +268,8 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
                 }
                 }
             }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
             precom->m_U0hatTPreFFT =
             EvalCoeffsToSlotsPrecompute(cc, ksiPows, rotGroup, false, scaleEnc, lEnc, flagPack);
@@ -280,6 +282,8 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
                 }
                 }
             }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
         }
     }
