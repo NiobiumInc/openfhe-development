@@ -328,8 +328,6 @@ void PrimeFactorize(IntType n, std::set<IntType>& primeFactors) {
 
 template <typename IntType>
 IntType FirstPrime(uint32_t nBits, uint64_t m) {
-    std::cerr << "[HW_DEBUG] FirstPrime called: nBits=" << nBits << ", m=" << m << std::endl;
-
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
         if (nBits > MAX_MODULUS_SIZE)
             OPENFHE_THROW(std::string(__func__) + ": Requested bit length " + std::to_string(nBits) +
@@ -346,13 +344,11 @@ IntType FirstPrime(uint32_t nBits, uint64_t m) {
         if ((qNew += M) < q)
             OPENFHE_THROW(std::string(__func__) + ": overflow growing candidate");
     }
-    std::cerr << "[HW_DEBUG] FirstPrime result: qNew=" << qNew << std::endl;
     return qNew;
 }
 
 template <typename IntType>
 IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
-    std::cerr << "[HW_DEBUG] FirstPrimeHardwareFormat called: nBits=" << nBits << ", m=" << m << std::endl;
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
@@ -370,7 +366,6 @@ IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
 
 template <typename IntType>
 IntType LastPrime(uint32_t nBits, uint64_t m) {
-    std::cerr << "[HW_DEBUG] LastPrime called: nBits=" << nBits << ", m=" << m << std::endl;
 
     if constexpr (std::is_same_v<IntType, NativeInteger>) {
         if (nBits > MAX_MODULUS_SIZE)
@@ -393,13 +388,11 @@ IntType LastPrime(uint32_t nBits, uint64_t m) {
         OPENFHE_THROW(std::string(__func__) + ": Requested " + std::to_string(nBits) + " bits, but returned " +
                       std::to_string(qNew.GetMSB()) + ". Please adjust parameters.");
 
-    std::cerr << "[HW_DEBUG] LastPrime result: qNew=" << qNew << std::endl;
     return qNew;
 }
 
 template <typename IntType>
 IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
-    std::cerr << "[HW_DEBUG] LastPrimeHardwareFormat called: nBits=" << nBits << ", m=" << m << std::endl;
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
@@ -417,20 +410,17 @@ IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
 
 template <typename IntType>
 IntType NextPrime(const IntType& q, uint64_t m) {
-    std::cerr << "[HW_DEBUG] NextPrime called: q=" << q << ", m=" << m << std::endl;
 
     IntType M(m), qNew(q + M);
     while (!MillerRabinPrimalityTest(qNew)) {
         if ((qNew += M) < q)
             OPENFHE_THROW(std::string(__func__) + ": overflow growing candidate");
     }
-    std::cerr << "[HW_DEBUG] NextPrime result: qNew=" << qNew << std::endl;
     return qNew;
 }
 
 template <typename IntType>
 IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
-    std::cerr << "[HW_DEBUG] NextPrimeHardwareFormat called: q=" << q << ", m=" << m << std::endl;
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
@@ -452,20 +442,17 @@ IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
 
 template <typename IntType>
 IntType PreviousPrime(const IntType& q, uint64_t m) {
-    std::cerr << "[HW_DEBUG] PreviousPrime called: q=" << q << ", m=" << m << std::endl;
 
     IntType M(m), qNew(q - M);
     while (!MillerRabinPrimalityTest(qNew)) {
         if ((qNew -= M) > q)
             OPENFHE_THROW(std::string(__func__) + ": overflow shrinking candidate");
     }
-    std::cerr << "[HW_DEBUG] PreviousPrime result: qNew=" << qNew << std::endl;
     return qNew;
 }
 
 template <typename IntType>
 IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
-    std::cerr << "[HW_DEBUG] PreviousPrimeHardwareFormat called: q=" << q << ", m=" << m << std::endl;
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
     // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
