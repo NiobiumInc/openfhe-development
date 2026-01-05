@@ -46,6 +46,14 @@
 #include "cprobes.h"
 #endif
 
+#ifdef DATA_TRACKING
+// Forward declarations for single-polynomial tracking functions
+extern "C" {
+    void openfhe_cprobe_track_single_poly_ntt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_intt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
+}
+#endif
+
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -553,6 +561,10 @@ void PolyImpl<VecType>::SwitchFormat() {
 #ifdef OPENFHE_CPROBES
         CopyValues(openfhe_cprobe_cache());
         openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+#ifdef DATA_TRACKING
+        // Track coefficient data for single-polynomial INTT operations
+        openfhe_cprobe_track_single_poly_intt(this, this, m_params->GetModulus().ConvertToInt());
+#endif
 #endif
         return;
     }
@@ -562,6 +574,10 @@ void PolyImpl<VecType>::SwitchFormat() {
 #ifdef OPENFHE_CPROBES
     CopyValues(openfhe_cprobe_cache());
     openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+#ifdef DATA_TRACKING
+    // Track coefficient data for single-polynomial NTT operations
+    openfhe_cprobe_track_single_poly_ntt(this, this, m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 }
 
