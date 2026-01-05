@@ -418,11 +418,9 @@ public:
         openfhe_cprobe_muli(GetId(), GetId(),
             element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
 #ifdef DATA_TRACKING
-        // Only track at Poly level if we're not already in DCRTPoly context
-        if (!openfhe_cprobe_is_in_dcrt_context()) {
-            openfhe_cprobe_track_single_poly_muli(this, this, element.ConvertToInt(), 
-                m_params->GetModulus().ConvertToInt());
-        }
+        // Track coefficient data for single-polynomial muli operations
+        openfhe_cprobe_track_single_poly_muli(this, this, element.ConvertToInt(),
+            m_params->GetModulus().ConvertToInt());
 #endif
 #endif
 
