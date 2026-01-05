@@ -150,20 +150,9 @@ public:
         size_t size{m_vectors.size()};
         // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
 #ifdef DATA_TRACKING
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_enable_dcrt_context();
-#endif
         for (size_t i = 0; i < size; ++i) {
             m_vectors[i] *= rhs.m_vectors[i];
-#ifdef OPENFHE_CPROBES
-            // Track each tower's coefficient data immediately after the operation
-            openfhe_cprobe_track_single_poly_mul(&m_vectors[i], &m_vectors[i], &rhs.m_vectors[i],
-                m_vectors[i].GetModulus().ConvertToInt());
-#endif
         }
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_disable_dcrt_context();
-#endif
 #else
         // Use parallel processing when DATA_TRACKING is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -198,25 +187,12 @@ public:
         if (m_vectors[0].GetModulus() != rhs.m_vectors[0].GetModulus())
             OPENFHE_THROW("Modulus mismatch");
         DCRTPolyType tmp(m_params, m_format);
-        
+
         // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
 #ifdef DATA_TRACKING
-        std::cerr << "[DEBUG] DCRTPoly Plus() - DATA_TRACKING path taken" << std::endl;
-#ifdef OPENFHE_CPROBES
-        std::cerr << "[DEBUG] DCRTPoly Plus() - OPENFHE_CPROBES enabled, calling context functions" << std::endl;
-        openfhe_cprobe_enable_dcrt_context();
-#endif
         for (size_t i = 0; i < size; ++i) {
             tmp.m_vectors[i] = m_vectors[i].PlusNoCheck(rhs.m_vectors[i]);
-#ifdef OPENFHE_CPROBES
-            // Track each tower's coefficient data immediately after the operation
-            openfhe_cprobe_track_single_poly_add(&tmp.m_vectors[i], &m_vectors[i], &rhs.m_vectors[i],
-                m_vectors[i].GetModulus().ConvertToInt());
-#endif
         }
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_disable_dcrt_context();
-#endif
 #else
         // Use parallel processing when DATA_TRACKING is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -244,20 +220,9 @@ public:
 
         // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
 #ifdef DATA_TRACKING
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_enable_dcrt_context();
-#endif
         for (size_t i = 0; i < size; ++i) {
             tmp.m_vectors[i] = m_vectors[i].TimesNoCheck(rhs.m_vectors[i]);
-#ifdef OPENFHE_CPROBES
-            // Track each tower's coefficient data immediately after the operation
-            openfhe_cprobe_track_single_poly_mul(&tmp.m_vectors[i], &m_vectors[i], &rhs.m_vectors[i],
-                m_vectors[i].GetModulus().ConvertToInt());
-#endif
         }
-#ifdef OPENFHE_CPROBES
-        openfhe_cprobe_disable_dcrt_context();
-#endif
 #else
         // Use parallel processing when DATA_TRACKING is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))

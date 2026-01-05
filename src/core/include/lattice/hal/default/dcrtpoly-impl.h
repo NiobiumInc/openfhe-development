@@ -438,17 +438,11 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator+=(const DCRTPolyImpl& rhs
     uint32_t size(m_vectors.size());
     
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+    // Each m_vectors[i] += will handle its own tracking
 #ifdef DATA_TRACKING
-    openfhe_cprobe_enable_dcrt_context();
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] += rhs.m_vectors[i];
-#ifdef OPENFHE_CPROBES
-        // Track each tower's coefficient data immediately after the operation
-        openfhe_cprobe_track_single_poly_add(&m_vectors[i], &m_vectors[i], &rhs.m_vectors[i],
-            m_vectors[i].GetModulus().ConvertToInt());
-#endif
     }
-    openfhe_cprobe_disable_dcrt_context();
 #else
     // Use parallel processing when DATA_TRACKING is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
