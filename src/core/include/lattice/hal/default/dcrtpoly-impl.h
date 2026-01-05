@@ -52,7 +52,7 @@
 #endif
 
 #ifdef DATA_TRACKING
-// Include Niobium bridge function declarations for coefficient tracking  
+// Include Niobium bridge function declarations for coefficient tracking
 extern "C" {
     void openfhe_cprobe_enable_dcrt_context();
     void openfhe_cprobe_disable_dcrt_context();
@@ -2124,9 +2124,17 @@ void DCRTPolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
 
     const uint32_t size  = m_vectors.size();
     const uint32_t limit = thread_limit < size ? thread_limit : size;
+#ifdef DATA_TRACKING
+    // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+    // Each m_vectors[i].SwitchFormat() will handle its own tracking
+    for (size_t i = 0; i < size; ++i) {
+        m_vectors[i].SwitchFormat();
+    }
+#else
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(limit))
     for (uint32_t i = 0; i < size; ++i)
         m_vectors[i].SwitchFormat();
+#endif
 }
 
 template <typename VecType>
