@@ -49,6 +49,18 @@
 
 #ifdef OPENFHE_CPROBES
 #include "cprobes.h"
+#ifdef DATA_TRACKING
+// Include Niobium bridge function declarations for coefficient tracking
+extern "C" {
+    void openfhe_cprobe_track_single_poly_add(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_mul(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_sub(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_muli(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_ntt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
+    bool openfhe_cprobe_is_in_dcrt_context();
+    void openfhe_cprobe_track_single_poly_intt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
+}
+#endif
 #endif
 
 #include <functional>
@@ -278,6 +290,10 @@ public:
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        openfhe_cprobe_track_single_poly_add(&tmp, this, &rhs, 
+            m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 
         return tmp;
@@ -289,6 +305,10 @@ public:
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        openfhe_cprobe_track_single_poly_add(&tmp, this, &rhs, 
+            m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 
         return tmp;
@@ -328,6 +348,13 @@ public:
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        // Only track at Poly level if we're not already in DCRTPoly context
+        if (!openfhe_cprobe_is_in_dcrt_context()) {
+            openfhe_cprobe_track_single_poly_mul(&tmp, this, &rhs, 
+                m_params->GetModulus().ConvertToInt());
+        }
+#endif
 #endif
 
         return tmp;
@@ -339,6 +366,13 @@ public:
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        // Only track at Poly level if we're not already in DCRTPoly context
+        if (!openfhe_cprobe_is_in_dcrt_context()) {
+            openfhe_cprobe_track_single_poly_mul(&tmp, this, &rhs, 
+                m_params->GetModulus().ConvertToInt());
+        }
+#endif
 #endif
 
         return tmp;
@@ -356,6 +390,13 @@ public:
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        // Only track at Poly level if we're not already in DCRTPoly context
+        if (!openfhe_cprobe_is_in_dcrt_context()) {
+            openfhe_cprobe_track_single_poly_mul(this, this, &rhs, 
+                m_params->GetModulus().ConvertToInt());
+        }
+#endif
 #endif
 
             return *this;
@@ -376,6 +417,13 @@ public:
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_muli(GetId(), GetId(),
             element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        // Only track at Poly level if we're not already in DCRTPoly context
+        if (!openfhe_cprobe_is_in_dcrt_context()) {
+            openfhe_cprobe_track_single_poly_muli(this, this, element.ConvertToInt(), 
+                m_params->GetModulus().ConvertToInt());
+        }
+#endif
 #endif
 
         return *this;
