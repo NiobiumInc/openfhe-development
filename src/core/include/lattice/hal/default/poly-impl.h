@@ -378,6 +378,11 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+    // Track coefficient data for single-polynomial add operations
+    openfhe_cprobe_track_single_poly_add(this, this, &element,
+        m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 
     return *this;

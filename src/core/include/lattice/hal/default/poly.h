@@ -349,11 +349,9 @@ public:
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #ifdef DATA_TRACKING
-        // Only track at Poly level if we're not already in DCRTPoly context
-        if (!openfhe_cprobe_is_in_dcrt_context()) {
-            openfhe_cprobe_track_single_poly_mul(&tmp, this, &rhs, 
-                m_params->GetModulus().ConvertToInt());
-        }
+        // Track coefficient data for single-polynomial mul operations
+        openfhe_cprobe_track_single_poly_mul(&tmp, this, &rhs,
+            m_params->GetModulus().ConvertToInt());
 #endif
 #endif
 
@@ -391,11 +389,9 @@ public:
         openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #ifdef DATA_TRACKING
-        // Only track at Poly level if we're not already in DCRTPoly context
-        if (!openfhe_cprobe_is_in_dcrt_context()) {
-            openfhe_cprobe_track_single_poly_mul(this, this, &rhs, 
-                m_params->GetModulus().ConvertToInt());
-        }
+        // Track coefficient data for single-polynomial mul operations
+        openfhe_cprobe_track_single_poly_mul(this, this, &rhs,
+            m_params->GetModulus().ConvertToInt());
 #endif
 #endif
 
