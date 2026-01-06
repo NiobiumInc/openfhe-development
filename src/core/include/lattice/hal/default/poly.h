@@ -59,6 +59,7 @@ extern "C" {
     void openfhe_cprobe_track_single_poly_ntt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
     bool openfhe_cprobe_is_in_dcrt_context();
     void openfhe_cprobe_track_single_poly_intt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_switchmodulus(const void* result_ptr, uint64_t old_modulus, uint64_t new_modulus);
 }
 #endif
 #endif
