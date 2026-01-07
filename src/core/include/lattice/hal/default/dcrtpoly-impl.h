@@ -789,18 +789,48 @@ template <typename VecType>
 DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const Integer& rhs) {
     NativeInteger val{rhs};
     uint32_t size(m_vectors.size());
+
+#ifdef DATA_TRACKING
+    // Process sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+    for (size_t i = 0; i < size; ++i) {
+        m_vectors[i] *= val;
+#ifdef OPENFHE_CPROBES
+        // Track each tower's coefficient data immediately after the operation
+        openfhe_cprobe_track_single_poly_muli(&m_vectors[i], &m_vectors[i], val.ConvertToInt(),
+                                              m_vectors[i].GetModulus().ConvertToInt());
+#endif
+    }
+#else
+    // Use parallel processing when DATA_TRACKING is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (uint32_t i = 0; i < size; ++i)
         m_vectors[i] *= val;
+#endif
+
     return *this;
 }
 
 template <typename VecType>
 DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const NativeInteger& rhs) {
     uint32_t size(m_vectors.size());
+
+#ifdef DATA_TRACKING
+    // Process sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+    for (size_t i = 0; i < size; ++i) {
+        m_vectors[i] *= rhs;
+#ifdef OPENFHE_CPROBES
+        // Track each tower's coefficient data immediately after the operation
+        openfhe_cprobe_track_single_poly_muli(&m_vectors[i], &m_vectors[i], rhs.ConvertToInt(),
+                                              m_vectors[i].GetModulus().ConvertToInt());
+#endif
+    }
+#else
+    // Use parallel processing when DATA_TRACKING is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (uint32_t i = 0; i < size; ++i)
         m_vectors[i] *= rhs;
+#endif
+
     return *this;
 }
 
