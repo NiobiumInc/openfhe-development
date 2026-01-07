@@ -152,6 +152,8 @@ EvalKey<DCRTPoly> KeySwitchHYBRID::KeySwitchGenInternal(const PrivateKey<DCRTPol
         openfhe_cprobe_key(p.GetId(), p.GetFormat());
       }
     }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
 
     return ek;

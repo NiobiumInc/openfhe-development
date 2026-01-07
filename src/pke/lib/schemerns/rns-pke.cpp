@@ -60,6 +60,8 @@ Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PrivateKey<DCRTPo
         openfhe_cprobe_input(v.GetId(), v.GetFormat());
       }
     }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
 
     return ciphertext;
@@ -85,6 +87,8 @@ Ciphertext<DCRTPoly> PKERNS::Encrypt(DCRTPoly plaintext, const PublicKey<DCRTPol
         openfhe_cprobe_input(v.GetId(), v.GetFormat());
       }
     }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
 
     return ciphertext;
@@ -240,6 +244,8 @@ DCRTPoly PKERNS::DecryptCore(const std::vector<DCRTPoly>& cv, const PrivateKey<D
         p.SetComputedValues(openfhe_cprobe_address(p.GetId()));
       }
     }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
 
     const DCRTPoly& s = privateKey->GetPrivateElement();

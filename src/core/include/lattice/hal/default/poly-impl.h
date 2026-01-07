@@ -519,6 +519,12 @@ template <typename VecType>
 void PolyImpl<VecType>::LazySwitchModulus(const Integer& modulus, const Integer& rootOfUnity, const Integer& modulusArb,
                                           const Integer& rootOfUnityArb) {
     if (m_values != nullptr) {
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_switchmodulus(GetId(), GetId(),
+            m_params->GetModulus().ConvertToInt(), modulus.ConvertToInt(),
+            m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
+            m_format);
+#endif
         m_values->LazySwitchModulus(modulus);
         auto c{m_params->GetCyclotomicOrder()};
         m_params = std::make_shared<PolyImpl::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
@@ -571,11 +577,21 @@ void PolyImpl<VecType>::ArbitrarySwitchFormat() {
         m_format = Format::EVALUATION;
         auto&& v = ChineseRemainderTransformArb<VecType>().ForwardTransform(*m_values, lr, bm, br, co);
         m_values = std::make_unique<VecType>(v);
+
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_cache());
+        openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), lr.ConvertToInt());
+#endif
     }
     else {
         m_format = Format::COEFFICIENT;
         auto&& v = ChineseRemainderTransformArb<VecType>().InverseTransform(*m_values, lr, bm, br, co);
         m_values = std::make_unique<VecType>(v);
+
+#ifdef OPENFHE_CPROBES
+        CopyValues(openfhe_cprobe_cache());
+        openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), lr.ConvertToInt());
+#endif
     }
 }
 

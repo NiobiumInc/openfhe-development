@@ -996,7 +996,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::ApproxSwitchCRTBasis(
     DCRTPolyImpl<VecType> ans(paramsP, m_format, true);
     uint32_t sizeQ = (m_vectors.size() > paramsQ->GetParams().size()) ? paramsQ->GetParams().size() : m_vectors.size();
     uint32_t sizeP = ans.m_vectors.size();
-#if defined(HAVE_INT128) && (NATIVEINT == 64) && !defined(WITH_REDUCED_NOISE) && \
+#if defined(HAVE_INT128) && (NATIVEINT == 64) && !defined(WITH_REDUCED_NOISE) && !defined(OPENFHE_CPROBES) && \
     (defined(WITH_OPENMP) || (defined(__clang__) && !defined(WITH_NATIVEOPT)))
     uint32_t ringDim = m_params->GetRingDimension();
     std::vector<DoubleNativeInt> sum(sizeP);
@@ -1171,7 +1171,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::SwitchCRTBasis(const std::shared_pt
         for (uint32_t j = 0; j < sizeP; ++j) {
             const auto& pj        = ans.m_vectors[j].GetModulus();
             const auto& QHatModpj = QHatModp[j];
-#if defined(HAVE_INT128) && NATIVEINT == 64
+#if defined(HAVE_INT128) && NATIVEINT == 64 && !defined(OPENFHE_CPROBES)
             DoubleNativeInt curValue = 0;
             for (uint32_t i = 0; i < sizeQ; ++i)
                 curValue += Mul128(xQHatInvModq[i].ConvertToInt(), QHatModpj[i].ConvertToInt());
@@ -1589,7 +1589,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::ApproxScaleAndRound(
         for (uint32_t j = 0; j < sizeP; ++j) {
             const auto& pj                     = ans.m_vectors[j].GetModulus();
             const auto& tPSHatInvModsDivsModpj = tPSHatInvModsDivsModp[j];
-#if defined(HAVE_INT128) && NATIVEINT == 64
+#if defined(HAVE_INT128) && NATIVEINT == 64 && !defined(OPENFHE_CPROBES)
             DoubleNativeInt curValue = 0;
             for (uint32_t i = 0; i < sizeQ; ++i) {
                 const NativeInteger& xi = m_vectors[i][ri];
@@ -1649,7 +1649,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::ScaleAndRound(
             const NativeInteger& xi = m_vectors[i + inputIndex][ri];
             nu += tOSHatInvModsDivsFrac[i] * xi.ConvertToDouble();
         }
-#if defined(HAVE_INT128) && NATIVEINT == 64
+#if defined(HAVE_INT128) && NATIVEINT == 64 && !defined(OPENFHE_CPROBES)
         if (isConvertableToNativeInt(nu)) {
             NativeInteger alpha = static_cast<BasicInteger>(nu);
             for (size_t j = 0; j < sizeO; ++j) {
@@ -1856,7 +1856,7 @@ void DCRTPolyImpl<VecType>::FastBaseConvqToBskMontgomery(
         const auto& qModBskj               = QModbsk[j];
         const auto& qModBskjPrecon         = QModbskPrecon[j];
         for (uint32_t k = 0; k < n; ++k) {
-#if defined(HAVE_INT128) && NATIVEINT == 64
+#if defined(HAVE_INT128) && NATIVEINT == 64 && !defined(OPENFHE_CPROBES)
             DoubleNativeInt result = 0;
             for (uint32_t i = 0; i < numQ; ++i)
                 result += Mul128(ximtildeQHatModqi[i * n + k].ConvertToInt<uint64_t>(),
@@ -1923,7 +1923,7 @@ void DCRTPolyImpl<VecType>::FastRNSFloorq(
         const auto& tDivqModBskj       = tQInvModbsk[j];
         const auto& tDivqModBskjPrecon = tQInvModbskPrecon[j];
         for (uint32_t k = 0; k < n; ++k) {
-#if defined(HAVE_INT128) && NATIVEINT == 64
+#if defined(HAVE_INT128) && NATIVEINT == 64 && !defined(OPENFHE_CPROBES)
             DoubleNativeInt aq = 0;
             for (uint32_t i = 0; i < numQ; ++i) {
                 const auto& xi = m_vectors[i][k];
@@ -1996,7 +1996,7 @@ void DCRTPolyImpl<VecType>::FastBaseConvSK(
         const auto& bModqj       = BModq[j];
         const auto& bModqjPrecon = BModqPrecon[j];
         for (uint32_t k = 0; k < n; ++k) {
-#if defined(HAVE_INT128) && NATIVEINT == 64
+#if defined(HAVE_INT128) && NATIVEINT == 64 && !defined(OPENFHE_CPROBES)
             DoubleNativeInt result = 0;
             for (uint32_t i = 0; i < sizeBskm1; ++i) {  // exclude msk residue
                 const auto& xi = m_vectors[sizeQ + i][k];

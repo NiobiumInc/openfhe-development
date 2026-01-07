@@ -52,8 +52,7 @@
 #include <algorithm>
 #include <cmath>
 #ifdef BOOTSTRAPTIMING
-    #include <iostream>
-#endif
+    #endif
 #include <limits>
 #include <map>
 #include <memory>
@@ -245,6 +244,8 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
                 }
               }
             }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
             precom->m_U0PreFFT     = EvalSlotsToCoeffsPrecompute(cc, ksiPows, rotGroup, false, scaleDec, lDec);
 #ifdef OPENFHE_CPROBES
@@ -256,6 +257,8 @@ void FHECKKSRNS::EvalBootstrapSetup(const CryptoContextImpl<DCRTPoly>& cc, std::
                 }
               }
             }
+#else
+    #error "OPENFHE_CPROBES must be enabled for this file"
 #endif
         }
     }
