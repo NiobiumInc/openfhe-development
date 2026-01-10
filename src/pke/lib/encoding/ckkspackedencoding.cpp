@@ -447,12 +447,40 @@ bool CKKSPackedEncoding::Decode(size_t noiseScaleDeg, double scalingFactor, Scal
         //  }
         // }
 
+        // Check if decryption should always proceed even with high approximation error
+        static bool alwaysDecrypt = []() {
+            const char* env = std::getenv("NB_ALWAYS_DECRYPT");
+            bool enabled = (env != nullptr && std::strlen(env) > 0);
+            if (enabled) {
+                std::cerr << "\n"
+                          << "=========================================================================\n"
+                          << "  WARNING: NB_ALWAYS_DECRYPT is set!\n"
+                          << "  Decryption will proceed even with HIGH APPROXIMATION ERRORS.\n"
+                          << "  THIS IS FOR TESTING/DEBUGGING ONLY - RESULTS MAY BE INCORRECT!\n"
+                          << "=========================================================================\n"
+                          << std::endl;
+            }
+            return enabled;
+        }();
+
         if (ckksDataType == REAL) {
             //   If less than 5 bits of precision is observed
-            if (logstd > p - 5.0)
-                OPENFHE_THROW(
-                    "The decryption failed because the approximation error is "
-                    "too high. Check the parameters. ");
+            if (logstd > p - 5.0) {
+                if (alwaysDecrypt) {
+                    std::cerr << "\n"
+                              << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                              << "  CRITICAL WARNING: APPROXIMATION ERROR IS TOO HIGH!\n"
+                              << "  Log standard deviation: " << logstd << " (threshold: " << (p - 5.0) << ")\n"
+                              << "  THE DECRYPTION IS INCORRECT AND RESULTS ARE UNRELIABLE!\n"
+                              << "  Proceeding anyway because NB_ALWAYS_DECRYPT is set.\n"
+                              << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                              << std::endl;
+                } else {
+                    OPENFHE_THROW(
+                        "The decryption failed because the approximation error is "
+                        "too high. Check the parameters. ");
+                }
+            }
         }
 
         // real values
