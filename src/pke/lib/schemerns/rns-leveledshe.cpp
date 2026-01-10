@@ -37,6 +37,10 @@
 #include <memory>
 #include <vector>
 
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
+
 namespace lbcrypto {
 
 /////////////////////////////////////////
@@ -292,9 +296,23 @@ void LeveledSHERNS::MultByMonomialInPlace(Ciphertext<DCRTPoly>& ciphertext, uint
     uint32_t powerReduced = power % M;
     monomial[power % N]   = powerReduced < N ? NativeInteger(1) : paramsNative->GetModulus() - NativeInteger(1);
 
+#ifdef OPENFHE_CPROBES
+    // Pause recording - don't record zero-init and monomial construction
+    openfhe_cprobe_pause_recording();
+#endif
+
     DCRTPoly monomialDCRT(elemParams, Format::COEFFICIENT, true);
     monomialDCRT = monomial;
     monomialDCRT.SetFormat(Format::EVALUATION);
+
+
+#ifdef OPENFHE_CPROBES
+    // Save the constructed monomial as input (in EVALUATION form, ready for multiplication)
+    openfhe_cprobe_save_dcrt_poly(&monomialDCRT);
+
+    // Resume recording - the multiplication below will be recorded
+    openfhe_cprobe_resume_recording();
+#endif
 
     for (uint32_t i = 0; i < ciphertext->NumberCiphertextElements(); ++i)
         cv[i] *= monomialDCRT;
