@@ -9,6 +9,10 @@ extern "C" {
 
 void openfhe_cprobe_execute();
 
+void openfhe_cprobe_pause_recording();
+
+void openfhe_cprobe_resume_recording();
+
 void openfhe_cprobe_annotate(const char*);
 
 void openfhe_cprobe_id(uintptr_t);
@@ -50,6 +54,8 @@ void openfhe_cprobe_switchmodulus(uintptr_t, uintptr_t, uint64_t, uint64_t, uint
 
 void openfhe_cprobe_ntt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 void openfhe_cprobe_intt(uintptr_t, uintptr_t, uint64_t, uint64_t);
+
+void openfhe_cprobe_save_dcrt_poly(const void* dcrt_poly_ptr);
 
 #ifdef __cplusplus
 }
