@@ -46,12 +46,14 @@
 #include "cprobes.h"
 #endif
 
+#ifdef OPENFHE_CPROBES
 #ifdef DATA_TRACKING
 // Forward declarations for single-polynomial tracking functions
 extern "C" {
     void openfhe_cprobe_track_single_poly_ntt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
     void openfhe_cprobe_track_single_poly_intt(const void* result_ptr, const void* operand_ptr, uint64_t modulus);
 }
+#endif
 #endif
 
 #include <cmath>
