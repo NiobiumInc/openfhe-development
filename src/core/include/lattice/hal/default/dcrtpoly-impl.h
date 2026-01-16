@@ -61,6 +61,7 @@ extern "C" {
     void openfhe_cprobe_track_single_poly_mul(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
     void openfhe_cprobe_track_single_poly_sub(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
     void openfhe_cprobe_track_single_poly_muli(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_addi(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
 }
 #endif
 #endif
@@ -2228,10 +2229,11 @@ void DCRTPolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
 #ifdef OPENFHE_CPROBES
 #ifdef DATA_TRACKING
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-    // Each m_vectors[i].SwitchFormat() will handle its own tracking
+    openfhe_cprobe_enable_dcrt_context();
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i].SwitchFormat();
     }
+    openfhe_cprobe_disable_dcrt_context();
 #else
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
