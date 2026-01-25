@@ -39,7 +39,9 @@
 #ifdef PARALLEL
     #include <omp.h>
 #endif
-
+#ifdef OPENFHE_CPROBES
+#include "cprobes.h"
+#endif
 namespace lbcrypto {
 
 class ParallelControls {
@@ -55,6 +57,13 @@ public:
             // omp_set_dynamic(0);
             // omp_set_nested(0);
             // omp_set_max_active_levels(1);
+#ifdef OPENFHE_CPROBES
+        openfhe_cporbe_with_openmp(true);        
+#endif
+#else
+#ifdef OPENFHE_CPROBES
+        openfhe_cporbe_with_openmp(false);        
+#endif
 #endif
     }
 
