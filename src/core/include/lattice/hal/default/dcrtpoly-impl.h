@@ -51,21 +51,6 @@
 #include "cprobes.h"
 #endif
 
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
-// Include Niobium bridge function declarations for coefficient tracking
-extern "C" {
-    void openfhe_cprobe_enable_dcrt_context();
-    void openfhe_cprobe_disable_dcrt_context();
-    void openfhe_cprobe_track_single_poly_add(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-    void openfhe_cprobe_track_single_poly_mul(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-    void openfhe_cprobe_track_single_poly_sub(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-    void openfhe_cprobe_track_single_poly_muli(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
-    void openfhe_cprobe_track_single_poly_addi(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
-}
-#endif
-#endif
-
 #include <algorithm>
 #include <ostream>
 #include <memory>
@@ -406,8 +391,7 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const DCRTPolyImpl& rhs) cons
     uint32_t size(m_vectors.size());
     
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     std::cerr << "[DEBUG] DCRTPoly Minus() - DATA_TRACKING path taken" << std::endl;
     std::cerr << "[DEBUG] DCRTPoly Minus() - OPENFHE_CPROBES enabled, calling context functions" << std::endl;
     openfhe_cprobe_enable_dcrt_context();
@@ -418,18 +402,6 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const DCRTPolyImpl& rhs) cons
             m_vectors[i].GetModulus().ConvertToInt());
     }
     openfhe_cprobe_disable_dcrt_context();
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        tmp.m_vectors[i] = m_vectors[i].Minus(rhs.m_vectors[i]);
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        tmp.m_vectors[i] = m_vectors[i].Minus(rhs.m_vectors[i]);
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -449,25 +421,10 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator+=(const DCRTPolyImpl& rhs
     
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
     // Each m_vectors[i] += will handle its own tracking
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] += rhs.m_vectors[i];
     }
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] += rhs.m_vectors[i];
-    }
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] += rhs.m_vectors[i];
-    }
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -507,8 +464,7 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const DCRTPolyImpl& rhs
     uint32_t size(m_vectors.size());
     
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     std::cerr << "[DEBUG] DCRTPoly operator-=() - DATA_TRACKING path taken" << std::endl;
     std::cerr << "[DEBUG] DCRTPoly operator-=() - OPENFHE_CPROBES enabled, calling context functions" << std::endl;
     openfhe_cprobe_enable_dcrt_context();
@@ -519,18 +475,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const DCRTPolyImpl& rhs
             m_vectors[i].GetModulus().ConvertToInt());
     }
     openfhe_cprobe_disable_dcrt_context();
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] -= rhs.m_vectors[i];
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] -= rhs.m_vectors[i];
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -546,8 +490,7 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const Integer& rhs) {
     uint32_t size(m_vectors.size());
     
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     openfhe_cprobe_enable_dcrt_context();
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] -= val;
@@ -556,18 +499,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const Integer& rhs) {
             m_vectors[i].GetModulus().ConvertToInt());
     }
     openfhe_cprobe_disable_dcrt_context();
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] -= val;
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] -= val;
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -582,8 +513,7 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const NativeInteger& rh
     uint32_t size(m_vectors.size());
     
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     openfhe_cprobe_enable_dcrt_context();
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] -= rhs;
@@ -592,18 +522,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const NativeInteger& rh
             m_vectors[i].GetModulus().ConvertToInt());
     }
     openfhe_cprobe_disable_dcrt_context();
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] -= rhs;
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] -= rhs;
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -846,8 +764,7 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const Integer& rhs) {
     NativeInteger val{rhs};
     uint32_t size(m_vectors.size());
 
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     // Process sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] *= val;
@@ -855,18 +772,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const Integer& rhs) {
         openfhe_cprobe_track_single_poly_muli(&m_vectors[i], &m_vectors[i], val.ConvertToInt(),
                                               m_vectors[i].GetModulus().ConvertToInt());
     }
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] *= val;
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] *= val;
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -881,8 +786,7 @@ template <typename VecType>
 DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const NativeInteger& rhs) {
     uint32_t size(m_vectors.size());
 
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     // Process sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] *= rhs;
@@ -890,18 +794,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const NativeInteger& rh
         openfhe_cprobe_track_single_poly_muli(&m_vectors[i], &m_vectors[i], rhs.ConvertToInt(),
                                               m_vectors[i].GetModulus().ConvertToInt());
     }
-#else
-    // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] *= rhs;
-#endif
-#else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (uint32_t i = 0; i < size; ++i)
-        m_vectors[i] *= rhs;
-#endif
 #else
     // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -2226,19 +2118,13 @@ void DCRTPolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
 
     const uint32_t size  = m_vectors.size();
     const uint32_t limit = thread_limit < size ? thread_limit : size;
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
     openfhe_cprobe_enable_dcrt_context();
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i].SwitchFormat();
     }
     openfhe_cprobe_disable_dcrt_context();
-#else
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-    for (size_t i = 0; i < size; ++i)
-        m_vectors[i].SwitchFormat();
-#endif
 #else
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)

@@ -53,26 +53,6 @@
 #include <utility>
 #include <vector>
 
-// Forward declarations for DATA_TRACKING functions
-#ifdef OPENFHE_CPROBES
-extern "C" void openfhe_cprobe_enable_dcrt_context();
-extern "C" void openfhe_cprobe_disable_dcrt_context();
-extern "C" void openfhe_cprobe_track_single_poly_add(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-extern "C" void openfhe_cprobe_track_single_poly_sub(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-extern "C" void openfhe_cprobe_track_single_poly_mul(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-#endif
-
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
-// Include Niobium bridge function declarations for coefficient tracking
-extern "C" {
-    void openfhe_cprobe_track_single_poly_add(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-    void openfhe_cprobe_track_single_poly_sub(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-    void openfhe_cprobe_track_single_poly_mul(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
-}
-#endif
-#endif
-
 namespace lbcrypto {
 
 template <typename VecType>
@@ -151,17 +131,10 @@ public:
     DCRTPolyType& operator*=(const DCRTPolyType& rhs) override {
         size_t size{m_vectors.size()};
         // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
         for (size_t i = 0; i < size; ++i) {
             m_vectors[i] *= rhs.m_vectors[i];
         }
-#else
-        // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-        for (size_t i = 0; i < size; ++i)
-            m_vectors[i] *= rhs.m_vectors[i];
-#endif
 #else
         // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -198,17 +171,10 @@ public:
         DCRTPolyType tmp(m_params, m_format);
 
         // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
         for (size_t i = 0; i < size; ++i) {
             tmp.m_vectors[i] = m_vectors[i].PlusNoCheck(rhs.m_vectors[i]);
         }
-#else
-        // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-        for (size_t i = 0; i < size; ++i)
-            tmp.m_vectors[i] = m_vectors[i].PlusNoCheck(rhs.m_vectors[i]);
-#endif
 #else
         // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
@@ -235,17 +201,10 @@ public:
         DCRTPolyType tmp(m_params, m_format);
 
         // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
-#ifdef OPENFHE_CPROBES
-#ifdef DATA_TRACKING
+#if OPENFHE_CPROBES && DATA_TRACKING
         for (size_t i = 0; i < size; ++i) {
             tmp.m_vectors[i] = m_vectors[i].TimesNoCheck(rhs.m_vectors[i]);
         }
-#else
-        // Use parallel processing when DATA_TRACKING is disabled
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
-        for (size_t i = 0; i < size; ++i)
-            tmp.m_vectors[i] = m_vectors[i].TimesNoCheck(rhs.m_vectors[i]);
-#endif
 #else
         // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
