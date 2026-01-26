@@ -57,6 +57,19 @@ void openfhe_cprobe_intt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 
 void openfhe_cprobe_save_dcrt_poly(const void* dcrt_poly_ptr);
 
+#if DATA_TRACKING
+// Include Niobium bridge function declarations for coefficient tracking
+extern "C" {
+    void openfhe_cprobe_enable_dcrt_context();
+    void openfhe_cprobe_disable_dcrt_context();
+    void openfhe_cprobe_track_single_poly_add(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_mul(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_sub(const void* result_ptr, const void* operand1_ptr, const void* operand2_ptr, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_muli(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
+    void openfhe_cprobe_track_single_poly_addi(const void* result_ptr, const void* operand_ptr, uint64_t immediate, uint64_t modulus);
+}
+#endif
+
 #ifdef __cplusplus
 }
 #endif
