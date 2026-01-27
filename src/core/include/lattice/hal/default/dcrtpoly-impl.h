@@ -403,7 +403,6 @@ DCRTPolyImpl<VecType> DCRTPolyImpl<VecType>::Minus(const DCRTPolyImpl& rhs) cons
     }
     openfhe_cprobe_disable_dcrt_context();
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         tmp.m_vectors[i] = m_vectors[i].Minus(rhs.m_vectors[i]);
@@ -426,7 +425,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator+=(const DCRTPolyImpl& rhs
         m_vectors[i] += rhs.m_vectors[i];
     }
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i) {
         m_vectors[i] += rhs.m_vectors[i];
@@ -476,7 +474,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const DCRTPolyImpl& rhs
     }
     openfhe_cprobe_disable_dcrt_context();
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         m_vectors[i] -= rhs.m_vectors[i];
@@ -500,7 +497,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const Integer& rhs) {
     }
     openfhe_cprobe_disable_dcrt_context();
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         m_vectors[i] -= val;
@@ -523,7 +519,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator-=(const NativeInteger& rh
     }
     openfhe_cprobe_disable_dcrt_context();
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         m_vectors[i] -= rhs;
@@ -773,7 +768,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const Integer& rhs) {
                                               m_vectors[i].GetModulus().ConvertToInt());
     }
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         m_vectors[i] *= val;
@@ -795,7 +789,6 @@ DCRTPolyImpl<VecType>& DCRTPolyImpl<VecType>::operator*=(const NativeInteger& rh
                                               m_vectors[i].GetModulus().ConvertToInt());
     }
 #else
-    // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
     for (size_t i = 0; i < size; ++i)
         m_vectors[i] *= rhs;
