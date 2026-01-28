@@ -274,6 +274,11 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& elem
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_muli(tmp.GetId(), GetId(),
         element.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+    // Track coefficient data for single-polynomial muli operations
+    openfhe_cprobe_track_single_poly_muli(&tmp, this, element.ConvertToInt(),
+        m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 
     return tmp;
@@ -292,6 +297,11 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
             (q - elementReduced).ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        // Track coefficient data for single-polynomial muli operations
+        openfhe_cprobe_track_single_poly_muli(&tmp, this, (q - elementReduced).ConvertToInt(),
+            m_params->GetModulus().ConvertToInt());
+#endif
 #endif
     }
     else {
@@ -303,6 +313,11 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
             elementReduced.ConvertToInt(), m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+        // Track coefficient data for single-polynomial muli operations
+        openfhe_cprobe_track_single_poly_muli(&tmp, this, elementReduced.ConvertToInt(),
+            m_params->GetModulus().ConvertToInt());
+#endif
 #endif
     }
 
@@ -355,6 +370,11 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
         m_params->GetModulus().ConvertToInt());
+#ifdef DATA_TRACKING
+    // Track coefficient data for single-polynomial add operations
+    openfhe_cprobe_track_single_poly_add(this, this, &element,
+        m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 
     return *this;
@@ -553,6 +573,10 @@ void PolyImpl<VecType>::SwitchFormat() {
 #ifdef OPENFHE_CPROBES
         CopyValues(openfhe_cprobe_cache());
         openfhe_cprobe_intt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+#ifdef DATA_TRACKING
+        // Track coefficient data for single-polynomial INTT operations
+        openfhe_cprobe_track_single_poly_intt(this, this, m_params->GetModulus().ConvertToInt());
+#endif
 #endif
         return;
     }
@@ -562,6 +586,10 @@ void PolyImpl<VecType>::SwitchFormat() {
 #ifdef OPENFHE_CPROBES
     CopyValues(openfhe_cprobe_cache());
     openfhe_cprobe_ntt(GetId(), GetId(), m_params->GetModulus().ConvertToInt(), ru.ConvertToInt());
+#ifdef DATA_TRACKING
+    // Track coefficient data for single-polynomial NTT operations
+    openfhe_cprobe_track_single_poly_ntt(this, this, m_params->GetModulus().ConvertToInt());
+#endif
 #endif
 }
 

@@ -130,9 +130,17 @@ public:
     DCRTPolyType& operator-=(const NativeInteger& rhs) override;
     DCRTPolyType& operator*=(const DCRTPolyType& rhs) override {
         size_t size{m_vectors.size()};
+        // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+#if OPENFHE_CPROBES && DATA_TRACKING
+        for (size_t i = 0; i < size; ++i) {
+            m_vectors[i] *= rhs.m_vectors[i];
+        }
+#else
+        // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
         for (size_t i = 0; i < size; ++i)
             m_vectors[i] *= rhs.m_vectors[i];
+#endif
         return *this;
     }
     DCRTPolyType& operator*=(const Integer& rhs) override;
@@ -161,9 +169,18 @@ public:
         if (m_vectors[0].GetModulus() != rhs.m_vectors[0].GetModulus())
             OPENFHE_THROW("Modulus missmatch");
         DCRTPolyType tmp(m_params, m_format);
+
+        // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+#if OPENFHE_CPROBES && DATA_TRACKING
+        for (size_t i = 0; i < size; ++i) {
+            tmp.m_vectors[i] = m_vectors[i].PlusNoCheck(rhs.m_vectors[i]);
+        }
+#else
+        // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
         for (size_t i = 0; i < size; ++i)
             tmp.m_vectors[i] = m_vectors[i].PlusNoCheck(rhs.m_vectors[i]);
+#endif
         return tmp;
     }
 
@@ -182,9 +199,18 @@ public:
         if (m_vectors[0].GetModulus() != rhs.m_vectors[0].GetModulus())
             OPENFHE_THROW("Modulus missmatch");
         DCRTPolyType tmp(m_params, m_format);
+
+        // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
+#if OPENFHE_CPROBES && DATA_TRACKING
+        for (size_t i = 0; i < size; ++i) {
+            tmp.m_vectors[i] = m_vectors[i].TimesNoCheck(rhs.m_vectors[i]);
+        }
+#else
+        // Use parallel processing when OPENFHE_CPROBES is disabled
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
         for (size_t i = 0; i < size; ++i)
             tmp.m_vectors[i] = m_vectors[i].TimesNoCheck(rhs.m_vectors[i]);
+#endif
         return tmp;
     }
     DCRTPolyType Times(const Integer& rhs) const override;
