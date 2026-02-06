@@ -60,6 +60,12 @@
 
 namespace lbcrypto {
 
+// Global flag to enable hollow mode (skip expensive math operations)
+// When enabled, polynomial operations skip actual computation but preserve
+// structure (IDs, formats, dimensions) and fire probes for instruction recording.
+// Controlled by Niobium compiler via enable_hollow_mode().
+extern bool g_hollow_mode;
+
 uintptr_t allocate_id();
 
 /**
@@ -273,13 +279,17 @@ public:
         if (m_format != rhs.m_format)
             OPENFHE_THROW("Format missmatch");
         auto tmp(*this);
-        tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+
+        // Hollow mode: skip actual addition, just preserve structure
+        if (!g_hollow_mode) {
+            tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #ifdef DATA_TRACKING
-        openfhe_cprobe_track_single_poly_add(&tmp, this, &rhs, 
+        openfhe_cprobe_track_single_poly_add(&tmp, this, &rhs,
             m_params->GetModulus().ConvertToInt());
 #endif
 #endif
@@ -288,13 +298,17 @@ public:
     }
     PolyImpl PlusNoCheck(const PolyImpl& rhs) const {
         auto tmp(*this);
-        tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+
+        // Hollow mode: skip actual addition, just preserve structure
+        if (!g_hollow_mode) {
+            tmp.m_values->ModAddNoCheckEq(*rhs.m_values);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_add(tmp.GetId(), GetId(), rhs.GetId(),
             m_params->GetModulus().ConvertToInt());
 #ifdef DATA_TRACKING
-        openfhe_cprobe_track_single_poly_add(&tmp, this, &rhs, 
+        openfhe_cprobe_track_single_poly_add(&tmp, this, &rhs,
             m_params->GetModulus().ConvertToInt());
 #endif
 #endif
@@ -331,7 +345,11 @@ public:
         if (m_format != Format::EVALUATION || rhs.m_format != Format::EVALUATION)
             OPENFHE_THROW("operator* for PolyImpl supported only in Format::EVALUATION");
         auto tmp(*this);
-        tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+
+        // Hollow mode: skip expensive multiplication, just preserve structure
+        if (!g_hollow_mode) {
+            tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
@@ -347,7 +365,11 @@ public:
     }
     PolyImpl TimesNoCheck(const PolyImpl& rhs) const {
         auto tmp(*this);
-        tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+
+        // Hollow mode: skip expensive multiplication, just preserve structure
+        if (!g_hollow_mode) {
+            tmp.m_values->ModMulNoCheckEq(*rhs.m_values);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_mul(tmp.GetId(), GetId(), rhs.GetId(),
@@ -355,7 +377,7 @@ public:
 #ifdef DATA_TRACKING
         // Only track at Poly level if we're not already in DCRTPoly context
         if (!openfhe_cprobe_is_in_dcrt_context()) {
-            openfhe_cprobe_track_single_poly_mul(&tmp, this, &rhs, 
+            openfhe_cprobe_track_single_poly_mul(&tmp, this, &rhs,
                 m_params->GetModulus().ConvertToInt());
         }
 #endif
@@ -371,7 +393,10 @@ public:
         if (m_format != Format::EVALUATION || rhs.m_format != Format::EVALUATION)
             OPENFHE_THROW("operator* for PolyImpl supported only in Format::EVALUATION");
         if (m_values) {
-            m_values->ModMulNoCheckEq(*rhs.m_values);
+            // Hollow mode: skip expensive multiplication
+            if (!g_hollow_mode) {
+                m_values->ModMulNoCheckEq(*rhs.m_values);
+            }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_mul(GetId(), GetId(), rhs.GetId(),
