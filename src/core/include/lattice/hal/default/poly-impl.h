@@ -327,7 +327,14 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
 template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Minus(const PolyImpl& rhs) const {
     PolyImpl<VecType> tmp(m_params, m_format);
-    tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
+
+    // Hollow mode: skip actual subtraction, just preserve structure
+    if (!g_hollow_mode) {
+        tmp.SetValues((*m_values).ModSub(*rhs.m_values), m_format);
+    } else {
+        // In hollow mode, copy structure but don't compute values
+        tmp.m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
+    }
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_sub(tmp.GetId(), GetId(), rhs.GetId(),
@@ -568,7 +575,10 @@ void PolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
     if (m_format != Format::COEFFICIENT) {
         m_format = Format::COEFFICIENT;
 
-        ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
+        // Hollow mode: skip expensive INTT transform, just toggle format flag
+        if (!g_hollow_mode) {
+            ChineseRemainderTransformFTT<VecType>().InverseTransformFromBitReverseInPlace(ru, co, &(*m_values));
+        }
 
 #ifdef OPENFHE_CPROBES
         CopyValues(openfhe_cprobe_cache());
@@ -581,7 +591,11 @@ void PolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
         return;
     }
     m_format = Format::EVALUATION;
-    ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
+
+    // Hollow mode: skip expensive NTT transform, just toggle format flag
+    if (!g_hollow_mode) {
+        ChineseRemainderTransformFTT<VecType>().ForwardTransformToBitReverseInPlace(ru, co, &(*m_values));
+    }
 
 #ifdef OPENFHE_CPROBES
     CopyValues(openfhe_cprobe_cache());
