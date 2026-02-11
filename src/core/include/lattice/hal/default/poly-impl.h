@@ -255,8 +255,10 @@ PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& eleme
 
 template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
-    tmp.SetValues((*m_values).ModSub(element), m_format);
+    PolyImpl<VecType> tmp(m_params, m_format, g_hollow_mode);
+    if (!g_hollow_mode) {
+        tmp.SetValues((*m_values).ModSub(element), m_format);
+    }
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_subi(tmp.GetId(), GetId(),
@@ -268,8 +270,10 @@ PolyImpl<VecType> PolyImpl<VecType>::Minus(const typename VecType::Integer& elem
 
 template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
-    tmp.SetValues((*m_values).ModMul(element), m_format);
+    PolyImpl<VecType> tmp(m_params, m_format, g_hollow_mode);
+    if (!g_hollow_mode) {
+        tmp.SetValues((*m_values).ModMul(element), m_format);
+    }
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_muli(tmp.GetId(), GetId(),
@@ -286,13 +290,15 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(const typename VecType::Integer& elem
 
 template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
+    PolyImpl<VecType> tmp(m_params, m_format, g_hollow_mode);
     Integer q{m_params->GetModulus()};
     if (element < 0) {
         Integer elementReduced{NativeInteger::Integer(-element)};
         if (elementReduced > q)
             elementReduced.ModEq(q);
-        tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
+        if (!g_hollow_mode) {
+            tmp.SetValues((*m_values).ModMul(q - elementReduced), m_format);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
@@ -308,7 +314,9 @@ PolyImpl<VecType> PolyImpl<VecType>::Times(NativeInteger::SignedNativeInt elemen
         Integer elementReduced{NativeInteger::Integer(element)};
         if (elementReduced > q)
             elementReduced.ModEq(q);
-        tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
+        if (!g_hollow_mode) {
+            tmp.SetValues((*m_values).ModMul(elementReduced), m_format);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_muli(tmp.GetId(), GetId(),
@@ -458,22 +466,19 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k) const {
     uint32_t mask{(uint32_t(1) << logn) - 1};
     auto q{m_params->GetModulus()};
 
-    if (bf) {
-        for (uint32_t j{0}, jk{k}; j < n; ++j, jk += (2 * k)) {
-            auto&& jrev{lbcrypto::ReverseBits(j, logn)};
-            auto&& idxrev{lbcrypto::ReverseBits((jk >> 1) & mask, logn)};
-            (*result.m_values)[jrev] = (*m_values)[idxrev];
+    if (!g_hollow_mode) {
+        if (bf) {
+            for (uint32_t j{0}, jk{k}; j < n; ++j, jk += (2 * k)) {
+                auto&& jrev{lbcrypto::ReverseBits(j, logn)};
+                auto&& idxrev{lbcrypto::ReverseBits((jk >> 1) & mask, logn)};
+                (*result.m_values)[jrev] = (*m_values)[idxrev];
+            }
         }
-
-#ifdef OPENFHE_CPROBES
-    openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
-#endif
-
-        return result;
+        else {
+            for (uint32_t j{0}, jk{0}; j < n; ++j, jk += k)
+                (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
+        }
     }
-
-    for (uint32_t j{0}, jk{0}; j < n; ++j, jk += k)
-        (*result.m_values)[jk & mask] = ((jk >> logn) & 0x1) ? q - (*m_values)[j] : (*m_values)[j];
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_automorphism(result.GetId(), GetId(), q.ConvertToInt(), mask, logn, k);
@@ -490,9 +495,12 @@ PolyImpl<VecType> PolyImpl<VecType>::AutomorphismTransform(uint32_t k, const std
         OPENFHE_THROW("Automorphism index not odd\n");
 
     PolyImpl<VecType> tmp(m_params, m_format, true);
-    uint32_t n = m_params->GetRingDimension();
-    for (uint32_t j = 0; j < n; ++j)
-        (*tmp.m_values)[j] = (*m_values)[precomp[j]];
+
+    if (!g_hollow_mode) {
+        uint32_t n = m_params->GetRingDimension();
+        for (uint32_t j = 0; j < n; ++j)
+            (*tmp.m_values)[j] = (*m_values)[precomp[j]];
+    }
 
 #ifdef OPENFHE_CPROBES
     uint32_t m{m_params->GetCyclotomicOrder()};
@@ -536,7 +544,11 @@ void PolyImpl<VecType>::SwitchModulus(const Integer& modulus, const Integer& roo
         m_format);
 #endif
     if (m_values != nullptr) {
-        m_values->SwitchModulus(modulus);
+        if (g_hollow_mode) {
+            m_values->SetModulus(modulus);
+        } else {
+            m_values->SwitchModulus(modulus);
+        }
         auto c{m_params->GetCyclotomicOrder()};
         m_params = std::make_shared<PolyImpl::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     }
@@ -552,7 +564,11 @@ void PolyImpl<VecType>::LazySwitchModulus(const Integer& modulus, const Integer&
             m_params->GetRootOfUnity().ConvertToInt(), rootOfUnity.ConvertToInt(),
             m_format);
 #endif
-        m_values->LazySwitchModulus(modulus);
+        if (g_hollow_mode) {
+            m_values->SetModulus(modulus);
+        } else {
+            m_values->LazySwitchModulus(modulus);
+        }
         auto c{m_params->GetCyclotomicOrder()};
         m_params = std::make_shared<PolyImpl::Params>(c, modulus, rootOfUnity, modulusArb, rootOfUnityArb);
     }

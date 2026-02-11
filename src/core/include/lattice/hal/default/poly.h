@@ -421,7 +421,9 @@ public:
 
     PolyImpl Times(const Integer& element) const override;
     PolyImpl& operator*=(const Integer& element) override {
-        m_values->ModMulEq(element);
+        if (!g_hollow_mode) {
+            m_values->ModMulEq(element);
+        }
 
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_muli(GetId(), GetId(),
@@ -469,7 +471,9 @@ public:
                            const Integer& rootOfUnityArb) override;
 
     PolyImpl& MultAccEqNoCheck(const PolyImpl& V, const Integer& I) override {
-        m_values->MultAccEqNoCheck(*V.m_values, I);
+        if (!g_hollow_mode) {
+            m_values->MultAccEqNoCheck(*V.m_values, I);
+        }
         return *this;
     }
 
