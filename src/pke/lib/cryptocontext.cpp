@@ -69,6 +69,7 @@ void CryptoContextImpl<Element>::SetKSTechniqueInScheme() {
 /////////////////////////////////////////
 template <typename Element>
 void CryptoContextImpl<Element>::EvalMultKeyGen(const PrivateKey<Element> key) {
+    HookGuard _g(hook_.get(), "EvalMultKeyGen");
     ValidateKey(key);
     if (CryptoContextImpl<Element>::s_evalMultKeyMap.find(key->GetKeyTag()) ==
         CryptoContextImpl<Element>::s_evalMultKeyMap.end()) {
@@ -79,6 +80,7 @@ void CryptoContextImpl<Element>::EvalMultKeyGen(const PrivateKey<Element> key) {
 
 template <typename Element>
 void CryptoContextImpl<Element>::EvalMultKeysGen(const PrivateKey<Element> key) {
+    HookGuard _g(hook_.get(), "EvalMultKeysGen");
     ValidateKey(key);
     if (CryptoContextImpl<Element>::s_evalMultKeyMap.find(key->GetKeyTag()) ==
         CryptoContextImpl<Element>::s_evalMultKeyMap.end()) {
@@ -130,6 +132,7 @@ void CryptoContextImpl<Element>::InsertEvalMultKey(const std::vector<EvalKey<Ele
 template <typename Element>
 void CryptoContextImpl<Element>::EvalSumKeyGen(const PrivateKey<Element> privateKey,
                                                const PublicKey<Element> publicKey) {
+    HookGuard _g(hook_.get(), "EvalSumKeyGen");
     ValidateKey(privateKey);
     if (publicKey != nullptr && privateKey->GetKeyTag() != publicKey->GetKeyTag()) {
         OPENFHE_THROW("Public key passed to EvalSumKeyGen does not match private key");
@@ -263,6 +266,7 @@ template <typename Element>
 void CryptoContextImpl<Element>::EvalAtIndexKeyGen(const PrivateKey<Element> privateKey,
                                                    const std::vector<int32_t>& indexList,
                                                    const PublicKey<Element> publicKey) {
+    HookGuard _g(hook_.get(), "EvalAtIndexKeyGen");
     ValidateKey(privateKey);
     if (publicKey != nullptr && privateKey->GetKeyTag() != publicKey->GetKeyTag()) {
         OPENFHE_THROW("Public key passed to EvalAtIndexKeyGen does not match private key");
@@ -368,6 +372,7 @@ void CryptoContextImpl<Element>::InsertEvalAutomorphismKey(
 template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalSum(ConstCiphertext<Element>& ciphertext,
                                                         uint32_t batchSize) const {
+    HookGuard _g(hook_.get(), "EvalSum");
     ValidateCiphertext(ciphertext);
     auto&& evalSumKeys = CryptoContextImpl<Element>::GetEvalAutomorphismKeyMap(ciphertext->GetKeyTag());
     return GetScheme()->EvalSum(ciphertext, batchSize, evalSumKeys);
@@ -378,6 +383,7 @@ Ciphertext<Element> CryptoContextImpl<Element>::EvalSumRows(ConstCiphertext<Elem
                                                             uint32_t numRows,
                                                             const std::map<uint32_t, EvalKey<Element>>& evalSumKeys,
                                                             uint32_t subringDim) const {
+    HookGuard _g(hook_.get(), "EvalSumRows");
     ValidateCiphertext(ciphertext);
     return GetScheme()->EvalSumRows(ciphertext, numRows, evalSumKeys, subringDim);
 }
@@ -386,6 +392,7 @@ template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalSumCols(
     ConstCiphertext<Element>& ciphertext, uint32_t numCols,
     const std::map<uint32_t, EvalKey<Element>>& evalSumKeysRight) const {
+    HookGuard _g(hook_.get(), "EvalSumCols");
     ValidateCiphertext(ciphertext);
 
     auto&& evalSumKeys = CryptoContextImpl<Element>::GetEvalAutomorphismKeyMap(ciphertext->GetKeyTag());
@@ -395,6 +402,7 @@ Ciphertext<Element> CryptoContextImpl<Element>::EvalSumCols(
 template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalAtIndex(ConstCiphertext<Element>& ciphertext,
                                                             int32_t index) const {
+    HookGuard _g(hook_.get(), "EvalAtIndex");
     ValidateCiphertext(ciphertext);
 
     // If the index is zero, no rotation is needed, copy the ciphertext and return
@@ -410,6 +418,7 @@ Ciphertext<Element> CryptoContextImpl<Element>::EvalAtIndex(ConstCiphertext<Elem
 template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalMerge(
     const std::vector<Ciphertext<Element>>& ciphertextVector) const {
+    HookGuard _g(hook_.get(), "EvalMerge");
     ValidateCiphertext(ciphertextVector[0]);
 
     auto evalAutomorphismKeys = CryptoContextImpl<Element>::GetEvalAutomorphismKeyMap(ciphertextVector[0]->GetKeyTag());
@@ -420,6 +429,7 @@ template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalInnerProduct(ConstCiphertext<Element>& ct1,
                                                                  ConstCiphertext<Element>& ct2,
                                                                  uint32_t batchSize) const {
+    HookGuard _g(hook_.get(), "EvalInnerProduct");
     ValidateCiphertext(ct1);
     if (ct2 == nullptr || ct1->GetKeyTag() != ct2->GetKeyTag())
         OPENFHE_THROW("Information was not generated with this crypto context");
@@ -432,6 +442,7 @@ Ciphertext<Element> CryptoContextImpl<Element>::EvalInnerProduct(ConstCiphertext
 template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalInnerProduct(ConstCiphertext<Element>& ct1,
                                                                  ConstPlaintext ct2, uint32_t batchSize) const {
+    HookGuard _g(hook_.get(), "EvalInnerProduct");
     ValidateCiphertext(ct1);
     if (ct2 == nullptr)
         OPENFHE_THROW("Information was not generated with this crypto context");
@@ -454,6 +465,7 @@ Plaintext CryptoContextImpl<Element>::GetPlaintextForDecrypt(PlaintextEncodings 
 template <typename Element>
 DecryptResult CryptoContextImpl<Element>::Decrypt(ConstCiphertext<Element>& ciphertext,
                                                   const PrivateKey<Element> privateKey, Plaintext* plaintext) {
+    HookGuard _g(hook_.get(), "Decrypt");
     if (ciphertext == nullptr)
         OPENFHE_THROW("ciphertext is empty");
     if (plaintext == nullptr)
@@ -510,6 +522,7 @@ template <typename Element>
 Ciphertext<Element> CryptoContextImpl<Element>::EvalChebyshevFunction(std::function<double(double)> func,
                                                                       ConstCiphertext<Element>& ciphertext,
                                                                       double a, double b, uint32_t degree) const {
+    HookGuard _g(hook_.get(), "EvalChebyshevFunction");
     std::vector<double> coefficients = EvalChebyshevCoefficients(func, a, b, degree);
     return EvalChebyshevSeries(ciphertext, coefficients, a, b);
 }
@@ -560,6 +573,7 @@ Plaintext CryptoContextImpl<DCRTPoly>::GetPlaintextForDecrypt(PlaintextEncodings
 template <>
 DecryptResult CryptoContextImpl<DCRTPoly>::Decrypt(ConstCiphertext<DCRTPoly>& ciphertext,
                                                    const PrivateKey<DCRTPoly> privateKey, Plaintext* plaintext) {
+    HookGuard _g(hook_.get(), "Decrypt");
     if (ciphertext == nullptr)
         OPENFHE_THROW("ciphertext is empty");
     if (plaintext == nullptr)

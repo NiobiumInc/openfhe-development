@@ -58,6 +58,7 @@
 #include "utils/type_name.h"
 
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <map>
 #include <memory>
@@ -67,11 +68,113 @@
 #include <utility>
 #include <vector>
 
-#ifdef DEBUG_KEY
-    #include <iostream>
-#endif
+#include <cstdint>
+#include <iomanip>
+#include <iostream>
 
 namespace lbcrypto {
+
+struct OpHook {
+    virtual ~OpHook() = default;
+    virtual void pre(const char* name) {}
+    virtual void post(const char* name, double elapsed_us) {}
+};
+
+class HookGuard {
+    OpHook* hook_;
+    const char* name_;
+    std::chrono::steady_clock::time_point start_;
+public:
+    HookGuard(OpHook* hook, const char* name)
+        : hook_(hook), name_(name),
+          start_(hook ? std::chrono::steady_clock::now()
+                      : std::chrono::steady_clock::time_point{}) {
+        if (hook_) hook_->pre(name_);
+    }
+    ~HookGuard() {
+        if (hook_) {
+            double us = std::chrono::duration<double, std::micro>(
+                std::chrono::steady_clock::now() - start_).count();
+            hook_->post(name_, us);
+        }
+    }
+    HookGuard(const HookGuard&) = delete;
+    HookGuard& operator=(const HookGuard&) = delete;
+};
+
+struct TimingStat {
+    uint64_t count    = 0;
+    double total_us   = 0;
+    double min_us     = 1e18;
+    double max_us     = 0;
+
+    void record(double us) {
+        count++;
+        total_us += us;
+        if (us < min_us) min_us = us;
+        if (us > max_us) max_us = us;
+    }
+};
+
+class TimingHook : public OpHook {
+    std::map<std::string, TimingStat> stats_;
+    bool logging_ = false;
+
+public:
+    void enable_logging(bool on) { logging_ = on; }
+
+    void pre(const char* name) override {
+        if (logging_)
+            std::cout << "[timing] >> " << name << "\n";
+    }
+
+    void post(const char* name, double us) override {
+        stats_[name].record(us);
+        if (logging_)
+            std::cout << "[timing] << " << name << " (" << us / 1000.0 << " ms)\n";
+    }
+
+    void reset() { stats_.clear(); }
+
+    void print_summary(std::ostream& os = std::cout) const {
+        if (stats_.empty()) {
+            os << "No calls recorded.\n";
+            return;
+        }
+
+        std::vector<std::pair<std::string, TimingStat>> sorted(stats_.begin(), stats_.end());
+        std::sort(sorted.begin(), sorted.end(),
+                  [](const auto& a, const auto& b) { return a.second.total_us > b.second.total_us; });
+
+        double grand_total = 0;
+        for (auto& [k, s] : sorted) grand_total += s.total_us;
+
+        os << "\nPer-method timing summary:\n";
+        os << std::string(90, '-') << "\n";
+        os << std::left  << std::setw(40) << "Method"
+           << std::right << std::setw(8)  << "Count"
+           << std::setw(14) << "Total (ms)"
+           << std::setw(12) << "Avg (ms)"
+           << std::setw(10) << "Min (ms)"
+           << std::setw(10) << "Max (ms)"
+           << "\n";
+        os << std::string(90, '-') << "\n";
+
+        for (auto& [name, s] : sorted) {
+            os << std::left  << std::setw(40) << name
+               << std::right << std::setw(8)  << s.count
+               << std::setw(14) << std::fixed << std::setprecision(3) << s.total_us / 1000.0
+               << std::setw(12) << s.total_us / s.count / 1000.0
+               << std::setw(10) << s.min_us / 1000.0
+               << std::setw(10) << s.max_us / 1000.0
+               << "\n";
+        }
+
+        os << std::string(90, '-') << "\n";
+        os << "Grand total: " << std::fixed << std::setprecision(3)
+           << grand_total / 1000.0 << " ms\n\n";
+    }
+};
 
 /**
  * @class CryptoContextImpl
@@ -271,6 +374,8 @@ protected:
     SCHEME m_schemeId{SCHEME::INVALID_SCHEME};
 
     uint32_t m_keyGenLevel{0};
+
+    mutable std::shared_ptr<OpHook> hook_;
 
     /**
     * @brief TypeCheck makes sure that an operation between two ciphertexts is permitted
@@ -502,6 +607,27 @@ public:
 
     SCHEME getSchemeId() const {
         return this->m_schemeId;
+    }
+
+    void set_hook(std::shared_ptr<OpHook> h) { hook_ = std::move(h); }
+    std::shared_ptr<OpHook> get_hook() const { return hook_; }
+
+    void enable_timing(bool logging = false) {
+        auto h = std::make_shared<TimingHook>();
+        if (logging) h->enable_logging(true);
+        hook_ = h;
+    }
+
+    void disable_timing() { hook_.reset(); }
+
+    void print_timing(std::ostream& os = std::cout) const {
+        if (auto h = std::dynamic_pointer_cast<TimingHook>(hook_))
+            h->print_summary(os);
+    }
+
+    void reset_timing() {
+        if (auto h = std::dynamic_pointer_cast<TimingHook>(hook_))
+            h->reset();
     }
 
     /**
@@ -951,6 +1077,7 @@ public:
     * @param feature the feature that should be enabled
     */
     void Enable(PKESchemeFeature feature) {
+        HookGuard _g(hook_.get(), "Enable");
         scheme->Enable(feature);
     }
 
@@ -959,6 +1086,7 @@ public:
     * @param featureMask bitwise value of several PKESchemeFeatures
     */
     void Enable(uint32_t featureMask) {
+        HookGuard _g(hook_.get(), "Enable");
         scheme->Enable(featureMask);
     }
 
@@ -1017,6 +1145,7 @@ public:
     * @return CyclotomicOrder
     */
     uint32_t GetCyclotomicOrder() const {
+        HookGuard _g(hook_.get(), "GetCyclotomicOrder");
         return params->GetElementParams()->GetCyclotomicOrder();
     }
 
@@ -1025,6 +1154,7 @@ public:
     * @return RingDimension
     */
     uint32_t GetRingDimension() const {
+        HookGuard _g(hook_.get(), "GetRingDimension");
         return params->GetElementParams()->GetRingDimension();
     }
 
@@ -1152,6 +1282,7 @@ public:
     */
     Plaintext MakePackedPlaintext(const std::vector<int64_t>& value, size_t noiseScaleDeg = 1,
                                   uint32_t level = 0) const {
+        HookGuard _g(hook_.get(), "MakePackedPlaintext");
         if (!value.size())
             OPENFHE_THROW("Cannot encode an empty value vector");
 
@@ -1171,6 +1302,7 @@ public:
     Plaintext MakeCKKSPackedPlaintext(const std::vector<std::complex<double>>& value, size_t noiseScaleDeg = 1,
                                       uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
                                       uint32_t slots = 0) const {
+        HookGuard _g(hook_.get(), "MakeCKKSPackedPlaintext");
         VerifyCKKSScheme(__func__);
         if (!value.size())
             OPENFHE_THROW("Cannot encode an empty value vector");
@@ -1190,6 +1322,7 @@ public:
     */
     Plaintext MakeCKKSPackedPlaintext(const std::vector<double>& value, size_t noiseScaleDeg = 1, uint32_t level = 0,
                                       const std::shared_ptr<ParmType> params = nullptr, uint32_t slots = 0) const {
+        HookGuard _g(hook_.get(), "MakeCKKSPackedPlaintext");
         VerifyCKKSScheme(__func__);
         if (!value.size())
             OPENFHE_THROW("Cannot encode an empty value vector");
@@ -1223,6 +1356,7 @@ public:
     * @return Generated key pair.
     */
     KeyPair<Element> KeyGen() const {
+        HookGuard _g(hook_.get(), "KeyGen");
         return GetScheme()->KeyGen(GetContextForPointer(this), false);
     }
 
@@ -1244,6 +1378,7 @@ public:
     * @return Encrypted ciphertext (or null on failure).
     */
     Ciphertext<Element> Encrypt(const Plaintext& plaintext, const PublicKey<Element> publicKey) const {
+        HookGuard _g(hook_.get(), "Encrypt");
         if (plaintext == nullptr)
             OPENFHE_THROW("Input plaintext is nullptr");
         ValidateKey(publicKey);
@@ -1270,6 +1405,7 @@ public:
     * @return Encrypted ciphertext (or null on failure).
     */
     Ciphertext<Element> Encrypt(const PublicKey<Element> publicKey, Plaintext plaintext) const {
+        HookGuard _g(hook_.get(), "Encrypt");
         return Encrypt(plaintext, publicKey);
     }
 
@@ -1281,6 +1417,7 @@ public:
     * @return Encrypted ciphertext (or null on failure).
     */
     Ciphertext<Element> Encrypt(const Plaintext& plaintext, const PrivateKey<Element> privateKey) const {
+        HookGuard _g(hook_.get(), "Encrypt");
         //    if (plaintext == nullptr)
         //      OPENFHE_THROW( "Input plaintext is nullptr");
         ValidateKey(privateKey);
@@ -1307,6 +1444,7 @@ public:
     * @return Encrypted ciphertext (or null on failure).
     */
     Ciphertext<Element> Encrypt(const PrivateKey<Element> privateKey, Plaintext plaintext) const {
+        HookGuard _g(hook_.get(), "Encrypt");
         return Encrypt(plaintext, privateKey);
     }
 
@@ -1331,6 +1469,7 @@ public:
     */
     inline DecryptResult Decrypt(const PrivateKey<Element> privateKey, ConstCiphertext<Element>& ciphertext,
                                  Plaintext* plaintext) {
+        HookGuard _g(hook_.get(), "Decrypt");
         return Decrypt(ciphertext, privateKey, plaintext);
     }
 
@@ -1360,6 +1499,7 @@ public:
     * @return Ciphertext after key switching.
     */
     Ciphertext<Element> KeySwitch(ConstCiphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
+        HookGuard _g(hook_.get(), "KeySwitch");
         ValidateCiphertext(ciphertext);
         ValidateKey(evalKey);
         return GetScheme()->KeySwitch(ciphertext, evalKey);
@@ -1372,6 +1512,7 @@ public:
     * @param evalKey     Evaluation key for key switching.
     */
     void KeySwitchInPlace(Ciphertext<Element>& ciphertext, const EvalKey<Element> evalKey) const {
+        HookGuard _g(hook_.get(), "KeySwitchInPlace");
         ValidateCiphertext(ciphertext);
         ValidateKey(evalKey);
         GetScheme()->KeySwitchInPlace(ciphertext, evalKey);
@@ -1388,6 +1529,7 @@ public:
     * @return Negated ciphertext.
     */
     Ciphertext<Element> EvalNegate(ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalNegate");
         ValidateCiphertext(ciphertext);
         return GetScheme()->EvalNegate(ciphertext);
     }
@@ -1398,6 +1540,7 @@ public:
     * @param ciphertext  Ciphertext to negate.
     */
     void EvalNegateInPlace(Ciphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalNegateInPlace");
         ValidateCiphertext(ciphertext);
         GetScheme()->EvalNegateInPlace(ciphertext);
     }
@@ -1415,6 +1558,7 @@ public:
     */
     Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext1,
                                 ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         TypeCheck(ciphertext1, ciphertext2);
         return GetScheme()->EvalAdd(ciphertext1, ciphertext2);
     }
@@ -1426,6 +1570,7 @@ public:
     * @param ciphertext2  Second addend.
     */
     void EvalAddInPlace(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalAddInPlace");
         TypeCheck(ciphertext1, ciphertext2);
         GetScheme()->EvalAddInPlace(ciphertext1, ciphertext2);
     }
@@ -1461,6 +1606,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, ConstPlaintext plaintext) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         TypeCheck(ciphertext, plaintext);
         plaintext->SetFormat(EVALUATION);
         return GetScheme()->EvalAdd(ciphertext, plaintext);
@@ -1474,6 +1620,7 @@ public:
     * @return Resulting ciphertext.
     */
     inline Ciphertext<Element> EvalAdd(ConstPlaintext plaintext, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         return EvalAdd(ciphertext, plaintext);
     }
 
@@ -1484,6 +1631,7 @@ public:
     * @param plaintext   Plaintext to add.
     */
     void EvalAddInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext plaintext) const {
+        HookGuard _g(hook_.get(), "EvalAddInPlace");
         TypeCheck(ciphertext, plaintext);
         plaintext->SetFormat(EVALUATION);
         GetScheme()->EvalAddInPlace(ciphertext, plaintext);
@@ -1551,6 +1699,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, double scalar) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         return scalar >= 0. ? GetScheme()->EvalAdd(ciphertext, scalar) : GetScheme()->EvalSub(ciphertext, -scalar);
     }
 
@@ -1562,6 +1711,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAdd(double scalar, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         return EvalAdd(ciphertext, scalar);
     }
 
@@ -1601,6 +1751,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, std::complex<double> scalar) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         return GetScheme()->EvalAdd(ciphertext, scalar);
     }
 
@@ -1612,6 +1763,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAdd(std::complex<double> scalar, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalAdd");
         return EvalAdd(ciphertext, scalar);
     }
 
@@ -1650,6 +1802,7 @@ public:
     */
     Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext1,
                                 ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         TypeCheck(ciphertext1, ciphertext2);
         return GetScheme()->EvalSub(ciphertext1, ciphertext2);
     }
@@ -1661,6 +1814,7 @@ public:
     * @param ciphertext2  Subtrahend.
     */
     void EvalSubInPlace(Ciphertext<Element>& ciphertext1, ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalSubInPlace");
         TypeCheck(ciphertext1, ciphertext2);
         GetScheme()->EvalSubInPlace(ciphertext1, ciphertext2);
     }
@@ -1696,6 +1850,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, ConstPlaintext plaintext) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         TypeCheck(ciphertext, plaintext);
         return GetScheme()->EvalSub(ciphertext, plaintext);
     }
@@ -1708,6 +1863,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalSub(ConstPlaintext plaintext, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         return EvalAdd(EvalNegate(ciphertext), plaintext);
     }
 
@@ -1745,6 +1901,7 @@ public:
     * @return Resulting ciphertext (ciphertext - scalar).
     */
     Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, double scalar) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         return scalar >= 0 ? GetScheme()->EvalSub(ciphertext, scalar) : GetScheme()->EvalAdd(ciphertext, -scalar);
     }
 
@@ -1756,6 +1913,7 @@ public:
     * @return Resulting ciphertext (scalar - ciphertext).
     */
     Ciphertext<Element> EvalSub(double scalar, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         return EvalAdd(EvalNegate(ciphertext), scalar);
     }
 
@@ -1791,6 +1949,7 @@ public:
     * @return Resulting ciphertext (ciphertext - scalar).
     */
     Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, std::complex<double> scalar) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         return GetScheme()->EvalAdd(ciphertext, -scalar);
     }
 
@@ -1802,6 +1961,7 @@ public:
     * @return Resulting ciphertext (scalar - ciphertext).
     */
     Ciphertext<Element> EvalSub(std::complex<double> scalar, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalSub");
         return EvalAdd(EvalNegate(ciphertext), scalar);
     }
 
@@ -1880,6 +2040,7 @@ public:
     */
     Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext1,
                                  ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         TypeCheck(ciphertext1, ciphertext2);
 
         const auto evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext1->GetKeyTag());
@@ -1929,6 +2090,7 @@ public:
     * @return Squared ciphertext.
     */
     Ciphertext<Element> EvalSquare(ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalSquare");
         ValidateCiphertext(ciphertext);
 
         const auto evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
@@ -1978,6 +2140,7 @@ public:
     */
     Ciphertext<Element> EvalMultNoRelin(ConstCiphertext<Element>& ciphertext1,
                                         ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalMultNoRelin");
         TypeCheck(ciphertext1, ciphertext2);
         return GetScheme()->EvalMult(ciphertext1, ciphertext2);
     }
@@ -1989,6 +2152,7 @@ public:
     * @return Relinearized ciphertext.
     */
     Ciphertext<Element> Relinearize(ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "Relinearize");
         // input parameter check
         if (!ciphertext)
             OPENFHE_THROW("Input ciphertext is nullptr");
@@ -2007,6 +2171,7 @@ public:
     * @param ciphertext  Ciphertext to relinearize (modified in place).
     */
     void RelinearizeInPlace(Ciphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "RelinearizeInPlace");
         // input parameter check
         if (!ciphertext)
             OPENFHE_THROW("Input ciphertext is nullptr");
@@ -2027,6 +2192,7 @@ public:
     */
     Ciphertext<Element> EvalMultAndRelinearize(ConstCiphertext<Element>& ciphertext1,
                                                ConstCiphertext<Element>& ciphertext2) const {
+        HookGuard _g(hook_.get(), "EvalMultAndRelinearize");
         if (!ciphertext1 || !ciphertext2)
             OPENFHE_THROW("Input ciphertext is nullptr");
 
@@ -2048,6 +2214,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, ConstPlaintext plaintext) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         TypeCheck(ciphertext, plaintext);
         return GetScheme()->EvalMult(ciphertext, plaintext);
     }
@@ -2060,6 +2227,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalMult(ConstPlaintext plaintext, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         return EvalMult(ciphertext, plaintext);
     }
 
@@ -2121,6 +2289,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, double scalar) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         if (!ciphertext)
             OPENFHE_THROW("Input ciphertext is nullptr");
         return GetScheme()->EvalMult(ciphertext, scalar);
@@ -2134,6 +2303,7 @@ public:
     * @return Resulting ciphertext.
     */
     inline Ciphertext<Element> EvalMult(double scalar, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         return EvalMult(ciphertext, scalar);
     }
 
@@ -2144,6 +2314,7 @@ public:
     * @param scalar      Real number multiplicand.
     */
     void EvalMultInPlace(Ciphertext<Element>& ciphertext, double scalar) const {
+        HookGuard _g(hook_.get(), "EvalMultInPlace");
         if (!ciphertext)
             OPENFHE_THROW("Input ciphertext is nullptr");
         GetScheme()->EvalMultInPlace(ciphertext, scalar);
@@ -2167,6 +2338,7 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, std::complex<double> scalar) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         if (!ciphertext)
             OPENFHE_THROW("Input ciphertext is nullptr");
         return GetScheme()->EvalMult(ciphertext, scalar);
@@ -2180,6 +2352,7 @@ public:
     * @return Resulting ciphertext.
     */
     inline Ciphertext<Element> EvalMult(std::complex<double> scalar, ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalMult");
         return EvalMult(ciphertext, scalar);
     }
 
@@ -2306,6 +2479,7 @@ public:
     * @return Rotated ciphertext.
     */
     Ciphertext<Element> EvalRotate(ConstCiphertext<Element>& ciphertext, int32_t index) const {
+        HookGuard _g(hook_.get(), "EvalRotate");
         ValidateCiphertext(ciphertext);
 
         auto evalKeyMap = CryptoContextImpl<Element>::GetEvalAutomorphismKeyMap(ciphertext->GetKeyTag());
@@ -2335,6 +2509,7 @@ public:
     * @return Pointer to precomputed rotation data.
     */
     std::shared_ptr<std::vector<Element>> EvalFastRotationPrecompute(ConstCiphertext<Element>& ciphertext) const {
+        HookGuard _g(hook_.get(), "EvalFastRotationPrecompute");
         return GetScheme()->EvalFastRotationPrecompute(ciphertext);
     }
 
@@ -2367,6 +2542,7 @@ public:
     */
     Ciphertext<Element> EvalFastRotation(ConstCiphertext<Element>& ciphertext, const uint32_t index,
                                          const uint32_t m, const std::shared_ptr<std::vector<Element>> digits) const {
+        HookGuard _g(hook_.get(), "EvalFastRotation");
         return GetScheme()->EvalFastRotation(ciphertext, index, m, digits);
     }
 
@@ -2443,6 +2619,7 @@ public:
     */
     void EvalRotateKeyGen(const PrivateKey<Element> privateKey, const std::vector<int32_t>& indexList,
                           const PublicKey<Element> publicKey = nullptr) {
+        HookGuard _g(hook_.get(), "EvalRotateKeyGen");
         EvalAtIndexKeyGen(privateKey, indexList, publicKey);
     };
 
@@ -2744,6 +2921,7 @@ public:
     */
     Ciphertext<Element> EvalChebyshevSeries(ConstCiphertext<Element>& ciphertext,
                                             const std::vector<double>& coefficients, double a, double b) const {
+        HookGuard _g(hook_.get(), "EvalChebyshevSeries");
         ValidateCiphertext(ciphertext);
         return GetScheme()->EvalChebyshevSeries(ciphertext, coefficients, a, b);
     }
@@ -3452,6 +3630,7 @@ public:
     */
     void EvalBootstrapSetup(std::vector<uint32_t> levelBudget = {5, 4}, std::vector<uint32_t> dim1 = {0, 0},
                             uint32_t slots = 0, uint32_t correctionFactor = 0, bool precompute = true) {
+        HookGuard _g(hook_.get(), "EvalBootstrapSetup");
         GetScheme()->EvalBootstrapSetup(*this, levelBudget, dim1, slots, correctionFactor, precompute);
     }
     /**
@@ -3461,6 +3640,7 @@ public:
     * @param slots       Number of slots to support permutations on.
     */
     void EvalBootstrapKeyGen(const PrivateKey<Element> privateKey, uint32_t slots) {
+        HookGuard _g(hook_.get(), "EvalBootstrapKeyGen");
         ValidateKey(privateKey);
         auto evalKeys = GetScheme()->EvalBootstrapKeyGen(privateKey, slots);
         CryptoContextImpl<Element>::InsertEvalAutomorphismKey(evalKeys, privateKey->GetKeyTag());
@@ -3472,6 +3652,7 @@ public:
     * @param slots  Number of slots to be bootstrapped.
     */
     void EvalBootstrapPrecompute(uint32_t slots = 0) {
+        HookGuard _g(hook_.get(), "EvalBootstrapPrecompute");
         GetScheme()->EvalBootstrapPrecompute(*this, slots);
     }
 
@@ -3485,6 +3666,7 @@ public:
     */
     Ciphertext<Element> EvalBootstrap(ConstCiphertext<Element>& ciphertext, uint32_t numIterations = 1,
                                       uint32_t precision = 0) const {
+        HookGuard _g(hook_.get(), "EvalBootstrap");
         return GetScheme()->EvalBootstrap(ciphertext, numIterations, precision);
     }
 
