@@ -45,6 +45,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <cstring>
 #include <utility>
 #include <vector>
 
