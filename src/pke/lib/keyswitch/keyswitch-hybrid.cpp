@@ -381,8 +381,17 @@ std::shared_ptr<std::vector<DCRTPoly>> KeySwitchHYBRID::EvalKeySwitchPrecomputeC
         for (uint32_t i = 0, idx = startPartIdx; i < sizePartQl; ++i, ++idx)
             partsCt.SetElementAtIndex(i, c.GetElementAtIndex(idx));
 
+#ifdef OPENFHE_CPROBES
+        // Clone before INTT to preserve EVALUATION-format elements for recording
+        // the correct cprobe data flow graph during instruction capture
+        auto partsCtClone = partsCt.Clone();
+        partsCtClone.SetFormat(Format::COEFFICIENT);
+        auto partsCtCompl = partsCtClone.ApproxSwitchCRTBasis(
+#else
         partsCt.SetFormat(Format::COEFFICIENT);
-        auto partsCtCompl = partsCt.ApproxSwitchCRTBasis(cryptoParams->GetParamsPartQ(part),
+        auto partsCtCompl = partsCt.ApproxSwitchCRTBasis(
+#endif
+                                                         cryptoParams->GetParamsPartQ(part),
                                                          cryptoParams->GetParamsComplPartQ(sizeQl - 1, part),
                                                          cryptoParams->GetPartQlHatInvModq(part, sizePartQl - 1),
                                                          cryptoParams->GetPartQlHatInvModqPrecon(part, sizePartQl - 1),
@@ -396,7 +405,11 @@ std::shared_ptr<std::vector<DCRTPoly>> KeySwitchHYBRID::EvalKeySwitchPrecomputeC
         for (uint32_t i = 0; i < startPartIdx; ++i)
             (*result)[part].SetElementAtIndex(i, std::move(partsCtCompl.GetElementAtIndex(i)));
         for (uint32_t i = startPartIdx; i < endPartIdx; ++i)
+#ifdef OPENFHE_CPROBES
+            (*result)[part].SetElementAtIndex(i, partsCt.GetElementAtIndex(i - startPartIdx));
+#else
             (*result)[part].SetElementAtIndex(i, c.GetElementAtIndex(i));
+#endif
         for (uint32_t i = endPartIdx; i < sizeQlP; ++i)
             (*result)[part].SetElementAtIndex(i, std::move(partsCtCompl.GetElementAtIndex(i - sizePartQl)));
     }

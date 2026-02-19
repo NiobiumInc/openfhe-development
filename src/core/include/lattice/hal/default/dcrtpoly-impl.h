@@ -2110,7 +2110,7 @@ void DCRTPolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
     m_format = (m_format == Format::COEFFICIENT) ? Format::EVALUATION : Format::COEFFICIENT;
 
     const uint32_t size  = m_vectors.size();
-    const uint32_t limit = thread_limit < size ? thread_limit : size;
+    [[maybe_unused]] const uint32_t limit = thread_limit < size ? thread_limit : size; // unused when OPENFHE_CPROBES && DATA_TRACKING is true
 #if OPENFHE_CPROBES && DATA_TRACKING
     // Process operations sequentially when DATA_TRACKING is enabled to ensure proper coefficient capture
     openfhe_cprobe_enable_dcrt_context();

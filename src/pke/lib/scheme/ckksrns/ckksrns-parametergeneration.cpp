@@ -498,10 +498,10 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
     }
 
     if (firstModSize == dcrtBits) {  // this requires dcrtBits < 60
-        moduliQ[0] = NextPrime<NativeInteger>(maxPrime, cyclOrder);
+        moduliQ[0] = NextPrimeHardwareFormat<NativeInteger>(maxPrime, cyclOrder);
     }
     else {
-        moduliQ[0] = LastPrime<NativeInteger>(firstModSize, cyclOrder);
+        moduliQ[0] = LastPrimeHardwareFormat<NativeInteger>(firstModSize, cyclOrder);
 
         // find if the value of moduliQ[0] is already in the vector starting with moduliQ[1] and
         // if there is, then get another prime for moduliQ[0]
@@ -523,8 +523,8 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
         // check if tempMod has a duplicate in the vector (exclude moduliQ[numPrimes] from this operation):
         const auto endPos = moduliQ.end() - 1;
         auto pos          = std::find(moduliQ.begin(), endPos, tempMod);
-        // if there is a duplicate, then we call NextPrime()
-        moduliQ[numPrimes] = (pos != endPos) ? NextPrime<NativeInteger>(maxPrime, cyclOrder) : tempMod;
+        // if there is a duplicate, then we call NextPrimeHardwareFormat()
+        moduliQ[numPrimes] = (pos != endPos) ? NextPrimeHardwareFormat<NativeInteger>(maxPrime, cyclOrder) : tempMod;
 
         rootsQ[numPrimes] = RootOfUnity(cyclOrder, moduliQ[numPrimes]);
     }

@@ -218,6 +218,12 @@ if(WITH_COVTEST)
     set(COVDIR ${BUILDDIR}/coverage/)
 endif()
 
+if(APPLE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
+elseif(UNIX)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--allow-shlib-undefined")
+endif()
+
 if(UNIX AND NOT APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # OpenFHE may use an external shared object provided by user for PRNG and linked with g++ on Linux.
     # In order to ensure that OpenFHE can dynamically load shared objects at runtime, add an additional library:
