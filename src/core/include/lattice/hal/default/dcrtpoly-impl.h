@@ -2119,7 +2119,7 @@ void DCRTPolyImpl<VecType>::SwitchFormat(uint32_t thread_limit) {
     }
     openfhe_cprobe_disable_dcrt_context();
 #else
-#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(size))
+#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(limit))
     for (size_t i = 0; i < size; ++i)
         m_vectors[i].SwitchFormat();
 #endif
