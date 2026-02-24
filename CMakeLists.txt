@@ -185,11 +185,14 @@ if(IGNORE_WARNINGS)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_C_FLAGS_RELEASE "-O0 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O0 -DNDEBUG")
+    # Default upstream behavior but to slow for regression. Renable for local debugging.
+    # set(CMAKE_C_FLAGS_RELEASE "-O0 -DNDEBUG")
+    # set(CMAKE_CXX_FLAGS_RELEASE "-O0 -DNDEBUG")
 
-    set(C_COMPILE_FLAGS "${C_COMPILE_FLAGS} -O0 -g")
-    set(CXX_COMPILE_FLAGS "${CXX_COMPILE_FLAGS} -O0 -g")
+    # set(C_COMPILE_FLAGS "${C_COMPILE_FLAGS} -O0 -g")
+    # set(CXX_COMPILE_FLAGS "${CXX_COMPILE_FLAGS} -O0 -g")
+    set(C_COMPILE_FLAGS "${C_COMPILE_FLAGS} -O3 -g")
+    set(CXX_COMPILE_FLAGS "${CXX_COMPILE_FLAGS} -O3 -g")
 else()
     set(C_COMPILE_FLAGS "${C_COMPILE_FLAGS} -O3")
     set(CXX_COMPILE_FLAGS "${CXX_COMPILE_FLAGS} -O3")
