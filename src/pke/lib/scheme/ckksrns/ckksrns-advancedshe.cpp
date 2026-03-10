@@ -646,10 +646,214 @@ Ciphertext<DCRTPoly> internalEvalChebyshevSeriesLinearWithPrecomp(std::vector<Ci
     return result;
 }
 
+// Optimization for of InnerEvalChebyshevPS be more efficient on nb hardware
+namespace niobium {
+// Helper: accumulate scalar * T[i] into output ciphertext.
+// Creates output on first non-zero term, adds to it on subsequent terms.
+template <typename VectorDataType>
+void AccumBabyStep(CryptoContext<DCRTPoly>& cc, Ciphertext<DCRTPoly>& acc,
+                   const Ciphertext<DCRTPoly>& Ti, const VectorDataType& scalar) {
+    if (IsNotEqualZero(scalar)) {
+        auto tmp = cc->EvalMult(Ti, scalar);
+        if (acc)
+            cc->EvalAddInPlaceNoCheck(acc, tmp);
+        else
+            acc = std::move(tmp);
+    }
+}
+
+template <typename VectorDataType>
+Ciphertext<DCRTPoly> InnerEvalChebyshevPS_NB(ConstCiphertext<DCRTPoly>& x, const std::vector<VectorDataType>& coefficients,
+                                          uint32_t k, uint32_t m, const std::vector<Ciphertext<DCRTPoly>>& T,
+                                          const std::vector<Ciphertext<DCRTPoly>>& T2) {
+    // Compute k*2^{m-1}-k because we use it a lot
+    uint32_t k2m2k = k * (1 << (m - 1)) - k;
+
+    // Divide coefficients by T^{k*2^{m-1}}
+    std::vector<VectorDataType> Tkm(k2m2k + k + 1);
+    Tkm.back() = 1;
+    auto divqr = LongDivisionChebyshev(coefficients, Tkm);
+
+    // Subtract x^{k(2^{m-1} - 1)} from r
+    auto& r2 = divqr->r;
+    if (uint32_t n = Degree(r2); static_cast<int32_t>(k2m2k - n) <= 0) {
+        r2.resize(n + 1);
+        r2[k2m2k] -= 1;
+    }
+    else {
+        r2.resize(k2m2k + 1);
+        r2.back() = -1;
+    }
+
+    auto divcs = LongDivisionChebyshev(r2, divqr->q);
+    auto cc    = x->GetCryptoContext();
+
+    // Prepare s2 early so we can check degrees before entering either path
+    auto& s2 = divcs->r;
+    s2.resize(k2m2k + 1);
+    s2.back() = 1;
+
+    bool q_base = (Degree(divqr->q) <= k);
+    bool s_base = (Degree(s2) <= k);
+
+    Ciphertext<DCRTPoly> cu, qu, su;
+
+    if (q_base && s_base) {
+        // === FUSED BASE-CASE PATH ===
+        // All three outputs (qu, su, cu) use linear combinations of T[0..k-1].
+        // Instead of 3 separate passes over the baby steps (each requiring a full
+        // reload from memory), we do a single pass: load each T[i] once, accumulate
+        // into all three outputs before T[i] is evicted from registers.
+
+        // Handle leading coefficients via T[k-1]
+        // q's leading coeff is always a power of two up to 2^{m-1}
+        qu                       = T[k - 1]->Clone();
+        const uint32_t q_lead    = std::log2(ToReal(divqr->q.back()));
+        for (uint32_t i = 0; i < q_lead; ++i)
+            cc->EvalAddInPlaceNoCheck(qu, qu);
+
+        // s2's leading coeff is always 1 (monic)
+        su = T[k - 1]->Clone();
+
+        // Save free terms before truncating coefficient vectors for middle terms
+        auto q_free = divqr->q.front();
+        divqr->q.resize(k);
+        uint32_t nq = Degree(divqr->q);
+
+        auto s_free = s2.front();
+        s2.resize(k);
+        uint32_t ns = Degree(s2);
+
+        uint32_t nc = Degree(divcs->q);
+
+        // Single fused pass over baby steps T[0..maxDeg-1].
+        // For each T[i], we do up to 3 scalar multiplies (MULI ~2.85µs each)
+        // and 3 accumulations (ADD ~5.6µs each) while T[i] is still in registers,
+        // instead of loading T[i] 3 separate times (LOAD ~11µs each).
+        uint32_t maxDeg = std::max({nq, ns, (nc > 1) ? nc : 0u});
+        Ciphertext<DCRTPoly> acc_q, acc_s, acc_c;
+
+        for (uint32_t i = 0; i < maxDeg; ++i) {
+            // T[i] is in registers for this iteration — use for all outputs
+            if (i < nq)
+                AccumBabyStep(cc, acc_q, T[i], divqr->q[i + 1]);
+            if (i < ns)
+                AccumBabyStep(cc, acc_s, T[i], s2[i + 1]);
+            if (nc > 1 && i < nc)
+                AccumBabyStep(cc, acc_c, T[i], divcs->q[i + 1]);
+        }
+
+        // Finalize middle-term accumulators
+        if (acc_q) {
+            cc->ModReduceInPlace(acc_q);
+            cc->EvalAddInPlace(qu, acc_q);
+        }
+        if (acc_s) {
+            cc->ModReduceInPlace(acc_s);
+            cc->EvalAddInPlace(su, acc_s);
+        }
+
+        // Free terms
+        cc->EvalAddInPlace(qu, q_free / 2.0);
+        cc->EvalAddInPlace(su, s_free / 2.0);
+        cc->LevelReduceInPlace(su, nullptr);
+
+        // Handle cu
+        if (nc == 1) {
+            if (IsNotEqualOne(divcs->q[1])) {
+                cu = cc->EvalMult(T.front(), divcs->q[1]);
+                cc->ModReduceInPlace(cu);
+            }
+            else {
+                cu = T.front()->Clone();
+            }
+        }
+        else if (acc_c) {
+            cc->ModReduceInPlace(acc_c);
+            cu = std::move(acc_c);
+        }
+
+        if (cu) {
+            cc->EvalAddInPlace(cu, divcs->q.front() / 2.0);
+            uint32_t cd =
+                std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(x->GetCryptoParameters())->GetCompositeDegree();
+            cc->LevelReduceInPlace(cu, nullptr, (T2[m - 1]->GetLevel() - cu->GetLevel()) / cd);
+        }
+    }
+    else {
+        // === ORIGINAL PATH (at least one of qu/su requires recursion) ===
+
+        if (Degree(divqr->q) > k) {
+            qu = InnerEvalChebyshevPS_NB(x, divqr->q, k, m - 1, T, T2);
+        }
+        else {
+            qu                   = T[k - 1]->Clone();
+            const uint32_t limit = std::log2(ToReal(divqr->q.back()));
+            for (uint32_t i = 0; i < limit; ++i)
+                cc->EvalAddInPlaceNoCheck(qu, qu);
+
+            cc->EvalAddInPlace(qu, divqr->q.front() / 2.0);
+
+            divqr->q.resize(k);
+            if (uint32_t n = Degree(divqr->q); n > 0)
+                cc->EvalAddInPlace(qu, EvalPartialLinearWSum(T, divqr->q, n));
+        }
+
+        if (Degree(s2) > k) {
+            su = InnerEvalChebyshevPS_NB(x, s2, k, m - 1, T, T2);
+        }
+        else {
+            su = T[k - 1]->Clone();
+
+            s2.resize(k);
+            if (uint32_t n = Degree(s2); n > 0)
+                cc->EvalAddInPlace(su, EvalPartialLinearWSum(T, s2, n));
+
+            cc->EvalAddInPlace(su, s2.front() / 2.0);
+            cc->LevelReduceInPlace(su, nullptr);
+        }
+
+        if (uint32_t n = Degree(divcs->q); n >= 1) {
+            if (n == 1) {
+                if (IsNotEqualOne(divcs->q[1])) {
+                    cu = cc->EvalMult(T.front(), divcs->q[1]);
+                    cc->ModReduceInPlace(cu);
+                }
+                else {
+                    cu = T.front()->Clone();
+                }
+            }
+            else {
+                cu = EvalPartialLinearWSum(T, divcs->q, n);
+            }
+
+            cc->EvalAddInPlace(cu, divcs->q.front() / 2.0);
+
+            uint32_t cd =
+                std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(x->GetCryptoParameters())->GetCompositeDegree();
+            cc->LevelReduceInPlace(cu, nullptr, (T2[m - 1]->GetLevel() - cu->GetLevel()) / cd);
+        }
+    }
+
+    cu = cu ? cc->EvalAdd(T2[m - 1], cu) : cc->EvalAdd(T2[m - 1], divcs->q.front() / 2.0);
+
+    auto result = cc->EvalMult(cu, qu);
+    cc->ModReduceInPlace(result);
+    cc->EvalAddInPlace(result, su);
+    return result;
+}
+
+}
+
 template <typename VectorDataType>
 Ciphertext<DCRTPoly> InnerEvalChebyshevPS(ConstCiphertext<DCRTPoly>& x, const std::vector<VectorDataType>& coefficients,
                                           uint32_t k, uint32_t m, const std::vector<Ciphertext<DCRTPoly>>& T,
                                           const std::vector<Ciphertext<DCRTPoly>>& T2) {
+#ifdef OPENFHE_CPROBES // use cprobes as indicated by the user to enable niobium optimizations
+    if (OPENFHE_CPROBES) {
+        return niobium::InnerEvalChebyshevPS_NB(x, coefficients, k, m, T, T2);
+    }
+#endif
     // Compute k*2^{m-1}-k because we use it a lot
     uint32_t k2m2k = k * (1 << (m - 1)) - k;
 
