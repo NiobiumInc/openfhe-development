@@ -50,4 +50,74 @@ CEREAL_CLASS_VERSION(lbcrypto::CiphertextImpl<lbcrypto::NativePoly>,
 CEREAL_CLASS_VERSION(lbcrypto::CiphertextImpl<lbcrypto::DCRTPoly>,
                      lbcrypto::CiphertextImpl<lbcrypto::DCRTPoly>::SerializedVersion());
 
+// ---------------------------------------------------------------------------
+// Niobium Auto-Facade: intercept Ciphertext serialization/deserialization
+// ---------------------------------------------------------------------------
+#ifdef NIOBIUM_AUTO_FACADE
+#include "niobium_auto_hooks.h"
+
+namespace lbcrypto {
+namespace Serial {
+
+// DeserializeFromFile — calls on_deserialize_ciphertext after loading
+inline bool DeserializeFromFile(const std::string& filename,
+                                Ciphertext<DCRTPoly>& obj,
+                                const SerType::SERBINARY& sertype) {
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    if (file.is_open()) {
+        Serial::Deserialize(obj, file, sertype);
+        file.close();
+        niobium_auto::on_deserialize_ciphertext(filename, obj);
+        return true;
+    }
+    return false;
+}
+
+inline bool DeserializeFromFile(const std::string& filename,
+                                Ciphertext<DCRTPoly>& obj,
+                                const SerType::SERJSON& sertype) {
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    if (file.is_open()) {
+        Serial::Deserialize(obj, file, sertype);
+        file.close();
+        niobium_auto::on_deserialize_ciphertext(filename, obj);
+        return true;
+    }
+    return false;
+}
+
+// SerializeToFile — probes in recording mode; retrieves HW result in replay mode
+inline bool SerializeToFile(const std::string& filename,
+                             const Ciphertext<DCRTPoly>& obj,
+                             const SerType::SERBINARY& sertype) {
+    if (niobium_auto::on_serialize_ciphertext(filename, obj))
+        return true;  // Replay: result already written to file by the hook
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    if (file.is_open()) {
+        Serial::Serialize(obj, file, sertype);
+        file.close();
+        return true;
+    }
+    return false;
+}
+
+inline bool SerializeToFile(const std::string& filename,
+                             const Ciphertext<DCRTPoly>& obj,
+                             const SerType::SERJSON& sertype) {
+    if (niobium_auto::on_serialize_ciphertext(filename, obj))
+        return true;
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    if (file.is_open()) {
+        Serial::Serialize(obj, file, sertype);
+        file.close();
+        return true;
+    }
+    return false;
+}
+
+}  // namespace Serial
+}  // namespace lbcrypto
+
+#endif  // NIOBIUM_AUTO_FACADE
+
 #endif  // __CIPHERTEXT_SER_H__

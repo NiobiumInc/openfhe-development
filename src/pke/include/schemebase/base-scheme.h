@@ -141,6 +141,17 @@ public:
     }
 #endif
 
+#ifdef NIOBIUM_AUTO_FACADE
+    void SetFHE(std::shared_ptr<FHEBase<Element>> fhe) { m_FHE = std::move(fhe); }
+    // Getters for sub-scheme components, needed by NiobiumAutoScheme to initialise
+    // its own SchemeBase base so non-virtual Verify*/KeySwitchDownFirstElement work.
+    const std::shared_ptr<PKEBase<Element>>&        GetPKE()         const { return m_PKE; }
+    const std::shared_ptr<KeySwitchBase<Element>>&  GetKeySwitch()   const { return m_KeySwitch; }
+    const std::shared_ptr<LeveledSHEBase<Element>>& GetLeveledSHE()  const { return m_LeveledSHE; }
+    const std::shared_ptr<AdvancedSHEBase<Element>>&GetAdvancedSHE() const { return m_AdvancedSHE; }
+    const std::shared_ptr<MultipartyBase<Element>>& GetMultiparty()  const { return m_Multiparty; }
+#endif
+
     bool IsFeatureEnabled(PKESchemeFeature feature) {
         switch (feature) {
             case PKE:
