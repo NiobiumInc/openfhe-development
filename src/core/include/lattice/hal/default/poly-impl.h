@@ -239,11 +239,13 @@ void PolyImpl<VecType>::SetValues(VecType&& values, Format format) {
 
 template <typename VecType>
 PolyImpl<VecType> PolyImpl<VecType>::Plus(const typename VecType::Integer& element) const {
-    PolyImpl<VecType> tmp(m_params, m_format);
-    if (m_format == Format::COEFFICIENT)
-        tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
-    else
-        tmp.SetValues((*m_values).ModAdd(element), m_format);
+    PolyImpl<VecType> tmp(m_params, m_format, g_hollow_mode);
+    if (!g_hollow_mode) {
+        if (m_format == Format::COEFFICIENT)
+            tmp.SetValues((*m_values).ModAddAtIndex(0, element), m_format);
+        else
+            tmp.SetValues((*m_values).ModAdd(element), m_format);
+    }
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_addi(tmp.GetId(), GetId(),
@@ -380,7 +382,11 @@ template <typename VecType>
 PolyImpl<VecType>& PolyImpl<VecType>::operator+=(const PolyImpl& element) {
     if (!m_values)
         m_values = std::make_unique<VecType>(m_params->GetRingDimension(), m_params->GetModulus());
-    m_values->ModAddEq(*element.m_values);
+
+    // Hollow mode: skip actual addition, just preserve structure
+    if (!g_hollow_mode) {
+        m_values->ModAddEq(*element.m_values);
+    }
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_add(GetId(), GetId(), element.GetId(),
@@ -414,8 +420,12 @@ void PolyImpl<VecType>::AddILElementOne() {
     static const Integer ONE(1);
     usint vlen{m_params->GetRingDimension()};
     const auto& m{m_params->GetModulus()};
-    for (usint i = 0; i < vlen; ++i)
-      (*m_values)[i].ModAddFastEq(ONE, m);
+
+    // Hollow mode: skip actual addition, just preserve structure
+    if (!g_hollow_mode) {
+        for (usint i = 0; i < vlen; ++i)
+          (*m_values)[i].ModAddFastEq(ONE, m);
+    }
 
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_annotate("AddILElementOne");
