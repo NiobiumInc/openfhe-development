@@ -31,6 +31,7 @@
 
 #include "encoding/ckkspackedencoding.h"
 
+#include "lattice/hal/default/poly.h"
 #include "lattice/lat-hal.h"
 
 #include "math/hal/basicint.h"

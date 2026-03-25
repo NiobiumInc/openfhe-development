@@ -53,7 +53,7 @@ CEREAL_CLASS_VERSION(lbcrypto::CiphertextImpl<lbcrypto::DCRTPoly>,
 // ---------------------------------------------------------------------------
 // Niobium Auto-Facade: intercept Ciphertext serialization/deserialization
 // ---------------------------------------------------------------------------
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
 #include "niobium_auto_hooks.h"
 
 namespace lbcrypto {
@@ -90,8 +90,9 @@ inline bool DeserializeFromFile(const std::string& filename,
 inline bool SerializeToFile(const std::string& filename,
                              const Ciphertext<DCRTPoly>& obj,
                              const SerType::SERBINARY& sertype) {
-    if (niobium_auto::on_serialize_ciphertext(filename, obj))
+    if (niobium_auto::on_serialize_ciphertext(filename, obj)){
         return true;  // Replay: result already written to file by the hook
+    }
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (file.is_open()) {
         Serial::Serialize(obj, file, sertype);
@@ -104,8 +105,9 @@ inline bool SerializeToFile(const std::string& filename,
 inline bool SerializeToFile(const std::string& filename,
                              const Ciphertext<DCRTPoly>& obj,
                              const SerType::SERJSON& sertype) {
-    if (niobium_auto::on_serialize_ciphertext(filename, obj))
+    if (niobium_auto::on_serialize_ciphertext(filename, obj)){
         return true;
+    }
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (file.is_open()) {
         Serial::Serialize(obj, file, sertype);
@@ -118,6 +120,6 @@ inline bool SerializeToFile(const std::string& filename,
 }  // namespace Serial
 }  // namespace lbcrypto
 
-#endif  // NIOBIUM_AUTO_FACADE
+#endif  // OPENFHE_CPROBES
 
 #endif  // __CIPHERTEXT_SER_H__

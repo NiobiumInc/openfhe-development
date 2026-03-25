@@ -141,7 +141,7 @@ public:
     }
 #endif
 
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
     void SetFHE(std::shared_ptr<FHEBase<Element>> fhe) { m_FHE = std::move(fhe); }
     // Getters for sub-scheme components, needed by NiobiumAutoScheme to initialise
     // its own SchemeBase base so non-virtual Verify*/KeySwitchDownFirstElement work.

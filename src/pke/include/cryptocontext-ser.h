@@ -223,7 +223,7 @@ template bool CryptoContextImpl<DCRTPoly>::DeserializeEvalAutomorphismKey<SerTyp
 // ---------------------------------------------------------------------------
 // Niobium Auto-Facade: intercept CryptoContext deserialization
 // ---------------------------------------------------------------------------
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
 #include "niobium_auto_hooks.h"
 
 namespace Serial {
@@ -256,7 +256,7 @@ inline bool DeserializeFromFile(const std::string& filename,
 
 }  // namespace Serial
 
-#endif  // NIOBIUM_AUTO_FACADE
+#endif  // OPENFHE_CPROBES
 
 }  // namespace lbcrypto
 

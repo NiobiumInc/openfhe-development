@@ -66,7 +66,7 @@
     #include <iostream>
 #endif
 
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
     #include "niobium_auto_hooks.h"
     #include "cprobes.h"
 #endif
@@ -979,7 +979,7 @@ public:
         return m_scheme;
     }
 
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
     void SetScheme(std::shared_ptr<SchemeBase<Element>> scheme) {
         m_scheme = std::move(scheme);
     }
@@ -1167,7 +1167,7 @@ public:
     */
     Plaintext MakePackedPlaintext(const std::vector<int64_t>& value, size_t noiseScaleDeg = 1,
                                   uint32_t level = 0) const {
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         if (g_replay_mode) return nullptr;
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
@@ -1175,7 +1175,7 @@ public:
             OPENFHE_THROW("Cannot encode an empty value vector");
 
         auto pt = MakePlaintext(PACKED_ENCODING, value, noiseScaleDeg, level);
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
 #endif
         return pt;
@@ -1194,7 +1194,7 @@ public:
     Plaintext MakeCKKSPackedPlaintext(const std::vector<std::complex<double>>& value, size_t noiseScaleDeg = 1,
                                       uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
                                       uint32_t slots = 0) const {
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         if (g_replay_mode) return nullptr;
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
@@ -1203,7 +1203,7 @@ public:
             OPENFHE_THROW("Cannot encode an empty value vector");
 
         auto pt = MakeCKKSPackedPlaintextInternal(value, noiseScaleDeg, level, params, slots);
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
 #endif
         return pt;
@@ -1221,7 +1221,7 @@ public:
     */
     Plaintext MakeCKKSPackedPlaintext(const std::vector<double>& value, size_t noiseScaleDeg = 1, uint32_t level = 0,
                                       const std::shared_ptr<ParmType> params = nullptr, uint32_t slots = 0) const {
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         if (g_replay_mode) return nullptr;
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
@@ -1234,7 +1234,7 @@ public:
                        [](double da) { return std::complex<double>(da); });
 
         auto pt = MakeCKKSPackedPlaintextInternal(complexValue, noiseScaleDeg, level, params, slots);
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
 #endif
         return pt;
@@ -1370,25 +1370,7 @@ public:
     */
     inline DecryptResult Decrypt(const PrivateKey<Element>& privateKey, ConstCiphertext<Element>& ciphertext,
                                  Plaintext* plaintext) {
-#ifdef NIOBIUM_AUTO_FACADE
-        {
-            // Recording: probes the ciphertext as output
-            // Replay: substitutes the dummy ct with the HW-computed result
-            auto ct_mut = std::const_pointer_cast<CiphertextImpl<Element>>(ciphertext);
-            niobium_auto::on_decrypt(ct_mut);
-            if (ct_mut != ciphertext) {
-                // HW result was substituted — decrypt it directly (no recording guards needed)
-                ConstCiphertext<Element> hw = ct_mut;
-                return Decrypt(hw, privateKey, plaintext);
-            }
-        }
-        if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
-#endif
-        auto res = Decrypt(ciphertext, privateKey, plaintext);
-#ifdef NIOBIUM_AUTO_FACADE
-        if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
-#endif
-        return res;
+        return Decrypt(ciphertext, privateKey, plaintext);
     }
 
     //------------------------------------------------------------------------------
@@ -4049,7 +4031,7 @@ public:
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(cereal::make_nvp("cc", m_params));
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
         // Serialize the real scheme, not the NiobiumAutoScheme proxy, so
         // deserialization creates a functional scheme (e.g. SchemeCKKSRNS).
         auto real_scheme = niobium_auto::unwrap_scheme(m_scheme);

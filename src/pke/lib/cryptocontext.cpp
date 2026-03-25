@@ -453,7 +453,32 @@ DecryptResult CryptoContextImpl<Element>::Decrypt(ConstCiphertext<Element>& ciph
     if (plaintext == nullptr)
         OPENFHE_THROW("plaintext is empty");
     ValidateKey(privateKey);
-
+    std::cout << "This decryption!" << std::endl;
+#ifdef OPENFHE_CPROBES
+    {
+        // Recording: probes the ciphertext as output
+        // Replay: substitutes the dummy ct with the HW-computed result
+        auto ct_mut = std::const_pointer_cast<CiphertextImpl<Element>>(ciphertext);
+        niobium_auto::on_decrypt(ct_mut);
+        if (ct_mut != ciphertext) {
+            // HW result was substituted — decrypt it directly (no recording guards needed)
+            ConstCiphertext<Element> hw = ct_mut;
+            return Decrypt(hw, privateKey, plaintext);
+        }
+    }
+    bool is_hollow = g_hollow_mode; // need to capture that state before pausing disables it
+    if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
+    if (is_hollow){
+        // In hollow mode, we skip the actual decryption and return a dummy plaintext
+        std::cout << "Hollow mode: returning dummy plaintext for decryption" << std::endl;
+        *plaintext = GetPlaintextForDecrypt(ciphertext->GetEncodingType(), GetElementParams(),
+                                                GetEncodingParams(), GetCKKSDataType());
+        
+        if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+        return DecryptResult((*plaintext)->GetLength());
+    }
+#endif
+     
     // determine which type of plaintext that you need to decrypt into
     // Plaintext decrypted =
     // CryptoContextImpl<Element>::GetPlaintextForDecrypt(ciphertext->GetEncodingType(),
@@ -493,6 +518,9 @@ DecryptResult CryptoContextImpl<Element>::Decrypt(ConstCiphertext<Element>& ciph
     }
 
     *plaintext = std::move(decrypted);
+#ifdef OPENFHE_CPROBES
+    if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+#endif
     return result;
 }
 
@@ -560,6 +588,31 @@ DecryptResult CryptoContextImpl<DCRTPoly>::Decrypt(ConstCiphertext<DCRTPoly>& ci
         OPENFHE_THROW("plaintext is empty");
     if (privateKey == nullptr || Mismatched(privateKey->GetCryptoContext()))
         OPENFHE_THROW("Information was not generated with this crypto context");
+    std::cout << "That decryption!" << std::endl;
+#ifdef OPENFHE_CPROBES
+    {
+        // Recording: probes the ciphertext as output
+        // Replay: substitutes the dummy ct with the HW-computed result
+        auto ct_mut = std::const_pointer_cast<CiphertextImpl<DCRTPoly>>(ciphertext);
+        niobium_auto::on_decrypt(ct_mut);
+        if (ct_mut != ciphertext) {
+            // HW result was substituted — decrypt it directly (no recording guards needed)
+            ConstCiphertext<DCRTPoly> hw = ct_mut;
+            return Decrypt(hw, privateKey, plaintext);
+        }
+    }
+    bool is_hollow = g_hollow_mode; // need to capture that state before pausing disables it
+    if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
+    if (is_hollow){
+        // In hollow mode, we skip the actual decryption and return a dummy plaintext
+        std::cout << "Hollow mode: returning dummy plaintext for decryption" << std::endl;
+        *plaintext = GetPlaintextForDecrypt(ciphertext->GetEncodingType(), GetElementParams(),
+                                                GetEncodingParams(), GetCKKSDataType());
+        
+        if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+        return DecryptResult((*plaintext)->GetLength());
+    }
+#endif
 
     // determine which type of plaintext that you need to decrypt into
     // Plaintext decrypted =
@@ -599,6 +652,9 @@ DecryptResult CryptoContextImpl<DCRTPoly>::Decrypt(ConstCiphertext<DCRTPoly>& ci
     }
 
     *plaintext = std::move(decrypted);
+#ifdef OPENFHE_CPROBES
+    if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+#endif
     return result;
 }
 

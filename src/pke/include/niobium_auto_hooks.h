@@ -8,11 +8,11 @@
 //
 // Implementations live in src/AutoFacade.cpp in the niobium library.
 //
-// Only active when NIOBIUM_AUTO_FACADE is defined.
+// Only active when OPENFHE_CPROBES is defined.
 
 #pragma once
 
-#ifdef NIOBIUM_AUTO_FACADE
+#ifdef OPENFHE_CPROBES
 
 #include <atomic>
 #include <cstdint>
@@ -46,7 +46,6 @@ using Ciphertext = std::shared_ptr<CiphertextImpl<Element>>;
 // immediately — the real work was already dispatched to hardware by replay().
 // ---------------------------------------------------------------------------
 extern bool g_replay_mode;
-extern bool g_replay_hollow_recording;
 
 // Counter for no-oped FHE operations during replay.
 // Incremented by NiobiumAutoScheme::dummy(); read by tests to confirm
@@ -106,4 +105,4 @@ std::shared_ptr<lbcrypto::SchemeBase<lbcrypto::DCRTPoly>> unwrap_scheme(
 
 }  // namespace niobium_auto
 
-#endif  // NIOBIUM_AUTO_FACADE
+#endif  // OPENFHE_CPROBES
