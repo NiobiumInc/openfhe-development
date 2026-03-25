@@ -220,6 +220,44 @@ template bool CryptoContextImpl<DCRTPoly>::SerializeEvalAutomorphismKey<SerType:
 template bool CryptoContextImpl<DCRTPoly>::DeserializeEvalAutomorphismKey<SerType::SERBINARY>(
     std::istream& ser, const SerType::SERBINARY&);
 
+// ---------------------------------------------------------------------------
+// Niobium Auto-Facade: intercept CryptoContext deserialization
+// ---------------------------------------------------------------------------
+#ifdef OPENFHE_CPROBES
+#include "niobium_auto_hooks.h"
+
+namespace Serial {
+
+inline bool DeserializeFromFile(const std::string& filename,
+                                CryptoContext<DCRTPoly>& obj,
+                                const SerType::SERBINARY& sertype) {
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    if (file.is_open()) {
+        Serial::Deserialize(obj, file, sertype);
+        file.close();
+        niobium_auto::on_deserialize_crypto_context(obj);
+        return true;
+    }
+    return false;
+}
+
+inline bool DeserializeFromFile(const std::string& filename,
+                                CryptoContext<DCRTPoly>& obj,
+                                const SerType::SERJSON& sertype) {
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    if (file.is_open()) {
+        Serial::Deserialize(obj, file, sertype);
+        file.close();
+        niobium_auto::on_deserialize_crypto_context(obj);
+        return true;
+    }
+    return false;
+}
+
+}  // namespace Serial
+
+#endif  // OPENFHE_CPROBES
+
 }  // namespace lbcrypto
 
 #endif  // __CRYPTOCONTEXT_SER_H__

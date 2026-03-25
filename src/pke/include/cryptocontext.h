@@ -66,6 +66,11 @@
     #include <iostream>
 #endif
 
+#ifdef OPENFHE_CPROBES
+    #include "niobium_auto_hooks.h"
+    #include "cprobes.h"
+#endif
+
 namespace lbcrypto {
 
 /**
@@ -974,6 +979,12 @@ public:
         return m_scheme;
     }
 
+#ifdef OPENFHE_CPROBES
+    void SetScheme(std::shared_ptr<SchemeBase<Element>> scheme) {
+        m_scheme = std::move(scheme);
+    }
+#endif
+
     /**
     * @brief Getter for CryptoParams
     * @return CryptoParams
@@ -1156,10 +1167,18 @@ public:
     */
     Plaintext MakePackedPlaintext(const std::vector<int64_t>& value, size_t noiseScaleDeg = 1,
                                   uint32_t level = 0) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return nullptr;
+        if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
+#endif
         if (value.empty())
             OPENFHE_THROW("Cannot encode an empty value vector");
 
-        return MakePlaintext(PACKED_ENCODING, value, noiseScaleDeg, level);
+        auto pt = MakePlaintext(PACKED_ENCODING, value, noiseScaleDeg, level);
+#ifdef OPENFHE_CPROBES
+        if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+#endif
+        return pt;
     }
 
     /**
@@ -1175,11 +1194,19 @@ public:
     Plaintext MakeCKKSPackedPlaintext(const std::vector<std::complex<double>>& value, size_t noiseScaleDeg = 1,
                                       uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
                                       uint32_t slots = 0) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return nullptr;
+        if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
+#endif
         VerifyCKKSScheme(__func__);
         if (value.empty())
             OPENFHE_THROW("Cannot encode an empty value vector");
 
-        return MakeCKKSPackedPlaintextInternal(value, noiseScaleDeg, level, params, slots);
+        auto pt = MakeCKKSPackedPlaintextInternal(value, noiseScaleDeg, level, params, slots);
+#ifdef OPENFHE_CPROBES
+        if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+#endif
+        return pt;
     }
 
     /**
@@ -1194,6 +1221,10 @@ public:
     */
     Plaintext MakeCKKSPackedPlaintext(const std::vector<double>& value, size_t noiseScaleDeg = 1, uint32_t level = 0,
                                       const std::shared_ptr<ParmType> params = nullptr, uint32_t slots = 0) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return nullptr;
+        if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
+#endif
         VerifyCKKSScheme(__func__);
         if (value.empty())
             OPENFHE_THROW("Cannot encode an empty value vector");
@@ -1202,7 +1233,11 @@ public:
         std::transform(value.begin(), value.end(), complexValue.begin(),
                        [](double da) { return std::complex<double>(da); });
 
-        return MakeCKKSPackedPlaintextInternal(complexValue, noiseScaleDeg, level, params, slots);
+        auto pt = MakeCKKSPackedPlaintextInternal(complexValue, noiseScaleDeg, level, params, slots);
+#ifdef OPENFHE_CPROBES
+        if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+#endif
+        return pt;
     }
 
     /**
@@ -3996,7 +4031,14 @@ public:
     template <class Archive>
     void save(Archive& ar, std::uint32_t const version) const {
         ar(cereal::make_nvp("cc", m_params));
+#ifdef OPENFHE_CPROBES
+        // Serialize the real scheme, not the NiobiumAutoScheme proxy, so
+        // deserialization creates a functional scheme (e.g. SchemeCKKSRNS).
+        auto real_scheme = niobium_auto::unwrap_scheme(m_scheme);
+        ar(cereal::make_nvp("kt", real_scheme));
+#else
         ar(cereal::make_nvp("kt", m_scheme));
+#endif
         ar(cereal::make_nvp("si", m_schemeId));
     }
 
