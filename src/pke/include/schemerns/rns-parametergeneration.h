@@ -69,7 +69,12 @@ public:
 
 protected:
     enum DCRT_MODULUS {
-        DEFAULT_EXTRA_MOD_SIZE = 20,
+        // Niobium: raised from 20 to 45. The FPGA hardware produces garbage
+        // output with very small moduli (~20-bit). A 45-bit extra modulus is
+        // well within the FPGA's proven range (50-59 bit moduli all work)
+        // while still preserving most of FLEXIBLEAUTOEXT's precision benefit
+        // over FLEXIBLEAUTO (~5 bits saved on first rescale vs ~30 bits at 20).
+        DEFAULT_EXTRA_MOD_SIZE = 45,
         MIN_SIZE               = 14,
         MAX_SIZE               = 60,
     };
