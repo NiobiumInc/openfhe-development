@@ -55,6 +55,8 @@ void openfhe_cprobe_switchmodulus(uintptr_t, uintptr_t, uint64_t, uint64_t, uint
 void openfhe_cprobe_ntt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 void openfhe_cprobe_intt(uintptr_t, uintptr_t, uint64_t, uint64_t);
 
+void openfhe_cprobe_free(uintptr_t);
+
 void openfhe_cprobe_save_dcrt_poly(const void* dcrt_poly_ptr);
 
 void openfhe_cporbe_with_openmp(bool with_openmp);
