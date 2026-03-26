@@ -129,7 +129,8 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_params = rhs.m_params;
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_copy(m_id, rhs.m_id);
-#endif    
+    openfhe_cprobe_reassign_id(m_id, rhs.m_id);  // Refcount: dst_old loses ref, src gains ref
+#endif
     m_id = rhs.m_id;
     if (!rhs.m_values) {
         m_values = nullptr;

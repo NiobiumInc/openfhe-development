@@ -37,6 +37,7 @@ void openfhe_cprobe_key(uintptr_t, int);
 
 void openfhe_cprobe_copy(uintptr_t, uintptr_t);
 void openfhe_cprobe_move(uintptr_t, uintptr_t);
+void openfhe_cprobe_reassign_id(uintptr_t dst_old, uintptr_t src);
 
 void openfhe_cprobe_add(uintptr_t, uintptr_t, uintptr_t, uint64_t);
 void openfhe_cprobe_sub(uintptr_t, uintptr_t, uintptr_t, uint64_t);
