@@ -67,6 +67,7 @@ namespace lbcrypto {
 extern bool g_hollow_mode;
 
 uintptr_t allocate_id();
+void reset_poly_id_counter(uintptr_t base = 1);
 
 /**
  * @class PolyImpl

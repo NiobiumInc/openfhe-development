@@ -57,12 +57,26 @@
 
 namespace lbcrypto {
 
+namespace detail {
+  inline std::atomic<uintptr_t>& poly_id_counter() {
+    static std::atomic<uintptr_t> value_id{1};
+    return value_id;
+  }
+}
+
 uintptr_t allocate_id() {
-  static std::atomic<uintptr_t> value_id{1};
+  auto& value_id = detail::poly_id_counter();
 #ifdef OPENFHE_CPROBES
   openfhe_cprobe_id(value_id);
 #endif
   return value_id.fetch_add(1, std::memory_order_relaxed);
+}
+
+// Reset the polynomial ID counter to a given base value.
+// Used by functional epochs to keep addresses in a predictable range,
+// mirroring the behavior of separate processes in the map-reduce architecture.
+void reset_poly_id_counter(uintptr_t base) {
+  detail::poly_id_counter().store(base, std::memory_order_relaxed);
 }
 
 template <typename VecType>
