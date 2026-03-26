@@ -115,8 +115,9 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     m_params = rhs.m_params;
 #ifdef OPENFHE_CPROBES
     openfhe_cprobe_copy(m_id, rhs.m_id);
-#endif    
-    m_id = rhs.m_id;
+#endif
+    // m_id is NOT copied: each PolyImpl keeps its birth m_id for its entire
+    // lifetime, giving one-owner/one-free semantics for address recycling.
     if (!rhs.m_values) {
         m_values = nullptr;
         return *this;
