@@ -449,7 +449,10 @@ bool ParameterGenerationBGVRNS::ParamsGenBGVRNSInternal(std::shared_ptr<CryptoPa
     uint32_t auxBits = DCRT_MODULUS::MAX_SIZE;
 
     // Estimate ciphertext modulus Q bound (in case of GHS/HYBRID P*Q)
-    uint32_t extraModSize = (scalTech == FLEXIBLEAUTOEXT) ? DCRT_MODULUS::DEFAULT_EXTRA_MOD_SIZE : 0;
+    uint32_t userExtraModSize = cryptoParamsBGVRNS->GetExtraModSize();
+    uint32_t extraModSize = (scalTech == FLEXIBLEAUTOEXT)
+        ? (userExtraModSize > 0 ? userExtraModSize : DCRT_MODULUS::DEFAULT_EXTRA_MOD_SIZE)
+        : 0;
     uint32_t qBound       = firstModSize + (numPrimes - 1) * dcrtBits + extraModSize;
 
     // estimate the extra modulus Q needed for threshold FHE flooding

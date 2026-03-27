@@ -79,6 +79,7 @@ namespace lbcrypto {
         SET_TO_SCHEME_DEFAULT(SCHEME, compositeDegree);                 \
         SET_TO_SCHEME_DEFAULT(SCHEME, registerWordSize);                \
         SET_TO_SCHEME_DEFAULT(SCHEME, ckksDataType);                    \
+        SET_TO_SCHEME_DEFAULT(SCHEME, extraModSize);                    \
     }
 void Params::SetToDefaults(SCHEME scheme) {
     switch (scheme) {
@@ -208,7 +209,8 @@ std::ostream& operator<<(std::ostream& os, const Params& obj) {
         << "; interactiveBootCompressionLevel: " << obj.interactiveBootCompressionLevel
         << "; compositeDegree: " << obj.compositeDegree
         << "; registerWordSize: " << obj.registerWordSize
-        << "; ckksDataType: " << obj.ckksDataType;
+        << "; ckksDataType: " << obj.ckksDataType
+        << "; extraModSize: " << obj.extraModSize;
 
     return os;
 }

@@ -84,6 +84,7 @@ constexpr CompressionLevel interactiveBootCompressionLevel = SLACK;
 constexpr uint32_t compositeDegree                         = 1;
 constexpr uint32_t registerWordSize                        = NATIVEINT;
 constexpr CKKSDataType ckksDataType                        = REAL;
+constexpr uint32_t extraModSize                            = 0;
 };  // namespace CKKSRNS_SCHEME_DEFAULTS
 
 namespace BFVRNS_SCHEME_DEFAULTS {
@@ -124,6 +125,7 @@ constexpr CompressionLevel interactiveBootCompressionLevel = SLACK;
 constexpr uint32_t compositeDegree                         = 1;
 constexpr uint32_t registerWordSize                        = NATIVEINT;
 constexpr CKKSDataType ckksDataType                        = REAL;
+constexpr uint32_t extraModSize                            = 0;
 };  // namespace BFVRNS_SCHEME_DEFAULTS
 
 namespace BGVRNS_SCHEME_DEFAULTS {
@@ -160,6 +162,7 @@ constexpr CompressionLevel interactiveBootCompressionLevel = SLACK;
 constexpr uint32_t compositeDegree                         = 1;
 constexpr uint32_t registerWordSize                        = NATIVEINT;
 constexpr CKKSDataType ckksDataType                        = REAL;
+constexpr uint32_t extraModSize                            = 0;
 };  // namespace BGVRNS_SCHEME_DEFAULTS
 
 //====================================================================================================================

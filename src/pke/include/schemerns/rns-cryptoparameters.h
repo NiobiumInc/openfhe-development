@@ -70,6 +70,7 @@ protected:
         : CryptoParametersRLWE<DCRTPoly>(rhs),
           m_ksTechnique(rhs.m_ksTechnique),
           m_scalTechnique(rhs.m_scalTechnique),
+          m_extraModSize(rhs.m_extraModSize),
           m_encTechnique(rhs.m_encTechnique),
           m_multTechnique(rhs.m_multTechnique),
           m_MPIntBootCiphertextCompressionLevel(rhs.m_MPIntBootCiphertextCompressionLevel) {}
@@ -159,7 +160,8 @@ protected:
             return false;
 
         return CryptoParametersRLWE<DCRTPoly>::CompareTo(rhs) && m_scalTechnique == el->m_scalTechnique &&
-               m_ksTechnique == el->m_ksTechnique && m_multTechnique == el->m_multTechnique &&
+               m_extraModSize == el->m_extraModSize && m_ksTechnique == el->m_ksTechnique &&
+               m_multTechnique == el->m_multTechnique &&
                m_encTechnique == el->m_encTechnique && m_numPartQ == el->m_numPartQ && m_auxBits == el->m_auxBits &&
                m_extraBits == el->m_extraBits && m_PREMode == el->m_PREMode &&
                m_multipartyMode == el->m_multipartyMode && m_executionMode == el->m_executionMode &&
@@ -233,6 +235,22 @@ public:
    */
     ScalingTechnique GetScalingTechnique() const {
         return m_scalTechnique;
+    }
+
+    /**
+   * Method to set the user-specified extra modulus size for FLEXIBLEAUTOEXT.
+   * 0 means use the library default.
+   */
+    void SetExtraModSize(uint32_t extraModSize) {
+        m_extraModSize = extraModSize;
+    }
+
+    /**
+   * Method to retrieve the user-specified extra modulus size for FLEXIBLEAUTOEXT.
+   * 0 means use the library default.
+   */
+    uint32_t GetExtraModSize() const {
+        return m_extraModSize;
     }
 
     /**
@@ -1397,6 +1415,9 @@ protected:
     KeySwitchTechnique m_ksTechnique;
 
     ScalingTechnique m_scalTechnique;
+
+    // User-specified extra modulus size for FLEXIBLEAUTOEXT (0 = use default).
+    uint32_t m_extraModSize{0};
 
     EncryptionTechnique m_encTechnique;
 

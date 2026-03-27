@@ -108,8 +108,11 @@ bool ParameterGenerationCKKSRNS::ParamsGenCKKSRNSInternal(std::shared_ptr<Crypto
         OPENFHE_THROW(s.str());
     }
 
-    // TODO: Allow the user to specify this?
-    uint32_t extraModSize = (scalTech == FLEXIBLEAUTOEXT) ? DCRT_MODULUS::DEFAULT_EXTRA_MOD_SIZE : 0;
+    // Use user-specified extra modulus size if set, otherwise fall back to library default.
+    uint32_t userExtraModSize = cryptoParamsCKKSRNS->GetExtraModSize();
+    uint32_t extraModSize = (scalTech == FLEXIBLEAUTOEXT)
+        ? (userExtraModSize > 0 ? userExtraModSize : DCRT_MODULUS::DEFAULT_EXTRA_MOD_SIZE)
+        : 0;
 
     //// HE Standards compliance logic/check
     SecurityLevel stdLevel = cryptoParamsCKKSRNS->GetStdLevel();

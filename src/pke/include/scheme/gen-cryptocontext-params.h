@@ -176,6 +176,12 @@ class Params {
     // CKKS data type: real or complex. Noise flooding is only enabled for real values.
     CKKSDataType ckksDataType;
 
+    // Bit size for the extra modulus in FLEXIBLEAUTOEXT scaling (CKKS and BGV).
+    // 0 means use the library default (DEFAULT_EXTRA_MOD_SIZE).
+    // Set to a larger value (e.g., 45) when targeting hardware that requires
+    // minimum modulus bit-widths (e.g., Niobium FPGA).
+    uint32_t extraModSize;
+
     void SetToDefaults(SCHEME scheme);
 
 protected:
@@ -362,6 +368,9 @@ public:
     CKKSDataType GetCKKSDataType() const {
         return ckksDataType;
     }
+    uint32_t GetExtraModSize() const {
+        return extraModSize;
+    }
 
     // setters
     // They all must be virtual, so any of them can be disabled in the derived class
@@ -460,6 +469,9 @@ public:
     }
     virtual void SetCKKSDataType(CKKSDataType ckksDataType0) {
         ckksDataType = ckksDataType0;
+    }
+    virtual void SetExtraModSize(uint32_t extraModSize0) {
+        extraModSize = extraModSize0;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Params& obj);
