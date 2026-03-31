@@ -93,32 +93,14 @@ public:
     PolyImpl(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
         : m_format{format}, m_params{params} {
-        if (initializeElementToZero) {
-            if (g_hollow_mode) {
-                // Hollow mode: allocate minimal stub (1 element) instead of full ring_dimension.
-                // Preserves non-null invariant for code that dereferences m_values.
-                m_values = std::make_unique<VecType>(1, m_params->GetModulus());
-#ifdef OPENFHE_CPROBES
-                openfhe_cprobe_zero(GetId(), m_format, m_params->GetModulus().ConvertToInt());
-#endif
-            } else {
-                PolyImpl::SetValuesToZero();
-            }
-        }
+        if (initializeElementToZero)
+            PolyImpl::SetValuesToZero();
     }
     PolyImpl(const std::shared_ptr<ILDCRTParams<Integer>>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
         : m_format(format), m_params(std::make_shared<Params>(params->GetCyclotomicOrder(), params->GetModulus(), 1)) {
-        if (initializeElementToZero) {
-            if (g_hollow_mode) {
-                m_values = std::make_unique<VecType>(1, m_params->GetModulus());
-#ifdef OPENFHE_CPROBES
-                openfhe_cprobe_zero(GetId(), m_format, m_params->GetModulus().ConvertToInt());
-#endif
-            } else {
-                this->SetValuesToZero();
-            }
-        }
+        if (initializeElementToZero)
+            this->SetValuesToZero();
     }
 
     PolyImpl(bool initializeElementToMax, const std::shared_ptr<Params>& params, Format format = Format::EVALUATION)
@@ -163,9 +145,7 @@ public:
     PolyImpl(const PolyType& p) noexcept
         : m_format{p.m_format},
           m_params{p.m_params},
-          m_values{(g_hollow_mode && p.m_params)
-                   ? std::make_unique<VecType>(1, p.m_params->GetModulus())
-                   : (p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr)} {
+          m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {
 #ifdef OPENFHE_CPROBES
             openfhe_cprobe_copy(GetId(), p.GetId());
 #endif

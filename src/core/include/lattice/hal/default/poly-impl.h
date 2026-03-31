@@ -118,11 +118,6 @@ PolyImpl<VecType>& PolyImpl<VecType>::operator=(const PolyImpl& rhs) noexcept {
     openfhe_cprobe_reassign_id(m_id, rhs.m_id);  // Refcount: dst_old loses ref, src gains ref
 #endif
     m_id = rhs.m_id;
-    if (g_hollow_mode) {
-        if (!m_values && m_params)
-            m_values = std::make_unique<VecType>(1, m_params->GetModulus());
-        return *this;
-    }
     if (!rhs.m_values) {
         m_values = nullptr;
         return *this;
