@@ -51,6 +51,7 @@
 #include "cprobes.h"
 #endif
 
+#include <atomic>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -65,6 +66,8 @@ namespace lbcrypto {
 // structure (IDs, formats, dimensions) and fire probes for instruction recording.
 // Controlled by Niobium compiler via enable_hollow_mode().
 extern bool g_hollow_mode;
+extern std::atomic<int64_t> g_poly_live_count;
+extern std::atomic<int64_t> g_poly_values_bytes;
 
 uintptr_t allocate_id();
 
@@ -93,12 +96,14 @@ public:
     PolyImpl(const std::shared_ptr<Params>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
         : m_format{format}, m_params{params} {
+        g_poly_live_count.fetch_add(1, std::memory_order_relaxed);
         if (initializeElementToZero)
             PolyImpl::SetValuesToZero();
     }
     PolyImpl(const std::shared_ptr<ILDCRTParams<Integer>>& params, Format format = Format::EVALUATION,
              bool initializeElementToZero = false)
         : m_format(format), m_params(std::make_shared<Params>(params->GetCyclotomicOrder(), params->GetModulus(), 1)) {
+        g_poly_live_count.fetch_add(1, std::memory_order_relaxed);
         if (initializeElementToZero)
             this->SetValuesToZero();
     }
@@ -146,6 +151,9 @@ public:
         : m_format{p.m_format},
           m_params{p.m_params},
           m_values{p.m_values ? std::make_unique<VecType>(*p.m_values) : nullptr} {
+        if (m_values && m_params)
+            g_poly_values_bytes.fetch_add(m_params->GetRingDimension() * sizeof(uint64_t), std::memory_order_relaxed);
+        g_poly_live_count.fetch_add(1, std::memory_order_relaxed);
 #ifdef OPENFHE_CPROBES
             openfhe_cprobe_copy(GetId(), p.GetId());
 #endif
@@ -153,6 +161,8 @@ public:
 
     PolyImpl(PolyType&& p) noexcept
         : m_format{p.m_format}, m_params{std::move(p.m_params)}, m_values{std::move(p.m_values)} {
+        g_poly_live_count.fetch_add(1, std::memory_order_relaxed);
+        // No bytes change — moved, not copied
 #ifdef OPENFHE_CPROBES
             openfhe_cprobe_copy(GetId(), p.GetId());
 #endif
@@ -193,6 +203,7 @@ public:
     void SetValuesToZero() override {
         usint r{m_params->GetRingDimension()};
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
+        g_poly_values_bytes.fetch_add(r * sizeof(uint64_t), std::memory_order_relaxed);
 #ifdef OPENFHE_CPROBES
         CopyValues(openfhe_cprobe_address(GetId()));
         openfhe_cprobe_zero(GetId(), m_format, m_params->GetModulus().ConvertToInt());
@@ -515,6 +526,9 @@ public:
     }
 
     ~PolyImpl() {
+        g_poly_live_count.fetch_sub(1, std::memory_order_relaxed);
+        if (m_values && m_params)
+            g_poly_values_bytes.fetch_sub(m_values->GetLength() * sizeof(uint64_t), std::memory_order_relaxed);
 #ifdef OPENFHE_CPROBES
         openfhe_cprobe_free(m_id);
 #endif

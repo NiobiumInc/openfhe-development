@@ -33,10 +33,16 @@
   Definition of hollow mode global flag for polynomial operations
  */
 
+#include <atomic>
+
 namespace lbcrypto {
 
 // Global hollow mode flag (default: false = real math)
 // Set to true by Niobium compiler to enable fast recording without math
 bool g_hollow_mode = false;
+
+// Memory tracking for PolyImpl objects
+std::atomic<int64_t> g_poly_live_count{0};
+std::atomic<int64_t> g_poly_values_bytes{0};
 
 }  // namespace lbcrypto
