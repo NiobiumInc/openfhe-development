@@ -201,7 +201,7 @@ public:
     void SetValues(VecType&& values, Format format) override;
 
     void SetValuesToZero() override {
-        usint r{m_params->GetRingDimension()};
+        usint r = g_hollow_mode ? 1 : m_params->GetRingDimension();
         m_values = std::make_unique<VecType>(r, m_params->GetModulus());
         g_poly_values_bytes.fetch_add(r * sizeof(uint64_t), std::memory_order_relaxed);
 #ifdef OPENFHE_CPROBES
