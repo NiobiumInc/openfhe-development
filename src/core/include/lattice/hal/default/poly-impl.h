@@ -67,6 +67,12 @@ namespace detail {
 uintptr_t allocate_id() {
   auto& value_id = detail::poly_id_counter();
 #ifdef OPENFHE_CPROBES
+  // Serialization threads create temporary DCRTPoly copies (e.g. for Montgomery transform).
+  // Advancing the counter from a background thread shifts main-thread poly IDs, causing the
+  // SSA to make incorrect merging decisions.  Return a sentinel without touching the counter.
+  if (openfhe_cprobe_is_serialization_thread()) {
+    return 0;
+  }
   openfhe_cprobe_id(value_id);
 #endif
   return value_id.fetch_add(1, std::memory_order_relaxed);

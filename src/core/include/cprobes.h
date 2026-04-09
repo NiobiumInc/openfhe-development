@@ -38,6 +38,9 @@ void openfhe_cprobe_key(uintptr_t, int);
 void openfhe_cprobe_copy(uintptr_t, uintptr_t);
 void openfhe_cprobe_move(uintptr_t, uintptr_t);
 
+void openfhe_cprobe_set_serialization_thread(bool);
+bool openfhe_cprobe_is_serialization_thread();
+
 void openfhe_cprobe_add(uintptr_t, uintptr_t, uintptr_t, uint64_t);
 void openfhe_cprobe_sub(uintptr_t, uintptr_t, uintptr_t, uint64_t);
 void openfhe_cprobe_mul(uintptr_t, uintptr_t, uintptr_t, uint64_t);
