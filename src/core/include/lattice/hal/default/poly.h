@@ -515,6 +515,12 @@ public:
         return 1;
     }
 
+    ~PolyImpl() {
+#ifdef OPENFHE_CPROBES
+        openfhe_cprobe_free(m_id);
+#endif
+    }
+
 protected:
     Format m_format{Format::EVALUATION};
     std::shared_ptr<Params> m_params{nullptr};
