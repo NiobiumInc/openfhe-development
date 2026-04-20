@@ -453,7 +453,6 @@ DecryptResult CryptoContextImpl<Element>::Decrypt(ConstCiphertext<Element>& ciph
     if (plaintext == nullptr)
         OPENFHE_THROW("plaintext is empty");
     ValidateKey(privateKey);
-    std::cout << "This decryption!" << std::endl;
 #ifdef OPENFHE_CPROBES
     {
         // Recording: probes the ciphertext as output
