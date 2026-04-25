@@ -1,0 +1,2653 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+============================================================
+
+Project: openfhe-development
+Generated: 2026-04-24
+Tool: SCANOSS (snippet detection with License dataset)
+Components: 65
+
+This file lists all third-party software components detected
+in this repository, along with their licenses and copyright
+notices as required by those licenses.
+
+------------------------------------------------------------
+
+WARNING: The following component(s) have no license information.
+These require manual review to determine licensing terms.
+
+  - pkcs11_solid (https://github.com/AndreanIvan/pkcs11_solid)
+
+------------------------------------------------------------
+
+LICENSE SUMMARY
+
+  0BSD: 1 component(s)
+  0BSD AND GPL-2.0-only AND GPL-3.0-only AND LGPL-2.1-only: 1 component(s)
+  AFL-2.1: 1 component(s)
+  AFL-3.0 AND GPL-2.0-only AND AFL-2.1 AND GPL-2.0-or-later AND MIT AND GPL-1.0-or-later: 1 component(s)
+  AGPL-3.0-only [COPYLEFT]: 1 component(s)
+  Apache-2.0: 14 component(s)
+  Apache-2.0 AND Apache-2.0 AND OpenSSL: 1 component(s)
+  Apache-2.0 WITH LLVM-exception: 1 component(s)
+  Apache-2.0 WITH LLVM-exception AND NCSA: 2 component(s)
+  Artistic-1.0-Perl: 1 component(s)
+  Artistic-1.0-Perl OR GPL-1.0-or-later: 1 component(s)
+  Artistic-2.0: 1 component(s)
+  BSD-2-Clause: 8 component(s)
+  BSD-2-Clause AND BSD-3-Clause: 1 component(s)
+  BSD-2-Clause AND LGPL-2.1-only: 1 component(s)
+  BSD-2-Clause-Darwin: 1 component(s)
+  BSD-2-Clause-Patent: 1 component(s)
+  BSD-3-Clause: 33 component(s)
+  BSD-3-Clause AND GPL-2.0-only AND BSD-3-Clause OR GPL-2.0-or-later AND GPL-1.0-or-later: 1 component(s)
+  BSD-3-Clause AND ISC AND ISC AND MIT AND MIT: 1 component(s)
+  BSD-3-Clause-LBNL: 1 component(s)
+  BSD-4-Clause-UC: 1 component(s)
+  BSD-Attribution-HPND-disclaimer: 1 component(s)
+  BSL-1.0: 1 component(s)
+  CC-BY-1.0: 1 component(s)
+  CC-BY-2.0: 1 component(s)
+  CC-BY-2.5: 1 component(s)
+  CC-BY-3.0: 1 component(s)
+  CC-BY-3.0-AT: 1 component(s)
+  CC-BY-3.0-US: 1 component(s)
+  CC-BY-4.0: 1 component(s)
+  CC-BY-NC-1.0: 1 component(s)
+  CC-BY-NC-2.0: 1 component(s)
+  CC-BY-NC-2.5: 1 component(s)
+  CC-BY-NC-3.0: 1 component(s)
+  CC-BY-NC-ND-1.0: 1 component(s)
+  CC-BY-NC-ND-2.5: 1 component(s)
+  CC-BY-NC-ND-3.0: 1 component(s)
+  CC-BY-NC-ND-3.0-IGO: 1 component(s)
+  CC-BY-NC-SA-1.0: 1 component(s)
+  CC-BY-NC-SA-2.0: 1 component(s)
+  CC-BY-NC-SA-2.5: 1 component(s)
+  CC-BY-NC-SA-3.0: 1 component(s)
+  CC-BY-ND-1.0: 1 component(s)
+  CC-BY-ND-2.5: 1 component(s)
+  CC-BY-ND-3.0: 1 component(s)
+  CC-BY-ND-4.0: 1 component(s)
+  CC-BY-SA-1.0: 1 component(s)
+  CC-BY-SA-2.0: 1 component(s)
+  CC-BY-SA-2.0-UK: 1 component(s)
+  CC-BY-SA-2.1-JP: 1 component(s)
+  CC-BY-SA-2.5: 1 component(s)
+  CC-BY-SA-3.0: 1 component(s)
+  CC-BY-SA-3.0 AND GPL-2.0-or-later AND CC-BY-4.0 AND GPL-2.0-only: 1 component(s)
+  CC-BY-SA-3.0-AT: 1 component(s)
+  CC-BY-SA-4.0: 1 component(s)
+  CC-PDDC: 1 component(s)
+  CC0-1.0: 1 component(s)
+  CC0-1.0 OR Apache-2.0 AND CC0-1.0 AND Apache-2.0 AND CC0-1.0 AND Apache-2.0: 1 component(s)
+  CDDL-1.0 [COPYLEFT]: 1 component(s)
+  CDDL-1.1 [COPYLEFT]: 1 component(s)
+  CPL-1.0 [COPYLEFT]: 1 component(s)
+  CPOL: 1 component(s)
+  EPL-1.0 [COPYLEFT]: 1 component(s)
+  EPL-2.0 [COPYLEFT]: 2 component(s)
+  FSFAP: 1 component(s)
+  GCC-exception-3.1: 1 component(s)
+  GFDL-1.1-only: 1 component(s)
+  GFDL-1.2-only: 1 component(s)
+  GFDL-1.3-only: 1 component(s)
+  GPL-1.0-only [COPYLEFT]: 1 component(s)
+  GPL-1.0-or-later [COPYLEFT]: 1 component(s)
+  GPL-1.0-or-later AND BSD-3-Clause: 1 component(s)
+  GPL-1.0-or-later AND CC-BY-4.0: 1 component(s)
+  GPL-1.0-or-later AND GPL-2.0-or-later AND GPL-2.0-only: 1 component(s)
+  GPL-1.0-or-later AND GPL-3.0-only AND MIT: 1 component(s)
+  GPL-2.0-only [COPYLEFT]: 2 component(s)
+  GPL-2.0-only AND GPL-3.0-only AND GPL-1.0-or-later AND GPL-1.0-or-later AND GPL-2.0-only: 1 component(s)
+  GPL-2.0-or-later [COPYLEFT]: 2 component(s)
+  GPL-3.0-linking-exception: 1 component(s)
+  GPL-3.0-linking-source-exception: 1 component(s)
+  GPL-3.0-only [COPYLEFT]: 4 component(s)
+  GPL-3.0-only AND BSD-3-Clause AND GPL-1.0-or-later AND GPL-2.0-only: 1 component(s)
+  GPL-3.0-only AND GPL-1.0-or-later AND BSD-3-Clause: 1 component(s)
+  GPL-3.0-or-later AND FSFAP: 1 component(s)
+  GPL-CC-1.0: 1 component(s)
+  HPND: 1 component(s)
+  HPND AND MIT-open-group: 1 component(s)
+  HPND AND MIT-open-group AND HPND-DEC: 1 component(s)
+  HPND-DEC AND MIT-open-group: 1 component(s)
+  HPND-sell-variant: 1 component(s)
+  HPND-sell-variant AND MIT: 1 component(s)
+  ICU: 1 component(s)
+  ISC: 2 component(s)
+  ISC AND BSD-Source-Code AND BSD-3-Clause AND BSD-2-Clause AND Zlib: 1 component(s)
+  LGPL-2.0-only [COPYLEFT]: 1 component(s)
+  LGPL-2.0-or-later AND LGPL-2.1-or-later: 1 component(s)
+  LGPL-2.1-only [COPYLEFT]: 2 component(s)
+  LGPL-2.1-only AND GPL-1.0-or-later AND LGPL-2.1-or-later: 1 component(s)
+  LGPL-2.1-only AND GPL-2.0-only AND GPL-2.0-only: 1 component(s)
+  LGPL-2.1-only AND GPL-2.0-only AND LGPL-2.1-only: 1 component(s)
+  LGPL-2.1-or-later [COPYLEFT]: 1 component(s)
+  LGPL-2.1-or-later AND GPL-3.0-or-later: 1 component(s)
+  LGPL-2.1-or-later AND LGPL-2.0-or-later: 1 component(s)
+  LGPL-2.1-or-later AND LLGPL: 1 component(s)
+  LGPL-2.1-or-later AND MPL-1.0 AND GPL-1.0-or-later: 1 component(s)
+  LGPL-3.0-linking-exception: 1 component(s)
+  LGPL-3.0-only [COPYLEFT]: 1 component(s)
+  LGPL-3.0-only AND CC-BY-SA-3.0: 1 component(s)
+  LGPLLR: 1 component(s)
+  LPPL-1.0: 1 component(s)
+  LPPL-1.1: 1 component(s)
+  LPPL-1.2: 1 component(s)
+  LPPL-1.3a: 1 component(s)
+  LPPL-1.3c: 1 component(s)
+  Libpng: 1 component(s)
+  Linux-syscall-note: 1 component(s)
+  MIT: 13 component(s)
+  MIT AND Apache-2.0: 1 component(s)
+  MIT AND GPL-2.0-only AND GPL-1.0-or-later AND MIT AND GPL-1.0-or-later AND MIT AND Boehm-GC AND GPL-1.0-or-later: 1 component(s)
+  MIT AND GPL-3.0-only: 1 component(s)
+  MIT AND HPND-sell-variant: 1 component(s)
+  MIT AND HPND-sell-variant AND MIT AND HPND AND MIT-open-group AND X11: 1 component(s)
+  MIT AND MIT-open-group: 1 component(s)
+  MIT AND X11-distribute-modifications-variant: 1 component(s)
+  MIT OR PSF-2.0: 1 component(s)
+  MIT-0: 1 component(s)
+  MIT-open-group: 1 component(s)
+  MIT-open-group AND HPND-sell-variant: 1 component(s)
+  MIT-open-group AND X11: 1 component(s)
+  MPL-1.0: 1 component(s)
+  MPL-1.1 [COPYLEFT]: 1 component(s)
+  MPL-2.0 [COPYLEFT]: 1 component(s)
+  MPL-2.0 AND Apache-2.0: 1 component(s)
+  OFL-1.1 [COPYLEFT]: 1 component(s)
+  OFL-1.1 AND Apache-2.0: 1 component(s)
+  OLDAP-2.8: 1 component(s)
+  PHP-3.0: 1 component(s)
+  PHP-3.01: 1 component(s)
+  Ruby: 1 component(s)
+  SGI-B-2.0: 1 component(s)
+  Sleepycat AND BSD-3-Clause: 1 component(s)
+  Spencer-86: 1 component(s)
+  Swift-exception AND u-boot-exception-2.0 AND WxWindows-exception-3.1: 1 component(s)
+  TU-Berlin-2.0: 1 component(s)
+  Unlicense: 1 component(s)
+  W3C: 1 component(s)
+  WTFPL: 1 component(s)
+  X11: 1 component(s)
+  X11 AND MIT: 1 component(s)
+  X11-distribute-modifications-variant: 1 component(s)
+  ZPL-1.1: 1 component(s)
+  ZPL-2.0: 1 component(s)
+  ZPL-2.1: 1 component(s)
+  Zlib: 1 component(s)
+  bzip2-1.0.6: 1 component(s)
+  curl: 2 component(s)
+  libtiff: 1 component(s)
+  snprintf: 1 component(s)
+
+------------------------------------------------------------
+
+COMPONENT ATTRIBUTIONS
+
+  2023_Pair
+  Version: step2
+  Source: https://github.com/Enqurance/2023_Pair
+  PURL: pkg:github/enqurance/2023_pair
+  Copyright:
+    Copyright 2006; Google Inc.
+    Copyright 2009; Google Inc.
+  License: BSD-3-Clause
+
+  AsersX-for-Termux
+  Version: v1.0.0
+  Source: https://github.com/TermuxnTR/AsersX-for-Termux
+  PURL: pkg:github/termuxntr/asersx-for-termux
+  Copyright:
+    Copyright 1994; 1995; 1996; 1999; 2000; 2001; 2002 Free Software
+    Copyright 1994; 1995; 1996; 1999; 2000; 2001; 2002 Free Software Foundation; Inc.
+  License: 0BSD, 0BSD AND GPL-2.0-only AND GPL-3.0-only AND LGPL-2.1-only, AFL-2.1, AFL-3.0 AND GPL-2.0-only AND AFL-2.1 AND GPL-2.0-or-later AND MIT AND GPL-1.0-or-later, AGPL-3.0-only, Apache-2.0, Apache-2.0 AND Apache-2.0 AND OpenSSL, Apache-2.0 WITH LLVM-exception, Apache-2.0 WITH LLVM-exception AND NCSA, Artistic-1.0-Perl, Artistic-1.0-Perl OR GPL-1.0-or-later, Artistic-2.0, BSD-2-Clause, BSD-2-Clause AND BSD-3-Clause, BSD-2-Clause AND LGPL-2.1-only, BSD-2-Clause-Darwin, BSD-2-Clause-Patent, BSD-3-Clause, BSD-3-Clause AND GPL-2.0-only AND BSD-3-Clause OR GPL-2.0-or-later AND GPL-1.0-or-later, BSD-3-Clause AND ISC AND ISC AND MIT AND MIT, BSD-4-Clause-UC, BSD-Attribution-HPND-disclaimer, BSL-1.0, CC-BY-1.0, CC-BY-2.0, CC-BY-2.5, CC-BY-3.0, CC-BY-3.0-AT, CC-BY-3.0-US, CC-BY-4.0, CC-BY-NC-1.0, CC-BY-NC-2.0, CC-BY-NC-2.5, CC-BY-NC-3.0, CC-BY-NC-ND-1.0, CC-BY-NC-ND-2.5, CC-BY-NC-ND-3.0, CC-BY-NC-ND-3.0-IGO, CC-BY-NC-SA-1.0, CC-BY-NC-SA-2.0, CC-BY-NC-SA-2.5, CC-BY-NC-SA-3.0, CC-BY-ND-1.0, CC-BY-ND-2.5, CC-BY-ND-3.0, CC-BY-ND-4.0, CC-BY-SA-1.0, CC-BY-SA-2.0, CC-BY-SA-2.0-UK, CC-BY-SA-2.1-JP, CC-BY-SA-2.5, CC-BY-SA-3.0, CC-BY-SA-3.0 AND GPL-2.0-or-later AND CC-BY-4.0 AND GPL-2.0-only, CC-BY-SA-3.0-AT, CC-BY-SA-4.0, CC-PDDC, CC0-1.0, CC0-1.0 OR Apache-2.0 AND CC0-1.0 AND Apache-2.0 AND CC0-1.0 AND Apache-2.0, CDDL-1.0, CDDL-1.1, CPL-1.0, EPL-1.0, EPL-2.0, FSFAP, GCC-exception-3.1, GFDL-1.1-only, GFDL-1.2-only, GFDL-1.3-only, GPL-1.0-only, GPL-1.0-or-later, GPL-1.0-or-later AND BSD-3-Clause, GPL-1.0-or-later AND CC-BY-4.0, GPL-1.0-or-later AND GPL-2.0-or-later AND GPL-2.0-only, GPL-1.0-or-later AND GPL-3.0-only AND MIT, GPL-2.0-only, GPL-2.0-only AND GPL-3.0-only AND GPL-1.0-or-later AND GPL-1.0-or-later AND GPL-2.0-only, GPL-3.0-linking-exception, GPL-3.0-linking-source-exception, GPL-3.0-only, GPL-3.0-only AND BSD-3-Clause AND GPL-1.0-or-later AND GPL-2.0-only, GPL-3.0-only AND GPL-1.0-or-later AND BSD-3-Clause, GPL-3.0-or-later AND FSFAP, GPL-CC-1.0, HPND, HPND AND MIT-open-group, HPND AND MIT-open-group AND HPND-DEC, HPND-DEC AND MIT-open-group, HPND-sell-variant, HPND-sell-variant AND MIT, ICU, ISC, ISC AND BSD-Source-Code AND BSD-3-Clause AND BSD-2-Clause AND Zlib, LGPL-2.0-only, LGPL-2.0-or-later AND LGPL-2.1-or-later, LGPL-2.1-only, LGPL-2.1-only AND GPL-1.0-or-later AND LGPL-2.1-or-later, LGPL-2.1-only AND GPL-2.0-only AND GPL-2.0-only, LGPL-2.1-only AND GPL-2.0-only AND LGPL-2.1-only, LGPL-2.1-or-later, LGPL-2.1-or-later AND GPL-3.0-or-later, LGPL-2.1-or-later AND LGPL-2.0-or-later, LGPL-2.1-or-later AND LLGPL, LGPL-2.1-or-later AND MPL-1.0 AND GPL-1.0-or-later, LGPL-3.0-linking-exception, LGPL-3.0-only, LGPL-3.0-only AND CC-BY-SA-3.0, LGPLLR, LPPL-1.0, LPPL-1.1, LPPL-1.2, LPPL-1.3a, LPPL-1.3c, Libpng, Linux-syscall-note, MIT, MIT AND Apache-2.0, MIT AND GPL-2.0-only AND GPL-1.0-or-later AND MIT AND GPL-1.0-or-later AND MIT AND Boehm-GC AND GPL-1.0-or-later, MIT AND GPL-3.0-only, MIT AND HPND-sell-variant, MIT AND HPND-sell-variant AND MIT AND HPND AND MIT-open-group AND X11, MIT AND MIT-open-group, MIT AND X11-distribute-modifications-variant, MIT OR PSF-2.0, MIT-0, MIT-open-group, MIT-open-group AND HPND-sell-variant, MIT-open-group AND X11, MPL-1.0, MPL-1.1, MPL-2.0, MPL-2.0 AND Apache-2.0, OFL-1.1, OFL-1.1 AND Apache-2.0, OLDAP-2.8, PHP-3.0, PHP-3.01, Ruby, SGI-B-2.0, Sleepycat AND BSD-3-Clause, Spencer-86, Swift-exception AND u-boot-exception-2.0 AND WxWindows-exception-3.1, TU-Berlin-2.0, Unlicense, W3C, WTFPL, X11, X11 AND MIT, X11-distribute-modifications-variant, ZPL-1.1, ZPL-2.0, ZPL-2.1, Zlib, bzip2-1.0.6, curl, libtiff, snprintf
+
+  AStarSearch
+  Version: 1.0
+  Source: https://github.com/eliainnocenti/AStarSearch
+  PURL: pkg:github/eliainnocenti/astarsearch
+  Copyright:
+    Copyright 2007; Google Inc.
+    Copyright 2008; Google Inc.
+  License: BSD-3-Clause
+
+  aview
+  Version: 1.3.0rc1-6
+  Source: https://snapshot.debian.org/archive/debian/20050312T000000Z/pool/main/a/aview/aview_1.3.0rc1-6_i386.deb
+  PURL: pkg:deb/debian/aview
+  Copyright:
+    (C) 2007 Free Software Foundation; Inc. <http:  fsf.org >
+    Copyright    1991-2020 Unicode; Inc. All rights reserved.
+    Copyright (C) 1989; 1991 Free Software Foundation; Inc.
+    Copyright (c) 2005; Google Inc.
+    Copyright (c) 2015-present libuv project contributors.
+    Copyright copyright text to reflect Google s relinquished ownership
+    Copyright copyright used for BSD software; slightly modified
+  License: GPL-2.0-or-later
+
+  benchmark
+  Version: 571c235
+  Source: https://github.com/google/benchmark
+  PURL: pkg:github/google/benchmark
+  Copyright:
+    Copyright 2021 Google Inc. All rights reserved
+    Copyright 2015 Google Inc.
+    Copyright 2015 Google Inc. All rights reserved.
+    Copyright 2016 Ismael Jimenez Martinez
+    Copyright 2016 Ismael Jimenez Martinez. All rights reserved.
+    Copyright 2017 Roman Lebedev. All rights reserved.
+    Copyright 2018 Google Inc.
+    Copyright 2018 Google Inc. All rights reserved.
+    Copyright 2020 Google Inc.
+    Copyright 2020 Google Inc. All rights reserved.
+    Copyright 2021 Google Inc.
+    Copyright 2021 Google Inc. All rights reserved.
+    Copyright copyright owner or entity authorized by
+  License: Apache-2.0
+
+  benchmark
+  Version: v1.8.4-gbenchmark
+  Source: https://github.com/stolyarchuk/benchmark
+  PURL: pkg:github/stolyarchuk/benchmark
+  License: Apache-2.0
+
+  build-artifacts
+  Version: cereal-1.3.1
+  Source: https://github.com/xmake-mirror/build-artifacts
+  PURL: pkg:github/xmake-mirror/build-artifacts
+  Copyright:
+    Copyright (C) 2004-2008 Ren   Nyffenegger
+    Copyright (C) 2004-2008 Ren.. Nyffenegger
+    Copyright (C) 2006; 2009 Marcin Kalicinski
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip. All rights reserved.
+    Copyright (c) 2004-2008 Rene Nyffenegger
+    Copyright (c) 2006; 2009 Marcin Kalicinski
+  License: BSD-2-Clause
+
+  cereal
+  Version: v1.2.0
+  Source: https://github.com/uscilab/cereal
+  PURL: pkg:github/uscilab/cereal
+  Copyright:
+    Copyright 2013-2022 Randolph Voorhies Shane Grant
+    Copyright (C) 2004-2008 Ren   Nyffenegger
+    Copyright (C) 2004-2008 Ren.. Nyffenegger
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip-> All rights reserved->
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip. All rights reserved.
+    Copyright (c) 2006-2013 Alexander Chemeris
+    Copyright (c) 2006; 2007 Marcin Kalicinski
+    Copyright (c) 2006; 2007 Marcin Kalicinski.
+    Copyright (c) 2013-2022; Randolph Voorhies; Shane Grant
+    Copyright (c) 2014; 2017; Randolph Voorhies; Shane Grant; Juan Pedro
+    Copyright (c) 2014; Randolph Voorhies; Shane Grant
+    Copyright (c) 2015; Kyle Fleming
+    Copyright (c) 2015; Kyle Fleming; Juan Pedro Bolivar Puente
+    Copyright (c) 2016; Randolph Voorhies; Shane Grant
+    Copyright (c) 2017; Juan Pedro Bolivar Puente
+    Copyright (c) 2017; Randolph Voorhies; Shane Grant
+    Copyright (c) 2018; Shane Grant
+  License: BSD-3-Clause
+
+  chemicalfun
+  Version: v0.1.8
+  Source: https://bitbucket.org/gems4/chemicalfun/get/v0.1.8.zip
+  PURL: pkg:bitbucket/gems4/chemicalfun
+  Copyright:
+    Copyright 2005 Google Inc. All Rights Reserved
+    Copyright 2009 Google Inc. All Rights Reserved
+    Copyright 2015 Google Inc. All rights reserved
+    Copyright 2018 Google LLC. All rights reserved
+    Copyright 2019 Google LLC. All Rights Reserved
+    Copyright 2020 Google Inc. All Rights Reserved
+    Copyright 2021 Google Inc. All Rights Reserved
+    Copyright 2005 Google Inc.
+    Copyright 2005 Google Inc. All Rights Reserved.
+    Copyright 2006; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2009 Google Inc.
+    Copyright 2009 Google Inc. All Rights Reserved.
+    Copyright 2009; Google Inc.
+    Copyright 2013; Google Inc.
+    Copyright 2015 Google Inc.
+    Copyright 2015 Google Inc. All rights reserved.
+    Copyright 2018 Google LLC.
+    Copyright 2018 Google LLC. All rights reserved.
+    Copyright 2019 Google LLC.
+    Copyright 2019 Google LLC.  All Rights Reserved.
+    Copyright 2019; Google Inc.
+    Copyright 2020 Google Inc.
+    Copyright 2020 Google Inc. All Rights Reserved.
+    Copyright 2021 Google Inc.
+    Copyright 2021 Google Inc. All Rights Reserved.
+  License: BSD-3-Clause
+
+  cherrytree
+  Version: 1.0.1
+  Source: https://github.com/giuspen/cherrytree
+  PURL: pkg:github/giuspen/cherrytree
+  Copyright:
+    Copyright 2009; Google Inc.
+  License: BSD-3-Clause
+
+  Class-template-for-Images_LABPROG
+  Version: v1.0.0
+  Source: https://github.com/edorustichini/Class-template-for-Images_LABPROG
+  PURL: pkg:github/edorustichini/class-template-for-images_labprog
+  Copyright:
+    Copyright 2005 Google Inc. All Rights Reserved
+    Copyright 2017 Google Inc
+    Copyright 2005 Google Inc.
+    Copyright 2005 Google Inc. All Rights Reserved.
+    Copyright 2005; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2017 Google Inc.
+    Copyright 2025; Google Inc.
+  License: BSD-3-Clause
+
+  codspeed-cpp
+  Version: v1.0.0
+  Source: https://github.com/CodSpeedHQ/codspeed-cpp
+  PURL: pkg:github/codspeedhq/codspeed-cpp
+  Copyright:
+    Copyright 2025 CodSpeed Technology SAS and contributors
+  License: MIT
+
+  Common
+  Version: v1
+  Source: https://github.com/SFCMM/Common
+  PURL: pkg:github/sfcmm/common
+  Copyright:
+    Copyright (c) 2014 Jarryd Beck
+    Copyright (c) 2021; SFCMM
+    Copyright 2008; Google Inc.
+    Copyright copyright owner or entity authorized by
+  License: BSD-2-Clause
+
+  controlr
+  Version: 1.9.0
+  Source: https://www.npmjs.com/package/controlr
+  PURL: pkg:npm/controlr
+  Copyright:
+    Copyright (c) 2006-2013 Alexander Chemeris
+    Copyright (c) 2006-2013 Alexander Chemeris.
+  License: MIT
+
+  d2x-xl
+  Version: 1.12.31.7
+  Source: https://sourceforge.net/projects/d2x-xl
+  PURL: pkg:sourceforge/d2x-xl
+  Copyright:
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip. All rights reserved.
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip. All rights reserved..
+  License: MIT
+
+  deepin-log-viewer
+  Version: 5.8.0.28
+  Source: https://github.com/linuxdeepin/deepin-log-viewer
+  PURL: pkg:github/linuxdeepin/deepin-log-viewer
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2005; Google Inc.
+    Copyright 2006; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2010; Google Inc.
+    Copyright 2013; Google Inc.
+    Copyright 2015; Google Inc.
+    Copyright 2018; Google LLC.
+  License: GPL-3.0-only
+
+  discord-music-presence
+  Version: v2.0.1
+  Source: https://github.com/ungive/discord-music-presence
+  PURL: pkg:github/ungive/discord-music-presence
+  Copyright:
+    Copyright 2005; Google Inc.
+  License: Apache-2.0, BSD-3-Clause, MIT
+
+  DM-Project
+  Version: First-One
+  Source: https://github.com/Nekson228/DM-Project
+  PURL: pkg:github/nekson228/dm-project
+  Copyright:
+    Copyright 2008; Google Inc.
+  License: BSD-3-Clause
+
+  doctest
+  Version: 2.4.7
+  Source: https://github.com/doctest/doctest
+  PURL: pkg:github/doctest/doctest
+  Copyright:
+    Copyright (c) 2016-2021 Viktor Kirilov
+  License: MIT
+
+  dotnet
+  Version: v9.0.0-rc.1.24431.7
+  Source: https://github.com/dotnet/dotnet
+  PURL: pkg:github/dotnet/dotnet
+  Copyright:
+    Copyright 2007; Google Inc.
+  License: CPOL, MIT
+
+  emacs
+  Version: emacs-24.3.90
+  Source: https://github.com/emacs-mirror/emacs
+  PURL: pkg:github/emacs-mirror/emacs
+  Copyright:
+    Copyright (C) 2002-2014 Free Software Foundation; Inc.
+    Copyright (c) 2002-2014 Free Software Foundation; Inc.
+  License: GPL-3.0-only
+
+  Fall_Semester_programing
+  Version: 72
+  Source: https://github.com/Kirya23/Fall_Semester_programing
+  PURL: pkg:github/kirya23/fall_semester_programing
+  Copyright:
+    Copyright 2000-2001 ; University of Notre Dame.
+    Copyright 2002-2003 ; Trustees of Indiana University.
+    Copyright 2014 Grav
+    Copyright 2014 fqiang
+    Copyright 2015-2016 Barrett Adair
+    Copyright 2016 MATHIEU CORNIC
+    Copyright 2017 Valere JEANTET
+    Copyright 2024 Google Inc
+    Copyright 2007; Google Inc.
+    Copyright 2024 Google Inc.
+  License: Apache-2.0, BSD-3-Clause
+
+  FreeCAD-LibPack
+  Version: 3.1.1
+  Source: https://github.com/FreeCAD/FreeCAD-LibPack
+  PURL: pkg:github/freecad/freecad-libpack
+  Copyright:
+    Copyright 2005; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+  License: LGPL-2.1-only
+
+  gcc
+  Version: basepoints
+  Source: https://github.com/gcc-mirror/gcc
+  PURL: pkg:github/gcc-mirror/gcc
+  Copyright:
+    (C) 1996; 1997; 1998; 1999; 2000; 2001; 2003; 2004; 2005; 2006;
+    Copyright 1996 Gordon Matzigkeit  gord@gnu.ai.mit.edu
+    Copyright (C) 1994 X Consortium
+    Copyright (C) 1996; 1997; 1998; 1999; 2000; 2001; 2003; 2004; 2005; 2006;
+    Copyright (c) 1996; 1997; 1998; 1999; 2000; 2001; 2003; 2004; 2005; 2006; 2007; 2008; 2009 Free Software Foundation; Inc.
+  License: GPL-2.0-only
+
+  github.com/abseil/googletest
+  Version: v1.14.1-0.20250212174407-c00fd25b71a1
+  Source: https://proxy.golang.org/github.com/abseil/googletest/@v/v1.14.1-0.20250212174407-c00fd25b71a1.zip
+  PURL: pkg:golang/github.com/abseil/googletest
+  Copyright:
+    Copyright 2007; Google Inc.
+    Copyright 2008; Google Inc.
+  License: BSD-3-Clause
+
+  github.com/chyezh/cgosymbolizer
+  Version: v0.0.0-20240718183735-925f0b3ad234
+  Source: https://proxy.golang.org/github.com/chyezh/cgosymbolizer/@v/v0.0.0-20240718183735-925f0b3ad234.zip
+  PURL: pkg:golang/github.com/chyezh/cgosymbolizer
+  Copyright:
+    Copyright 2012-2024 Free Software Foundation Inc
+    Copyright (C) 2012-2024 Free Software Foundation; Inc.
+    Copyright (c) 2012-2024 Free Software Foundation; Inc.
+  License: BSD-3-Clause
+
+  github.com/ianlancetaylor/libbacktrace
+  Version: v0.0.0-20200513181113-9b7f216e8679
+  Source: https://proxy.golang.org/github.com/ianlancetaylor/libbacktrace/@v/v0.0.0-20200513181113-9b7f216e8679.zip
+  PURL: pkg:golang/github.com/ianlancetaylor/libbacktrace
+  Copyright:
+    Copyright 2012-2018 Free Software Foundation Inc
+    Copyright (C) 2012-2018 Free Software Foundation; Inc.
+    Copyright (c) 2012-2018 Free Software Foundation; Inc.
+  License: BSD-2-Clause
+
+  github.com/USCiLab/cereal
+  Version: v1.3.3-0.20220327215417-ddd467244713
+  Source: https://proxy.golang.org/github.com/uscilab/cereal/@v/v1.3.3-0.20220327215417-ddd467244713.zip
+  PURL: pkg:golang/github.com/uscilab/cereal
+  Copyright:
+    Copyright (c) 2014; Randolph Voorhies; Shane Grant
+  License: BSD-3-Clause
+
+  google-testmock
+  Version: 1.14.0
+  Source: https://www.nuget.org/packages/google-testmock
+  PURL: pkg:nuget/google-testmock
+  Copyright:
+    Copyright 2005; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008; Google Inc.
+  License: BSD-3-Clause
+
+  googletest
+  Version: v1.17.0
+  Source: https://github.com/google/googletest
+  PURL: pkg:github/google/googletest
+  Copyright:
+    Copyright 2008 ; Google Inc.
+    Copyright 2008 Google Inc
+    Copyright 2010 Google Inc. All Rights Reserved
+    Copyright 2017 Google Inc
+    Copyright 2024 Google Inc
+    Copyright 2005; Google Inc.
+    Copyright 2006; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2010 Google Inc.
+    Copyright 2010 Google Inc.  All Rights Reserved.
+    Copyright 2017 Google Inc.
+    Copyright 2018; Google Inc.
+    Copyright 2020; Google Inc.
+    Copyright 2024 Google Inc.
+    Copyright copyright owner or entity authorized by
+  License: BSD-3-Clause
+
+  gperftools
+  Version: gperftools-2.17.2
+  Source: https://github.com/gperftools/gperftools
+  PURL: pkg:github/gperftools/gperftools
+  Copyright:
+    Copyright 2005 ; Google Inc.
+    Copyright 2005 Google Inc
+    Copyright 2008 ; Google Inc.
+    Copyright 2014 gperftools Contributors
+    Copyright (c) 2003; Google Inc.
+    Copyright (c) 2004; Google Inc.
+    Copyright (c) 2005; Google Inc.
+    Copyright (c) 2006; Google Inc.
+    Copyright (c) 2007; Google Inc.
+    Copyright (c) 2008; Google Inc.
+    Copyright (c) 2009; Google Inc.
+    Copyright (c) 2010 The Chromium Authors
+    Copyright (c) 2010 The Chromium Authors. All rights reserved.
+    Copyright (c) 2011; Google Inc.
+    Copyright (c) 2013; Google Inc.
+    Copyright (c) 2014; 2024; gperftools Contributors
+    Copyright (c) 2014; gperftools Contributors
+    Copyright (c) 2016; gperftools Contributors
+    Copyright (c) 2021; IBM Ltd.
+    Copyright (c) 2021; gperftools Contributors
+    Copyright (c) 2023; gperftools Contributors
+    Copyright (c) 2023; gperftools Contributors.
+    Copyright (c) 2024; gperftools Contributors
+    Copyright 2009 Google Inc.
+    Copyright 2009 Google Inc. All Rights Reserved.
+  License: BSD-3-Clause
+
+  gperftools
+  Version: a81b2eb
+  Source: https://github.com/alk/gperftools
+  PURL: pkg:github/alk/gperftools
+  Copyright:
+    Copyright 2005 Google Inc
+    Copyright 2023 gperftools Contributors
+    Copyright (c) 2000; Google Inc.
+    Copyright (c) 2003; Google Inc.
+    Copyright (c) 2004; Google Inc.
+    Copyright (c) 2005; Google Inc.
+    Copyright (c) 2007; Google Inc.
+    Copyright (c) 2008-2009; Google Inc.
+    Copyright (c) 2008; Google Inc.
+    Copyright (c) 2011; Google Inc.
+    Copyright (c) 2014; 2024; gperftools Contributors
+    Copyright (c) 2014; gperftools Contributors
+    Copyright (c) 2014; gperftools Contributors.
+    Copyright (c) 2023; gperftools Contributors
+    Copyright (c) 2024; gperftools Contributors
+    Copyright 2008; Google Inc.
+    Copyright 2009 Google Inc.
+    Copyright 2009 Google Inc. All Rights Reserved.
+  License: BSD-3-Clause
+
+  gperftools
+  Version: gperftools-2.15
+  Source: https://github.com/Navezjt/gperftools
+  PURL: pkg:github/navezjt/gperftools
+  Copyright:
+    Copyright (c) 2005; Google Inc.
+    Copyright (c) 2006; Google Inc.
+    Copyright (c) 2007; Google Inc.
+    Copyright (c) 2008; Google Inc.
+    Copyright (c) 2009; Google Inc.
+    Copyright (c) 2010; Google Inc.
+    Copyright (c) 2024; gperftools Contributors
+  License: BSD-3-Clause
+
+  HELICS
+  Version: 1.0.0-beta.2
+  Source: https://github.com/GMLC-TDC/HELICS
+  PURL: pkg:github/gmlc-tdc/helics
+  Copyright:
+    Copyright (C) 2006; 2009 Marcin Kalicinski
+    Copyright (C) 2006; 2009 Marcin Kalicinski.
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip. All rights reserved.
+    Copyright (C) 2015 THL A29 Limited; a Tencent company; and Milo Yip. All rights reserved..
+    Copyright (c) 2006; 2009 Marcin Kalicinski
+  License: BSD-3-Clause
+
+  hesea_lib
+  Version: 3309fcb
+  Source: https://github.com/privasea/hesea_lib
+  PURL: pkg:github/privasea/hesea_lib
+  Copyright:
+    Copyright (c) 2014; Randolph Voorhies; Shane Grant
+  License: BSD-2-Clause
+
+  image_processing
+  Version: 40edd53
+  Source: https://github.com/hermosayhl/image_processing
+  PURL: pkg:github/hermosayhl/image_processing
+  Copyright:
+    Copyright (c) 2016 The Pybind Development Team; All rights reserved.
+    Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>; All rights reserved.
+    Copyright copyright owner or entity authorized by
+  License: Apache-2.0, BSD-3-Clause, BSD-3-Clause-LBNL
+
+  imodel-native
+  Version: v4.0.6
+  Source: https://github.com/iTwin/imodel-native
+  PURL: pkg:github/itwin/imodel-native
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2009 Google Inc. All rights reserved
+    Copyright 2006; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2009 Google Inc.
+    Copyright 2009 Google Inc. All rights reserved.
+    Copyright 2009; Google Inc.
+    Copyright 2013; Google Inc.
+    Copyright 2015; Google Inc.
+    Copyright 2018; Google Inc.
+  License: Apache-2.0, curl
+
+  lab06
+  Version: v1.0.0
+  Source: https://github.com/PhilippD3/lab06
+  PURL: pkg:github/philippd3/lab06
+  Copyright:
+    Copyright 2007; Google Inc.
+  License: Apache-2.0, BSD-3-Clause
+
+  libbacktrace
+  Version: 86885d1
+  Source: https://github.com/ianlancetaylor/libbacktrace
+  PURL: pkg:github/ianlancetaylor/libbacktrace
+  Copyright:
+    Copyright 2012-2016 Free Software Foundation Inc
+    Copyright 2012-2024 Free Software Foundation Inc
+    Copyright (C) 2012-2016 Free Software Foundation; Inc.
+    Copyright (C) 2012-2024 Free Software Foundation; Inc.
+    Copyright (C) 2013-2024 Free Software Foundation; Inc.
+    Copyright (C) 2015-2024 Free Software Foundation; Inc.
+    Copyright (C) 2017-2024 Free Software Foundation; Inc.
+    Copyright (C) 2018-2024 Free Software Foundation; Inc.
+    Copyright (C) 2020-2024 Free Software Foundation; Inc.
+    Copyright (C) 2022-2024 Free Software Foundation; Inc.
+    Copyright (c) 2012-2024 Free Software Foundation; Inc.
+    Copyright (c) 2012-2024 Free Software Foundation; Inc. Adapted
+    Copyright (c) 2013-2024 Free Software Foundation; Inc.
+    Copyright (c) 2015-2024 Free Software Foundation; Inc. Adapted
+    Copyright (c) 2017-2024 Free Software Foundation; Inc.
+    Copyright (c) 2018-2024 Free Software Foundation; Inc.
+    Copyright (c) 2020-2024 Free Software Foundation; Inc.
+    Copyright (c) 2022-2024 Free Software Foundation; Inc.
+  License: BSD-2-Clause, BSD-3-Clause
+
+  libwebrtc-bin
+  Version: 91.4472.0.0
+  Source: https://github.com/crow-misia/libwebrtc-bin
+  PURL: pkg:github/crow-misia/libwebrtc-bin
+  Copyright:
+    Copyright 1993 The Regents of the University of California.
+    Copyright 1995 97 Mark Olesen  lt;olesen@me.QueensU.CA gt
+    Copyright 1995 ;97 Mark Olesen  lt;olesen@me.QueensU.CA gt;
+    Copyright 1995-2022 Jean-loup Gailly and Mark Adler
+    Copyright 1996-2010 the NASM Authors - All rights reserved.
+    Copyright 1998 Todd C. Miller  lt;Todd.Miller@courtesan.com gt;
+    Copyright 1998-2011 The OpenSSL Project.  All rights reserved.
+    Copyright 1999-2000 Ross Bencina and Phil Burk
+    Copyright 2000 Dug Song  lt;dugsong@monkey.org gt;
+    Copyright 2000-2007 Niels Provos  lt;provos@citi.umich.edu gt;
+    Copyright 2001 Steve Underwood
+    Copyright 2001-2011 Xiph.Org; Skype Limited; Octasic;
+    Copyright 2001-2017 Cisco Systems; Inc.
+    Copyright 2001-2023 Xiph.Org; Skype Limited; Octasic;
+    Copyright 2002 Niels Provos  lt;provos@citi.umich.edu gt;
+    Copyright 2003 Michael A. Davis  lt;mike@datanerds.net gt;
+    Copyright 2003-2004 ; Mark Borgerding
+    Copyright 2004 the University Corporation for Atmospheric
+    Copyright 2005 Steve Underwood
+    Copyright 2005-2008 ; The Android Open Source Project
+    Copyright 2005-2017 ; Xiph.Org Foundation
+    Copyright 2006 Maxim Yegorushkin  lt;maxim.yegorushkin@gmail.com gt;
+    Copyright 2007 Sun Microsystems
+    Copyright 2007-2010 Niels Provos and Nick Mathewson
+    Copyright 2007-2017 ; Jean-Marc Valin
+    Copyright 2007-2019 University of Illinois at Urbana-Champaign.
+    Copyright 2008 Google Inc.  All rights reserved.
+    Copyright 2009 The Go Authors. All rights reserved.
+    Copyright 2009-2014 by the contributors listed in CREDITS.TXT
+    Copyright 2009-2015 by the contributors listed in CREDITS.TXT
+    Copyright 2009-2019 by the contributors listed in CREDITS.TXT
+    Copyright 2009-2023 D. R. Commander.  All Rights Reserved. lt;br gt;
+    Copyright 2009-2024 D. R. Commander.  All Rights Reserved. lt;br gt;
+    Copyright 2010 ; The WebM Project authors. All rights reserved.
+    Copyright 2010 The Android Open Source Project
+    Copyright 2011 ; The WebRTC project authors. All rights reserved.
+    Copyright 2011 Google Inc. All Rights Reserved.
+    Copyright 2011 The LibYuv Project Authors. All rights reserved.
+    Copyright 2013 Julien Pommier ( pommier@modartt.com )
+    Copyright 2015 The Chromium Authors
+    Copyright 2015 The Chromium Authors. All rights reserved.
+    Copyright 2015 Viktor Szathm  ry.  All Rights Reserved.
+    Copyright 2015-2016 the fiat-crypto authors (see
+    Copyright 2015-2020 the fiat-crypto authors (see
+    Copyright 2015-2020 the fiat-crypto authors (see the AUTHORS file)
+    Copyright 2016 ; Alliance for Open Media. All rights reserved.
+    Copyright 2017 ; Mozilla
+    Copyright 2017 ; The Android Open Source Project
+    Copyright 2017 ; The CRC32C Authors.
+    Copyright 2019 Zenichi Amano
+    Copyright 2022 ; Google Inc.
+    Copyright 2023 The Chromium Authors
+    Copyright (c) 2011; The WebRTC project authors. All rights reserved.
+    Copyright (c) 2011; The WebRTC project authors. All rights reserved..
+    Copyright copyright owner or entity authorized by
+  License: Apache-2.0
+
+  llvm-daily-fedora-rpms
+  Version: source-snapshot
+  Source: https://github.com/kwk/llvm-daily-fedora-rpms
+  PURL: pkg:github/kwk/llvm-daily-fedora-rpms
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2016 Ismael Jimenez Martinez. All rights reserved
+    Copyright 2017 Roman Lebedev. All rights reserved
+    Copyright 2021 Google Inc. All rights reserved
+    Copyright COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM; DAMAGES OR OTHER
+    Copyright (c) 2006 Kirill Simonov
+    Copyright (c) 2010-2015 Benjamin Peterson
+    Copyright (c) 2013-2014; Pexpect development team
+    Copyright (c) 2019 Intel Corporation. All rights reserved.
+    Copyright .. 2002-2009 Michael J. Fromberger
+    Copyright 2005; Google Inc.
+    Copyright 2006; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2013; Google Inc.
+    Copyright 2015; Google Inc.
+    Copyright 2016 Ismael Jimenez Martinez
+    Copyright 2016 Ismael Jimenez Martinez. All rights reserved.
+    Copyright 2017 Roman Lebedev. All rights reserved.
+    Copyright 2021 Google Inc.
+    Copyright 2021 Google Inc. All rights reserved.
+    Copyright copyright owner or entity authorized by
+  License: Apache-2.0, Apache-2.0 WITH LLVM-exception AND NCSA, BSD-3-Clause, ISC, MIT
+
+  maingopy
+  Version: 0.8.1
+  Source: https://pypi.org/project/maingopy
+  PURL: pkg:pypi/maingopy
+  Copyright:
+    Copyright 2005; Google Inc.
+    Copyright 2009 Google Inc.
+    Copyright 2009 Google Inc. All Rights Reserved.
+  License: EPL-2.0
+
+  mitata
+  Version: 0.1.12
+  Source: https://www.npmjs.com/package/mitata
+  PURL: pkg:npm/mitata
+  Copyright:
+    Copyright 2022 evanwashere
+  License: MIT
+
+  Mypal
+  Version: 27.7.2
+  Source: https://github.com/Feodor2/Mypal
+  PURL: pkg:github/feodor2/mypal
+  Copyright:
+    Copyright 2006; Google Inc.
+  License: BSD-3-Clause
+
+  nurikit
+  Version: v0.1.0a14.post0
+  Source: https://github.com/seoklab/nurikit
+  PURL: pkg:github/seoklab/nurikit
+  Copyright:
+    Copyright 1998 -2024
+    Copyright 1999-2024 ; The Biopython Contributors
+    Copyright 2001-2002 Enthought; Inc. 2003-2024; SciPy Developers.
+    Copyright 2003-2012 Egervary Jeno Kombinatorikus Optimalizalasi
+    Copyright 2008 ; Google Inc.
+    Copyright 2009-2016 Pu Liu and Douglas L. Theobald
+    Copyright 2009-present ; Homebrew contributors
+    Copyright 2011 Ciyou Zhu; Richard Byrd; Jorge Nocedal and Jose Luis Morales.
+    Copyright 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>; All rights reserved.
+    Copyright 2017 Google Inc
+    Copyright 2023 Lab of Computational Biology and Biomolecular Engineering SNU
+    Copyright 2023 Lab of Computational Biology and Biomolecular Engineering; SNU
+    Copyright 2007; Google Inc.
+    Copyright 2017 Google Inc.
+    Copyright 2020; Google Inc.
+  License: Apache-2.0
+
+  objektinis-prog-class
+  Version: ver2.0
+  Source: https://github.com/mykolassl/objektinis-prog-class
+  PURL: pkg:github/mykolassl/objektinis-prog-class
+  Copyright:
+    Copyright 2006; Google Inc.
+    Copyright 2008; Google Inc.
+  License: BSD-3-Clause
+
+  open3d
+  Version: main-devel
+  Source: https://github.com/isl-org/Open3D
+  PURL: pkg:github/isl-org/open3d
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2005; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2015; Google Inc.
+  License: MIT
+
+  openfhe-development
+  Version: old-dev-v1.1.0
+  Source: https://github.com/openfheorg/openfhe-development
+  PURL: pkg:github/openfheorg/openfhe-development
+  Copyright:
+    Copyright 2022 ; OpenFHE
+    Copyright 2022 OpenFHE
+    Copyright  c) 2014-2022  NJIT  Duality Technologies Inc. and other contributors
+    Copyright  c) 2014-2023  NJIT  Duality Technologies Inc. and other contributors
+    Copyright  c) 2014-2024  NJIT  Duality Technologies Inc. and other contributors
+    Copyright  c) 2014-2025  NJIT  Duality Technologies Inc. and other contributors
+    Copyright (c) 2014-2022; NJIT; Duality Technologies Inc. and other contributors
+    Copyright (c) 2014-2023; NJIT; Duality Technologies Inc. and other contributors
+    Copyright (c) 2014-2024; NJIT; Duality Technologies Inc. and other contributors
+    Copyright (c) 2014-2025; NJIT; Duality Technologies Inc. and other contributors
+    Copyright (c) 2022; OpenFHE
+    Copyright 2012; Samuel Neves <sneves@dei.uc.pt>
+    Copyright 2012; Samuel Neves <sneves@dei.uc.pt>.  You may use this under the
+    Copyright 2016; JP Aumasson <jeanphilippe.aumasson@gmail.com>
+    Copyright 2016; JP Aumasson <jeanphilippe.aumasson@gmail.com>.
+    Copyright 2016; Samuel Neves <sneves@dei.uc.pt>
+  License: BSD-2-Clause
+
+  Otus_IP_filter
+  Version: 3
+  Source: https://github.com/Daniil199820/Otus_IP_filter
+  PURL: pkg:github/daniil199820/otus_ip_filter
+  Copyright:
+    Copyright 2009 Google Inc. All rights reserved
+    Copyright 2009 Google Inc.
+    Copyright 2009 Google Inc.  All rights reserved.
+  License: BSD-3-Clause
+
+  p2pool
+  Version: v4.5
+  Source: https://github.com/SChernykh/p2pool
+  PURL: pkg:github/schernykh/p2pool
+  Copyright:
+    Copyright 2024 Google Inc
+    Copyright 2024 Google Inc.
+  License: GPL-3.0-only
+
+  pf2
+  Version: v0.7.0
+  Source: https://github.com/osyoyu/pf2
+  PURL: pkg:github/osyoyu/pf2
+  Copyright:
+    Copyright 2023 Daisuke Aritomo
+    Copyright (C) 2012-2016 Free Software Foundation; Inc.
+    Copyright (c) 2023 Daisuke Aritomo
+  License: BSD-3-Clause, MIT
+
+  pkcs11_solid
+  Version: result-addition
+  Source: https://github.com/AndreanIvan/pkcs11_solid
+  PURL: pkg:github/andreanivan/pkcs11_solid
+  Copyright:
+    Copyright 2007; Google Inc.
+  License: UNKNOWN — requires manual review
+
+  platform/external/google-benchmark
+  Version: platform-tools-30.0.1
+  Source: https://android.googlesource.com/platform/external/google-benchmark/+archive/platform-tools-30.0.1.tar.gz
+  PURL: pkg:googlesource/android/platform/external/google-benchmark
+  Copyright:
+    Copyright 2015 Google Inc. All rights reserved
+    Copyright 2015 Google Inc.
+    Copyright 2015 Google Inc. All rights reserved.
+  License: Apache-2.0
+
+  platform/external/googletest
+  Version: aml_ads_351017080
+  Source: https://android.googlesource.com/platform/external/googletest/+archive/aml_ads_351017080.tar.gz
+  PURL: pkg:googlesource/android/platform/external/googletest
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2017 Google Inc
+    Copyright 2024 Google Inc
+    Copyright 2005; Google Inc.
+    Copyright 2006; Google Inc.
+    Copyright 2007; Google Inc.
+    Copyright 2009; Google Inc.
+    Copyright 2017 Google Inc.
+    Copyright 2018; Google Inc.
+    Copyright 2024 Google Inc.
+  License: BSD-3-Clause
+
+  rayx
+  Version: v0.19.4
+  Source: https://github.com/hz-b/rayx
+  PURL: pkg:github/hz-b/rayx
+  Copyright:
+    Copyright 2005; Google Inc.
+    Copyright 2007; Google Inc.
+  License: MIT
+
+  RK2
+  Version: v1.0.0.0
+  Source: https://github.com/amandreev17/RK2
+  PURL: pkg:github/amandreev17/rk2
+  License: BSD-3-Clause
+
+  rk2
+  Version: 1.0.5
+  Source: https://github.com/1gadji/rk2
+  PURL: pkg:github/1gadji/rk2
+  Copyright:
+    Copyright 2020; Google Inc.
+  License: BSD-3-Clause
+
+  Task_2
+  Version: 3
+  Source: https://github.com/VishnenkoMaxim/Task_2
+  PURL: pkg:github/vishnenkomaxim/task_2
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+  License: BSD-3-Clause
+
+  tcmalloc
+  Version: gperftools-2.1
+  Source: https://github.com/yangzhengxing/tcmalloc
+  PURL: pkg:github/yangzhengxing/tcmalloc
+  License: BSD-3-Clause
+
+  under-the-c-desktop
+  Version: iteration-4
+  Source: https://github.com/EECE3093C/under-the-c-desktop
+  PURL: pkg:github/eece3093c/under-the-c-desktop
+  Copyright:
+    Copyright 2008; Google Inc.
+    Copyright 2009; Google Inc.
+    Copyright 2010; Google Inc.
+  License: BSD-3-Clause
+
+  upx
+  Version: v3.00
+  Source: https://github.com/upx/upx
+  PURL: pkg:github/upx/upx
+  Copyright:
+    Copyright 1996-2014 Free Software Foundation Inc
+    Copyright 1999-2017 Free Software Foundation Inc
+    Copyright (C) 1996-2014 Free Software Foundation; Inc.
+    Copyright (C) 1999-2017 Free Software Foundation; Inc.
+    Copyright (c) 1996-2014 Free Software Foundation; Inc.
+    Copyright (c) 1999-2017 Free Software Foundation; Inc.
+  License: GPL-2.0-or-later
+
+  uthenticode
+  Version: v1.0.6
+  Source: https://github.com/trailofbits/uthenticode
+  PURL: pkg:github/trailofbits/uthenticode
+  Copyright:
+    Copyright (c) 2020 William Woodruff <william @ yossarian.net>
+    Copyright 2008; Google Inc.
+    Copyright 2008; Google Inc..
+    Copyright 2015; Google Inc.
+    Copyright 2015; Google Inc..
+  License: MIT
+
+  velocypack
+  Version: 247fc38
+  Source: https://github.com/arangodb/velocypack
+  PURL: pkg:github/arangodb/velocypack
+  Copyright:
+    Copyright 2008; Google Inc.
+    Copyright 2009; Google Inc.
+  License: Apache-2.0
+
+  winchecksec
+  Version: v3.1.0
+  Source: https://github.com/trailofbits/winchecksec
+  PURL: pkg:github/trailofbits/winchecksec
+  Copyright:
+    Copyright 2008 Google Inc
+    Copyright 2017 Google Inc
+    Copyright 2005; Google Inc.
+    Copyright 2006; Google Inc.
+    Copyright 2008 Google Inc.
+    Copyright 2008; Google Inc.
+    Copyright 2008; Google Inc..
+    Copyright 2009; Google Inc.
+    Copyright 2017 Google Inc.
+    Copyright 2018; Google Inc.
+    Copyright 2019; Google LLC.
+  License: Apache-2.0
+
+  xmlf90
+  Version: 1.5
+  Source: https://launchpad.net/xmlf90/trunk/1.5/+download/xmlf90-1.5.1.tar.gz
+  PURL: pkg:deb/xmlf90
+  Copyright:
+    Copyright (C) 2011-2017 Free Software Foundation; Inc.
+    Copyright (c) 2011-2017 Free Software Foundation; Inc.
+  License: BSD-2-Clause
+
+------------------------------------------------------------
+
+FULL LICENSE TEXTS
+
+--- BSD-3-Clause ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- 0BSD ---
+
+Full license text available at: https://spdx.org/licenses/0BSD.html
+
+
+--- 0BSD AND GPL-2.0-only AND GPL-3.0-only AND LGPL-2.1-only ---
+
+Full license text available at: https://spdx.org/licenses/0BSD AND GPL-2.0-only AND GPL-3.0-only AND LGPL-2.1-only.html
+
+
+--- CC0-1.0 OR Apache-2.0 AND CC0-1.0 AND Apache-2.0 AND CC0-1.0 AND Apache-2.0 ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- LGPL-2.1-only AND GPL-2.0-only AND LGPL-2.1-only ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-2.1-only AND GPL-2.0-only AND LGPL-2.1-only.html
+
+
+--- LGPL-2.1-only AND GPL-2.0-only AND GPL-2.0-only ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-2.1-only AND GPL-2.0-only AND GPL-2.0-only.html
+
+
+--- MIT AND GPL-2.0-only AND GPL-1.0-or-later AND MIT AND GPL-1.0-or-later AND MIT AND Boehm-GC AND GPL-1.0-or-later ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- GPL-2.0-only AND GPL-3.0-only AND GPL-1.0-or-later AND GPL-1.0-or-later AND GPL-2.0-only ---
+
+Full license text available at: https://spdx.org/licenses/GPL-2.0-only AND GPL-3.0-only AND GPL-1.0-or-later AND GPL-1.0-or-later AND GPL-2.0-only.html
+
+
+--- X11 AND MIT ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- X11-distribute-modifications-variant ---
+
+Full license text available at: https://spdx.org/licenses/X11-distribute-modifications-variant.html
+
+
+--- X11 ---
+
+Full license text available at: https://spdx.org/licenses/X11.html
+
+
+--- Zlib ---
+
+Full license text available at: https://spdx.org/licenses/Zlib.html
+
+
+--- ZPL-1.1 ---
+
+Full license text available at: https://spdx.org/licenses/ZPL-1.1.html
+
+
+--- ZPL-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/ZPL-2.0.html
+
+
+--- ZPL-2.1 ---
+
+Full license text available at: https://spdx.org/licenses/ZPL-2.1.html
+
+
+--- Unlicense ---
+
+Full license text available at: https://spdx.org/licenses/Unlicense.html
+
+
+--- TU-Berlin-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/TU-Berlin-2.0.html
+
+
+--- W3C ---
+
+Full license text available at: https://spdx.org/licenses/W3C.html
+
+
+--- WTFPL ---
+
+Full license text available at: https://spdx.org/licenses/WTFPL.html
+
+
+--- PHP-3.01 ---
+
+Full license text available at: https://spdx.org/licenses/PHP-3.01.html
+
+
+--- PHP-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/PHP-3.0.html
+
+
+--- Spencer-86 ---
+
+Full license text available at: https://spdx.org/licenses/Spencer-86.html
+
+
+--- Swift-exception AND u-boot-exception-2.0 AND WxWindows-exception-3.1 ---
+
+Full license text available at: https://spdx.org/licenses/Swift-exception AND u-boot-exception-2.0 AND WxWindows-exception-3.1.html
+
+
+--- Sleepycat AND BSD-3-Clause ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- SGI-B-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/SGI-B-2.0.html
+
+
+--- Ruby ---
+
+Full license text available at: https://spdx.org/licenses/Ruby.html
+
+
+--- MPL-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/MPL-1.0.html
+
+
+--- MPL-1.1 ---
+
+Full license text available at: https://spdx.org/licenses/MPL-1.1.html
+
+
+--- MPL-2.0 AND Apache-2.0 ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- MPL-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/MPL-2.0.html
+
+
+--- MIT OR PSF-2.0 ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT AND HPND-sell-variant AND MIT AND HPND AND MIT-open-group AND X11 ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT AND GPL-3.0-only ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT AND Apache-2.0 ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT AND MIT-open-group ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT AND HPND-sell-variant ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT AND X11-distribute-modifications-variant ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT-0 ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT-open-group AND X11 ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT-open-group AND HPND-sell-variant ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT-open-group ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- MIT ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- Linux-syscall-note ---
+
+Full license text available at: https://spdx.org/licenses/Linux-syscall-note.html
+
+
+--- Libpng ---
+
+Full license text available at: https://spdx.org/licenses/Libpng.html
+
+
+--- LPPL-1.1 ---
+
+Full license text available at: https://spdx.org/licenses/LPPL-1.1.html
+
+
+--- LPPL-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/LPPL-1.0.html
+
+
+--- LPPL-1.3c ---
+
+Full license text available at: https://spdx.org/licenses/LPPL-1.3c.html
+
+
+--- LPPL-1.3a ---
+
+Full license text available at: https://spdx.org/licenses/LPPL-1.3a.html
+
+
+--- LPPL-1.2 ---
+
+Full license text available at: https://spdx.org/licenses/LPPL-1.2.html
+
+
+--- LGPL-2.1-or-later AND GPL-3.0-or-later ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.1-or-later AND LLGPL ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.1-or-later AND LGPL-2.0-or-later ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.1-or-later AND MPL-1.0 AND GPL-1.0-or-later ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.1-or-later ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.1-only AND GPL-1.0-or-later AND LGPL-2.1-or-later ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.1-only ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-2.1-only.html
+
+
+--- LGPL-2.0-or-later AND LGPL-2.1-or-later ---
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+--- LGPL-2.0-only ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-2.0-only.html
+
+
+--- LGPL-3.0-linking-exception ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-3.0-linking-exception.html
+
+
+--- LGPL-3.0-only AND CC-BY-SA-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-3.0-only AND CC-BY-SA-3.0.html
+
+
+--- LGPL-3.0-only ---
+
+Full license text available at: https://spdx.org/licenses/LGPL-3.0-only.html
+
+
+--- LGPLLR ---
+
+Full license text available at: https://spdx.org/licenses/LGPLLR.html
+
+
+--- OLDAP-2.8 ---
+
+Full license text available at: https://spdx.org/licenses/OLDAP-2.8.html
+
+
+--- OFL-1.1 AND Apache-2.0 ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- OFL-1.1 ---
+
+Full license text available at: https://spdx.org/licenses/OFL-1.1.html
+
+
+--- ISC ---
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+
+--- ISC AND BSD-Source-Code AND BSD-3-Clause AND BSD-2-Clause AND Zlib ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- ICU ---
+
+Full license text available at: https://spdx.org/licenses/ICU.html
+
+
+--- HPND-sell-variant ---
+
+Full license text available at: https://spdx.org/licenses/HPND-sell-variant.html
+
+
+--- HPND-sell-variant AND MIT ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- HPND-DEC AND MIT-open-group ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- HPND AND MIT-open-group ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- HPND AND MIT-open-group AND HPND-DEC ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- HPND ---
+
+Full license text available at: https://spdx.org/licenses/HPND.html
+
+
+--- EPL-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/EPL-1.0.html
+
+
+--- EPL-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/EPL-2.0.html
+
+
+--- GPL-1.0-only ---
+
+Full license text available at: https://spdx.org/licenses/GPL-1.0-only.html
+
+
+--- GPL-1.0-or-later ---
+
+Full license text available at: https://spdx.org/licenses/GPL-1.0-or-later.html
+
+
+--- GPL-1.0-or-later AND GPL-2.0-or-later AND GPL-2.0-only ---
+
+Full license text available at: https://spdx.org/licenses/GPL-1.0-or-later AND GPL-2.0-or-later AND GPL-2.0-only.html
+
+
+--- GPL-1.0-or-later AND GPL-3.0-only AND MIT ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- GPL-1.0-or-later AND CC-BY-4.0 ---
+
+Full license text available at: https://spdx.org/licenses/GPL-1.0-or-later AND CC-BY-4.0.html
+
+
+--- GPL-1.0-or-later AND BSD-3-Clause ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- GPL-3.0-only AND BSD-3-Clause AND GPL-1.0-or-later AND GPL-2.0-only ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- GPL-3.0-only AND GPL-1.0-or-later AND BSD-3-Clause ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- GPL-3.0-only ---
+
+Full license text available at: https://spdx.org/licenses/GPL-3.0-only.html
+
+
+--- GPL-3.0-or-later AND FSFAP ---
+
+Full license text available at: https://spdx.org/licenses/GPL-3.0-or-later AND FSFAP.html
+
+
+--- GPL-3.0-linking-exception ---
+
+Full license text available at: https://spdx.org/licenses/GPL-3.0-linking-exception.html
+
+
+--- GPL-3.0-linking-source-exception ---
+
+Full license text available at: https://spdx.org/licenses/GPL-3.0-linking-source-exception.html
+
+
+--- GPL-2.0-only ---
+
+Full license text available at: https://spdx.org/licenses/GPL-2.0-only.html
+
+
+--- GPL-CC-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/GPL-CC-1.0.html
+
+
+--- GCC-exception-3.1 ---
+
+Full license text available at: https://spdx.org/licenses/GCC-exception-3.1.html
+
+
+--- GFDL-1.1-only ---
+
+Full license text available at: https://spdx.org/licenses/GFDL-1.1-only.html
+
+
+--- GFDL-1.3-only ---
+
+Full license text available at: https://spdx.org/licenses/GFDL-1.3-only.html
+
+
+--- GFDL-1.2-only ---
+
+Full license text available at: https://spdx.org/licenses/GFDL-1.2-only.html
+
+
+--- FSFAP ---
+
+Full license text available at: https://spdx.org/licenses/FSFAP.html
+
+
+--- Artistic-1.0-Perl OR GPL-1.0-or-later ---
+
+Full license text available at: https://spdx.org/licenses/Artistic-1.0-Perl OR GPL-1.0-or-later.html
+
+
+--- Artistic-1.0-Perl ---
+
+Full license text available at: https://spdx.org/licenses/Artistic-1.0-Perl.html
+
+
+--- Artistic-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/Artistic-2.0.html
+
+
+--- Apache-2.0 ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- Apache-2.0 WITH LLVM-exception ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- Apache-2.0 WITH LLVM-exception AND NCSA ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- Apache-2.0 AND Apache-2.0 AND OpenSSL ---
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+--- AFL-3.0 AND GPL-2.0-only AND AFL-2.1 AND GPL-2.0-or-later AND MIT AND GPL-1.0-or-later ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- AFL-2.1 ---
+
+Full license text available at: https://spdx.org/licenses/AFL-2.1.html
+
+
+--- AGPL-3.0-only ---
+
+Full license text available at: https://spdx.org/licenses/AGPL-3.0-only.html
+
+
+--- CPL-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CPL-1.0.html
+
+
+--- CC0-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC0-1.0.html
+
+
+--- CC-BY-2.5 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-2.5.html
+
+
+--- CC-BY-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-2.0.html
+
+
+--- CC-BY-3.0-US ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-3.0-US.html
+
+
+--- CC-BY-3.0-AT ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-3.0-AT.html
+
+
+--- CC-BY-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-3.0.html
+
+
+--- CC-BY-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-1.0.html
+
+
+--- CC-BY-4.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-4.0.html
+
+
+--- CC-BY-SA-4.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-4.0.html
+
+
+--- CC-BY-SA-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-1.0.html
+
+
+--- CC-BY-SA-2.1-JP ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-2.1-JP.html
+
+
+--- CC-BY-SA-2.0-UK ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-2.0-UK.html
+
+
+--- CC-BY-SA-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-2.0.html
+
+
+--- CC-BY-SA-2.5 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-2.5.html
+
+
+--- CC-BY-SA-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-3.0.html
+
+
+--- CC-BY-SA-3.0 AND GPL-2.0-or-later AND CC-BY-4.0 AND GPL-2.0-only ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-3.0 AND GPL-2.0-or-later AND CC-BY-4.0 AND GPL-2.0-only.html
+
+
+--- CC-BY-SA-3.0-AT ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-SA-3.0-AT.html
+
+
+--- CC-BY-ND-4.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-ND-4.0.html
+
+
+--- CC-BY-ND-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-ND-1.0.html
+
+
+--- CC-BY-ND-2.5 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-ND-2.5.html
+
+
+--- CC-BY-ND-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-ND-3.0.html
+
+
+--- CC-BY-NC-ND-2.5 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-ND-2.5.html
+
+
+--- CC-BY-NC-ND-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-ND-3.0.html
+
+
+--- CC-BY-NC-ND-3.0-IGO ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-ND-3.0-IGO.html
+
+
+--- CC-BY-NC-ND-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-ND-1.0.html
+
+
+--- CC-BY-NC-SA-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-SA-2.0.html
+
+
+--- CC-BY-NC-SA-2.5 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-SA-2.5.html
+
+
+--- CC-BY-NC-SA-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-SA-3.0.html
+
+
+--- CC-BY-NC-SA-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-SA-1.0.html
+
+
+--- CC-BY-NC-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-1.0.html
+
+
+--- CC-BY-NC-2.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-2.0.html
+
+
+--- CC-BY-NC-2.5 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-2.5.html
+
+
+--- CC-BY-NC-3.0 ---
+
+Full license text available at: https://spdx.org/licenses/CC-BY-NC-3.0.html
+
+
+--- CC-PDDC ---
+
+Full license text available at: https://spdx.org/licenses/CC-PDDC.html
+
+
+--- CDDL-1.1 ---
+
+Full license text available at: https://spdx.org/licenses/CDDL-1.1.html
+
+
+--- CDDL-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/CDDL-1.0.html
+
+
+--- BSL-1.0 ---
+
+Full license text available at: https://spdx.org/licenses/BSL-1.0.html
+
+
+--- BSD-3-Clause AND GPL-2.0-only AND BSD-3-Clause OR GPL-2.0-or-later AND GPL-1.0-or-later ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- BSD-3-Clause AND ISC AND ISC AND MIT AND MIT ---
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--- BSD-2-Clause ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- BSD-2-Clause AND BSD-3-Clause ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- BSD-2-Clause AND LGPL-2.1-only ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- BSD-2-Clause-Patent ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- BSD-2-Clause-Darwin ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+--- BSD-4-Clause-UC ---
+
+Full license text available at: https://spdx.org/licenses/BSD-4-Clause-UC.html
+
+
+--- BSD-Attribution-HPND-disclaimer ---
+
+Full license text available at: https://spdx.org/licenses/BSD-Attribution-HPND-disclaimer.html
+
+
+--- snprintf ---
+
+Full license text available at: https://spdx.org/licenses/snprintf.html
+
+
+--- libtiff ---
+
+Full license text available at: https://spdx.org/licenses/libtiff.html
+
+
+--- curl ---
+
+Full license text available at: https://spdx.org/licenses/curl.html
+
+
+--- bzip2-1.0.6 ---
+
+Full license text available at: https://spdx.org/licenses/bzip2-1.0.6.html
+
+
+--- GPL-2.0-or-later ---
+
+Full license text available at: https://spdx.org/licenses/GPL-2.0-or-later.html
+
+
+--- CPOL ---
+
+Full license text available at: https://spdx.org/licenses/CPOL.html
+
+
+--- BSD-3-Clause-LBNL ---
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
