@@ -1,0 +1,7 @@
+{
+  "bom": {
+    "include": [
+      {"purl":"pkg:github/openfheorg/openfhe-development","comment":"BSD-2-Clause upstream, GPL only in build tools"}
+    ]
+  }
+}
