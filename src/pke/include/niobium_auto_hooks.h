@@ -37,6 +37,9 @@ class CiphertextImpl;
 template <typename Element>
 using Ciphertext = std::shared_ptr<CiphertextImpl<Element>>;
 
+class PlaintextImpl;
+using Plaintext = std::shared_ptr<PlaintextImpl>;
+
 }  // namespace lbcrypto
 
 // ---------------------------------------------------------------------------
@@ -66,6 +69,17 @@ void on_deserialize_crypto_context(lbcrypto::CryptoContext<lbcrypto::DCRTPoly>& 
 // Queues a tag_input call (to be flushed when lazy_init fires).
 void on_deserialize_ciphertext(const std::string& filepath,
                                lbcrypto::Ciphertext<lbcrypto::DCRTPoly>& ct);
+
+// Called from CryptoContextImpl::MakePackedPlaintext /
+// MakeCKKSPackedPlaintext after the encoder has finished producing pt.
+// Weak default: no-op (existing programs linking only libnbfhetch get
+// no behavioral change). Strong override in libniobium_client_autofacade:
+// tag pt as an input under an auto-generated name (pt_0, pt_1, ...) so
+// the FHETCH simulator has the encoded polynomial values as live-in
+// data — required for replay of any op that consumes the plaintext.
+// In DORMANT mode (explicit niobium::compiler() SDK in use), the
+// override stays a no-op to avoid duplicate-tagging the manual flow.
+void on_make_plaintext(lbcrypto::Plaintext& pt);
 
 // Called from the first EvalAdd/EvalMult/EvalRotate/EvalSub/EvalNegate.
 // Idempotent — only runs once.  Loads config, sets up the compiler session,

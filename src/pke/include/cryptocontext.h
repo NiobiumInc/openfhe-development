@@ -1168,7 +1168,18 @@ public:
     Plaintext MakePackedPlaintext(const std::vector<int64_t>& value, size_t noiseScaleDeg = 1,
                                   uint32_t level = 0) const {
 #ifdef OPENFHE_CPROBES
-        if (g_replay_mode) return nullptr;
+        // Replay path: skip the encoding (the FHETCH sim already has the
+        // live-in values from the recording on disk). Still fire
+        // on_make_plaintext with a null pt so the auto-facade override can
+        // advance its deterministic counter and rehydrate the recorded
+        // plaintext bytes from <prog>.input_pt_<N>.bin into captured_inputs.
+        // The downstream Eval*(ct, pt) wrappers short-circuit to the
+        // scheme proxy in replay, so null pt never touches TypeCheck.
+        if (g_replay_mode) {
+            Plaintext null_pt;
+            niobium_auto::on_make_plaintext(null_pt);
+            return null_pt;
+        }
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
         if (value.empty())
@@ -1177,6 +1188,7 @@ public:
         auto pt = MakePlaintext(PACKED_ENCODING, value, noiseScaleDeg, level);
 #ifdef OPENFHE_CPROBES
         if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+        niobium_auto::on_make_plaintext(pt);
 #endif
         return pt;
     }
@@ -1195,7 +1207,11 @@ public:
                                       uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
                                       uint32_t slots = 0) const {
 #ifdef OPENFHE_CPROBES
-        if (g_replay_mode) return nullptr;
+        if (g_replay_mode) {
+            Plaintext null_pt;
+            niobium_auto::on_make_plaintext(null_pt);
+            return null_pt;
+        }
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
         VerifyCKKSScheme(__func__);
@@ -1205,6 +1221,7 @@ public:
         auto pt = MakeCKKSPackedPlaintextInternal(value, noiseScaleDeg, level, params, slots);
 #ifdef OPENFHE_CPROBES
         if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+        niobium_auto::on_make_plaintext(pt);
 #endif
         return pt;
     }
@@ -1222,7 +1239,11 @@ public:
     Plaintext MakeCKKSPackedPlaintext(const std::vector<double>& value, size_t noiseScaleDeg = 1, uint32_t level = 0,
                                       const std::shared_ptr<ParmType> params = nullptr, uint32_t slots = 0) const {
 #ifdef OPENFHE_CPROBES
-        if (g_replay_mode) return nullptr;
+        if (g_replay_mode) {
+            Plaintext null_pt;
+            niobium_auto::on_make_plaintext(null_pt);
+            return null_pt;
+        }
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
         VerifyCKKSScheme(__func__);
@@ -1236,6 +1257,7 @@ public:
         auto pt = MakeCKKSPackedPlaintextInternal(complexValue, noiseScaleDeg, level, params, slots);
 #ifdef OPENFHE_CPROBES
         if (niobium_auto::is_recording()) openfhe_cprobe_resume_recording();
+        niobium_auto::on_make_plaintext(pt);
 #endif
         return pt;
     }
@@ -1507,6 +1529,14 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAdd(ConstCiphertext<Element>& ciphertext, Plaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        // In replay, MakeCKKSPackedPlaintext returns a null pt as a shortcut;
+        // dispatch straight to the scheme proxy which already handles the
+        // null-pt path (NiobiumAutoScheme::EvalAdd(ct, pt) returns dummy(ct)
+        // without dereferencing pt). Without this early-return, TypeCheck
+        // and SetFormat would crash on the null plaintext.
+        if (g_replay_mode) return GetScheme()->EvalAdd(ciphertext, plaintext);
+#endif
         TypeCheck(ciphertext, plaintext);
         plaintext->SetFormat(EVALUATION);
         return GetScheme()->EvalAdd(ciphertext, plaintext);
@@ -1530,6 +1560,9 @@ public:
     * @param plaintext   Plaintext to add.
     */
     void EvalAddInPlace(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) { GetScheme()->EvalAddInPlace(ciphertext, plaintext); return; }
+#endif
         TypeCheck(ciphertext, plaintext);
         plaintext->SetFormat(EVALUATION);
         GetScheme()->EvalAddInPlace(ciphertext, plaintext);
@@ -1553,6 +1586,9 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalAddMutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return GetScheme()->EvalAddMutable(ciphertext, plaintext);
+#endif
         TypeCheck(ciphertext, plaintext);
         plaintext->SetFormat(EVALUATION);
         return GetScheme()->EvalAddMutable(ciphertext, plaintext);
@@ -1718,6 +1754,9 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalSub(ConstCiphertext<Element>& ciphertext, Plaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return GetScheme()->EvalSub(ciphertext, plaintext);
+#endif
         TypeCheck(ciphertext, plaintext);
         return GetScheme()->EvalSub(ciphertext, plaintext);
     }
@@ -1741,6 +1780,9 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalSubMutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return GetScheme()->EvalSubMutable(ciphertext, plaintext);
+#endif
         TypeCheck(ciphertext, plaintext);
         return GetScheme()->EvalSubMutable(ciphertext, plaintext);
     }
@@ -1766,6 +1808,9 @@ public:
     * @param plaintext  Subtrahend.
     */
     void EvalSubInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) { GetScheme()->EvalSubInPlace(ciphertext, plaintext); return; }
+#endif
         TypeCheck(ciphertext, plaintext);
         GetScheme()->EvalSubInPlace(ciphertext, plaintext);
     }
@@ -2060,7 +2105,11 @@ public:
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
 
-        if (evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
+        // Skip the key-vec sufficiency check in replay: dummy ciphertexts
+        // from NiobiumAutoScheme carry an inflated NumberCiphertextElements
+        // that would falsely trip the threshold. The scheme proxy returns
+        // dummy(ct) without ever consulting evalKeyVec.
+        if (!g_replay_mode && evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for Relinearize");
 
         return GetScheme()->Relinearize(ciphertext, evalKeyVec);
@@ -2077,7 +2126,7 @@ public:
             OPENFHE_THROW("Input ciphertext is nullptr");
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
-        if (evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
+        if (!g_replay_mode && evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
 
         GetScheme()->RelinearizeInPlace(ciphertext, evalKeyVec);
@@ -2097,7 +2146,7 @@ public:
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext1->GetKeyTag());
 
-        if (evalKeyVec.size() <
+        if (!g_replay_mode && evalKeyVec.size() <
             (ciphertext1->NumberCiphertextElements() + ciphertext2->NumberCiphertextElements() - 3)) {
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for EvalMultAndRelinearize");
         }
@@ -2122,6 +2171,9 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalMult(ConstCiphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return GetScheme()->EvalMult(ciphertext, plaintext);
+#endif
         TypeCheck(ciphertext, plaintext);
         return GetScheme()->EvalMult(ciphertext, plaintext);
     }
@@ -2145,6 +2197,9 @@ public:
     * @return Resulting ciphertext.
     */
     Ciphertext<Element> EvalMultMutable(Ciphertext<Element>& ciphertext, Plaintext& plaintext) const {
+#ifdef OPENFHE_CPROBES
+        if (g_replay_mode) return GetScheme()->EvalMultMutable(ciphertext, plaintext);
+#endif
         TypeCheck(ciphertext, plaintext);
         return GetScheme()->EvalMultMutable(ciphertext, plaintext);
     }
