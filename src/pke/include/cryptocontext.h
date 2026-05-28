@@ -69,7 +69,14 @@
 #ifdef OPENFHE_CPROBES
     #include "niobium_auto_hooks.h"
     #include "cprobes.h"
+
+    // Helper macro to throw excpetions if condtion is met and replay 
+    // mode is off
+    #define NB_REQUIRE_BUT_NOT_IN_REPLAY(condition, message) \
+        do { if (!g_replay_mode && !(condition)) { OPENFHE_THROW(message); } } while (0)
+
 #endif
+
 
 namespace lbcrypto {
 
@@ -248,6 +255,19 @@ class CryptoContextImpl : public Serializable {
     static std::map<std::string, std::vector<EvalKey<Element>>> s_evalMultKeyMap;
     // cached evalautomorphism keys, by secret key UID
     static std::map<std::string, std::shared_ptr<std::map<uint32_t, EvalKey<Element>>>> s_evalAutomorphismKeyMap;
+
+
+#ifdef OPENFHE_CPROBES
+    /**
+    * @brief During replay create a null plaintext, tags and returns it
+    */
+    static Plaintext ReplayNullPlaintext(){
+        Plaintext null_pt;
+        niobium_auto::on_make_plaintext(null_pt);
+        return null_pt;
+    }
+
+#endif
 
 protected:
     // crypto parameters
@@ -1168,18 +1188,8 @@ public:
     Plaintext MakePackedPlaintext(const std::vector<int64_t>& value, size_t noiseScaleDeg = 1,
                                   uint32_t level = 0) const {
 #ifdef OPENFHE_CPROBES
-        // Replay path: skip the encoding (the FHETCH sim already has the
-        // live-in values from the recording on disk). Still fire
-        // on_make_plaintext with a null pt so the auto-facade override can
-        // advance its deterministic counter and rehydrate the recorded
-        // plaintext bytes from <prog>.input_pt_<N>.bin into captured_inputs.
-        // The downstream Eval*(ct, pt) wrappers short-circuit to the
-        // scheme proxy in replay, so null pt never touches TypeCheck.
-        if (g_replay_mode) {
-            Plaintext null_pt;
-            niobium_auto::on_make_plaintext(null_pt);
-            return null_pt;
-        }
+        // Replay path: skip the encoding 
+        if (g_replay_mode) return ReplayNullPlaintext();
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
         if (value.empty())
@@ -1207,11 +1217,8 @@ public:
                                       uint32_t level = 0, const std::shared_ptr<ParmType> params = nullptr,
                                       uint32_t slots = 0) const {
 #ifdef OPENFHE_CPROBES
-        if (g_replay_mode) {
-            Plaintext null_pt;
-            niobium_auto::on_make_plaintext(null_pt);
-            return null_pt;
-        }
+        // Replay path: skip the encoding 
+        if (g_replay_mode) return ReplayNullPlaintext();
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
         VerifyCKKSScheme(__func__);
@@ -1239,11 +1246,8 @@ public:
     Plaintext MakeCKKSPackedPlaintext(const std::vector<double>& value, size_t noiseScaleDeg = 1, uint32_t level = 0,
                                       const std::shared_ptr<ParmType> params = nullptr, uint32_t slots = 0) const {
 #ifdef OPENFHE_CPROBES
-        if (g_replay_mode) {
-            Plaintext null_pt;
-            niobium_auto::on_make_plaintext(null_pt);
-            return null_pt;
-        }
+        // Replay path: skip the encoding 
+        if (g_replay_mode) return ReplayNullPlaintext();
         if (niobium_auto::is_recording()) openfhe_cprobe_pause_recording();
 #endif
         VerifyCKKSScheme(__func__);
@@ -2105,13 +2109,14 @@ public:
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
 
-        // Skip the key-vec sufficiency check in replay: dummy ciphertexts
-        // from NiobiumAutoScheme carry an inflated NumberCiphertextElements
-        // that would falsely trip the threshold. The scheme proxy returns
-        // dummy(ct) without ever consulting evalKeyVec.
-        if (!g_replay_mode && evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
+#ifdef OPENFHE_CPROBES
+        // Skip the key-vec sufficiency check in replay
+        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2), "Insufficient value was used for maxRelinSkDeg to generate keys for Relinearize");
+#else
+        if (evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for Relinearize");
 
+#endif
         return GetScheme()->Relinearize(ciphertext, evalKeyVec);
     }
 
@@ -2126,8 +2131,14 @@ public:
             OPENFHE_THROW("Input ciphertext is nullptr");
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
-        if (!g_replay_mode && evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
+#ifdef OPENFHE_CPROBES
+        // Skip the key-vec sufficiency check in replay
+        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2), "Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
+        
+#else
+        if (evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
+#endif
 
         GetScheme()->RelinearizeInPlace(ciphertext, evalKeyVec);
     }
@@ -2146,11 +2157,16 @@ public:
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext1->GetKeyTag());
 
-        if (!g_replay_mode && evalKeyVec.size() <
+#ifdef OPENFHE_CPROBES
+        
+        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() <
+            (ciphertext1->NumberCiphertextElements() + ciphertext2->NumberCiphertextElements() - 3),"Insufficient value was used for maxRelinSkDeg to generate keys for EvalMultAndRelinearize");
+#else
+        if (evalKeyVec.size() <
             (ciphertext1->NumberCiphertextElements() + ciphertext2->NumberCiphertextElements() - 3)) {
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for EvalMultAndRelinearize");
         }
-
+#endif
         return GetScheme()->EvalMultAndRelinearize(ciphertext1, ciphertext2, evalKeyVec);
     }
 
