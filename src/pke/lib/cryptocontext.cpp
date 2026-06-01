@@ -588,7 +588,6 @@ DecryptResult CryptoContextImpl<DCRTPoly>::Decrypt(ConstCiphertext<DCRTPoly>& ci
         OPENFHE_THROW("plaintext is empty");
     if (privateKey == nullptr || Mismatched(privateKey->GetCryptoContext()))
         OPENFHE_THROW("Information was not generated with this crypto context");
-    std::cout << "That decryption!" << std::endl;
 #ifdef OPENFHE_CPROBES
     {
         // Recording: probes the ciphertext as output
