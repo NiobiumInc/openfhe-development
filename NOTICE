@@ -90,7 +90,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----
 
-Package: certifi:2026.4.22
+Package: certifi:2026.5.20
 
 The following copyrights and licenses were found in the source code of this package:
 
@@ -2169,7 +2169,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ----
 
-Package: lxml:6.1.0
+Package: lxml:6.1.1
 
 The following copyrights and licenses were found in the source code of this package:
 
@@ -2481,7 +2481,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ----
 
-Package: requests:2.33.1
+Package: requests:2.34.2
 
 The following copyrights and licenses were found in the source code of this package:
 
@@ -2745,7 +2745,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----
 
-Package: soupsieve:2.8.3
+Package: soupsieve:2.8.4
 
 The following copyrights and licenses were found in the source code of this package:
 
