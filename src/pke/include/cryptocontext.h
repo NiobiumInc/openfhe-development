@@ -2110,8 +2110,9 @@ public:
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
 
 #ifdef OPENFHE_CPROBES
-        // Skip the key-vec sufficiency check in replay
-        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2), "Insufficient value was used for maxRelinSkDeg to generate keys for Relinearize");
+        // Skip the key-vec sufficiency check in replay. NB_REQUIRE asserts the
+        // SUCCESS condition (keys sufficient), i.e. throws on the inverse.
+        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() >= (ciphertext->NumberCiphertextElements() - 2), "Insufficient value was used for maxRelinSkDeg to generate keys for Relinearize");
 #else
         if (evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for Relinearize");
@@ -2132,9 +2133,9 @@ public:
 
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext->GetKeyTag());
 #ifdef OPENFHE_CPROBES
-        // Skip the key-vec sufficiency check in replay
-        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2), "Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
-        
+        // Skip the key-vec sufficiency check in replay. NB_REQUIRE asserts the
+        // SUCCESS condition (keys sufficient), i.e. throws on the inverse.
+        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() >= (ciphertext->NumberCiphertextElements() - 2), "Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
 #else
         if (evalKeyVec.size() < (ciphertext->NumberCiphertextElements() - 2))
             OPENFHE_THROW("Insufficient value was used for maxRelinSkDeg to generate keys for RelinearizeInPlace");
@@ -2158,8 +2159,8 @@ public:
         const auto& evalKeyVec = CryptoContextImpl<Element>::GetEvalMultKeyVector(ciphertext1->GetKeyTag());
 
 #ifdef OPENFHE_CPROBES
-        
-        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() <
+        // NB_REQUIRE asserts the SUCCESS condition (keys sufficient).
+        NB_REQUIRE_BUT_NOT_IN_REPLAY(evalKeyVec.size() >=
             (ciphertext1->NumberCiphertextElements() + ciphertext2->NumberCiphertextElements() - 3),"Insufficient value was used for maxRelinSkDeg to generate keys for EvalMultAndRelinearize");
 #else
         if (evalKeyVec.size() <
