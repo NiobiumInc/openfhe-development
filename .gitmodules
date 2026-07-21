@@ -9,4 +9,4 @@
 	url = https://github.com/gperftools/gperftools.git
 [submodule "third-party/cereal"]
 	path = third-party/cereal
-	url = https://github.com/openfheorg/cereal.git
+	url = https://github.com/NiobiumInc/cereal.git
