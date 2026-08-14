@@ -54,34 +54,22 @@ class CCParams;
 template <typename ContextGeneratorType, typename Element>
 typename ContextGeneratorType::ContextType genCryptoContextCKKSRNSInternal(
     const CCParams<ContextGeneratorType>& parameters) {
-#if NATIVEINT == 128
-    if (parameters.GetScalingTechnique() == FLEXIBLEAUTO || parameters.GetScalingTechnique() == FLEXIBLEAUTOEXT ||
-        parameters.GetScalingTechnique() == COMPOSITESCALINGAUTO ||
-        parameters.GetScalingTechnique() == COMPOSITESCALINGMANUAL) {
-        OPENFHE_THROW(
-            "128-bit CKKS is not supported for the FLEXIBLEAUTO, FLEXIBLEAUTOEXT, COMPOSITESCALINGAUTO or COMPOSITESCALINGMANUAL methods.");
-    }
-#endif
     using ParmType                   = typename Element::Params;
     constexpr float assuranceMeasure = 36.0f;
 
     auto ep = std::make_shared<ParmType>();
 
-    usint scalingModSize    = parameters.GetScalingModSize();
-    usint firstModSize      = parameters.GetFirstModSize();
+    uint32_t scalingModSize    = parameters.GetScalingModSize();
+    uint32_t firstModSize      = parameters.GetFirstModSize();
     double floodingNoiseStd = 0;
     if (parameters.GetDecryptionNoiseMode() == NOISE_FLOODING_DECRYPT &&
         parameters.GetExecutionMode() == EXEC_EVALUATION) {
-        if (parameters.GetNoiseEstimate() == 0) {
-            OPENFHE_THROW(
-                "Noise estimate must be set in the combination of NOISE_FLOODING_DECRYPT and EXEC_EVALUATION modes.");
-        }
         double logstd =
-            parameters.GetStatisticalSecurity() / 2 + log2(sqrt(12 * parameters.GetNumAdversarialQueries()));
-        floodingNoiseStd = pow(2, logstd + parameters.GetNoiseEstimate());
+            parameters.GetStatisticalSecurity() / 2 + std::log2(std::sqrt(12 * parameters.GetNumAdversarialQueries()));
+        floodingNoiseStd = std::pow(2, logstd + parameters.GetNoiseEstimate());
 #if NATIVEINT == 128
         scalingModSize = parameters.GetDesiredPrecision() + parameters.GetNoiseEstimate() + logstd +
-                         0.5 * log2(parameters.GetRingDim());
+                         0.5 * std::log2(parameters.GetRingDim());
         firstModSize = scalingModSize + 11;
 #else
         scalingModSize = MAX_MODULUS_SIZE - 1;

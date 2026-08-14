@@ -33,8 +33,6 @@
   This code exercises the encoding libraries of the OpenFHE lattice encryption library.
 */
 
-#define PROFILE
-
 #include "encoding/encodings.h"
 #include "gtest/gtest.h"
 #include "lattice/lat-hal.h"
@@ -47,11 +45,12 @@ using namespace lbcrypto;
 
 class UTGENERAL_ENCODING : public ::testing::Test {
 protected:
-    virtual void SetUp() {}
+    virtual void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     virtual void TearDown() {
-        // Code here will be called immediately after each test
-        // (right before the destructor).
+        OpenFHEParallelControls.UnitTestStop();
     }
 };
 
@@ -126,7 +125,7 @@ TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics) 
     BigInteger modulusP(p);
 
     uint32_t mArb = 2 * m;
-    uint32_t mNTT = pow(2, ceil(log2(2 * m - 1)));
+    uint32_t mNTT = std::pow(2, std::ceil(std::log2(2 * m - 1)));
 
     // populate the towers for the small modulus
 
@@ -188,7 +187,7 @@ TEST_F(UTGENERAL_ENCODING, packed_int_ptxt_encoding_DCRTPoly_prime_cyclotomics_n
     BigInteger modulusP(p);
 
     uint32_t mArb = 2 * m;
-    uint32_t mNTT = pow(2, ceil(log2(2 * m - 1)));
+    uint32_t mNTT = std::pow(2, std::ceil(std::log2(2 * m - 1)));
 
     // populate the towers for the small modulus
     std::vector<NativeInteger> init_moduli(init_size);

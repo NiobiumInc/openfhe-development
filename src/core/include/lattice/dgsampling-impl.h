@@ -75,14 +75,14 @@ void LatticeGaussSampUtility<Element>::GaussSampGq(const Element& syndrome, doub
 
     //  set the values of matrix L
     // (double) is added to avoid integer division
-    l[0] = sqrt(base * (1 + 1 / k) + 1);
+    l[0] = std::sqrt(base * (1 + 1 / k) + 1);
     for (size_t i = 1; i < k; i++)
-        l[i] = sqrt(base * (1 + 1 / static_cast<double>(k - i)));
+        l[i] = std::sqrt(base * (1 + 1 / static_cast<double>(k - i)));
 
     h[0] = 0;
     // (double) is added to avoid integer division
     for (size_t i = 1; i < k; i++)
-        h[i] = sqrt(base * (1 - 1 / static_cast<double>(k - (i - 1))));
+        h[i] = std::sqrt(base * (1 - 1 / static_cast<double>(k - (i - 1))));
 
     // c can be pre-computed as it only depends on the modulus
     // (double) is added to avoid integer division
@@ -151,14 +151,14 @@ void LatticeGaussSampUtility<Element>::GaussSampGqArbBase(const Element& syndrom
 
     //  set the values of matrix L
     // (double) is added to avoid integer division
-    l[0] = sqrt(base * (1 + 1 / k) + 1);
+    l[0] = std::sqrt(base * (1 + 1 / k) + 1);
     for (size_t i = 1; i < k; i++)
-        l[i] = sqrt(base * (1 + 1 / static_cast<double>(k - i)));
+        l[i] = std::sqrt(base * (1 + 1 / static_cast<double>(k - i)));
 
     h[0] = 0;
     // (double) is added to avoid integer division
     for (size_t i = 1; i < k; i++)
-        h[i] = sqrt(base * (1 - 1 / static_cast<double>(k - (i - 1))));
+        h[i] = std::sqrt(base * (1 - 1 / static_cast<double>(k - (i - 1))));
 
     // c can be pre-computed as it only depends on the modulus
     // (double) is added to avoid integer division
@@ -445,7 +445,7 @@ std::shared_ptr<Matrix<int64_t>> LatticeGaussSampUtility<Element>::ZSampleF(cons
                                                                             size_t n) {
     if (f.Size() == 1) {
         auto p     = std::make_shared<Matrix<int64_t>>([]() { return 0; }, 1, 1);
-        (*p)(0, 0) = dgg.GenerateIntegerKarney(c[0].real(), sqrt(f[0].real()));
+        (*p)(0, 0) = dgg.GenerateIntegerKarney(c[0].real(), std::sqrt(f[0].real()));
         return p;
     }
 
@@ -455,7 +455,7 @@ std::shared_ptr<Matrix<int64_t>> LatticeGaussSampUtility<Element>::ZSampleF(cons
     f0.SetFormat(Format::EVALUATION);
     f1.SetFormat(Format::EVALUATION);
 
-    usint f0_size = f0.Size();
+    uint32_t f0_size = f0.Size();
 
     auto qZVector = std::make_shared<Matrix<int64_t>>([]() { return 0; }, f0_size * 2, 1);
 
@@ -477,7 +477,7 @@ Matrix<int32_t> LatticeGaussSampUtility<Element>::Permute(Matrix<int32_t>* p) {
     int evenPtr = 0;
     int oddPtr  = p->GetRows() / 2;
     Matrix<int32_t> permuted([]() { return 0; }, p->GetRows(), 1);
-    for (usint i = 0; i < p->GetRows(); i++) {
+    for (uint32_t i = 0; i < p->GetRows(); i++) {
         if (i % 2 == 0) {
             permuted(evenPtr, 0) = (*p)(i, 0);
             evenPtr++;

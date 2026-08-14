@@ -31,13 +31,13 @@
 
 #if !defined(_MSC_VER)
 
-    #include "UnitTestUtils.h"
+    #include "gtest/gtest.h"
     #include "UnitTestCCParams.h"
     #include "UnitTestCryptoContext.h"
+    #include "UnitTestUtils.h"
 
     #include <iostream>
     #include <vector>
-    #include "gtest/gtest.h"
 
 using namespace lbcrypto;
 
@@ -95,9 +95,9 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTBGVRNS_SHEAD
     return os << test.toString();
 }
 //===========================================================================================================
-constexpr usint RING_DIM = 8192;
-constexpr usint PTM      = 20;
-constexpr usint DSIZE    = 4;
+constexpr uint32_t RING_DIM = 8192;
+constexpr uint32_t PTM      = 20;
+constexpr uint32_t DSIZE    = 4;
 constexpr double STD_DEV = 3.19;
 
 // clang-format off
@@ -120,10 +120,13 @@ class UTBGVRNS_SHEADVANCED : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_
     using Element = DCRTPoly;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void UnitTest_EvalMultSingle(const TEST_CASE_UTBGVRNS_SHEADVANCED& testData,

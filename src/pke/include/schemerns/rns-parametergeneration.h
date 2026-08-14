@@ -35,6 +35,7 @@
 #include "lattice/lat-hal.h"
 
 #include "schemebase/base-parametergeneration.h"
+#include "schemerns/rns-modulus-limits.h"
 
 #include <string>
 #include <memory>
@@ -66,13 +67,6 @@ public:
     std::string SerializedObjectName() const {
         return "ParameterGenerationRNS";
     }
-
-protected:
-    enum DCRT_MODULUS {
-        DEFAULT_EXTRA_MOD_SIZE = 20,
-        MIN_SIZE               = 14,
-        MAX_SIZE               = 60,
-    };
 };
 
 }  // namespace lbcrypto

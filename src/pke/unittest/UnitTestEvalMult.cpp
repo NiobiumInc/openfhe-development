@@ -28,13 +28,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
-#include "UnitTestUtils.h"
+
+#include "gtest/gtest.h"
 #include "UnitTestCCParams.h"
 #include "UnitTestCryptoContext.h"
+#include "UnitTestUtils.h"
 
 #include <iostream>
 #include <vector>
-#include "gtest/gtest.h"
 
 using namespace lbcrypto;
 
@@ -113,15 +114,15 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_EVAL
 }
 //===========================================================================================================
 #if NATIVEINT == 128
-constexpr usint SCALE = 78;
+constexpr uint32_t SCALE = 78;
 #else
-constexpr usint SCALE = 50;
+constexpr uint32_t SCALE = 50;
 #endif
-constexpr usint RING_DIM        = 16;
-constexpr usint BATCH           = 8;
-constexpr usint MULT_DEPTH      = 4;
+constexpr uint32_t RING_DIM        = 16;
+constexpr uint32_t BATCH           = 8;
+constexpr uint32_t MULT_DEPTH      = 4;
 constexpr SecurityLevel SEC_LVL = HEStd_NotSet;
-constexpr usint PTM             = 65537;
+constexpr uint32_t PTM             = 65537;
 
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_EVALMULT> testCasesUTGENERAL_EVALMULT = {
@@ -265,11 +266,13 @@ class UTGENERAL_EVALMULT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_E
     const double eps = EPSILON;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
-        PackedEncoding::Destroy();
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void UnitTest_EvalMultManyErrorHandling(const TEST_CASE_UTGENERAL_EVALMULT& testData,
@@ -325,12 +328,12 @@ protected:
             // EvalMult Operation
             ////////////////////////////////////////////////////////////
             // Perform consecutive multiplications and do a keyswtiching at the end.
-            auto ciphertextMul12 = (INVALID_CIPHERTEXT_ERROR1 == testData.error) ?
-                                       cryptoContext->EvalMultNoRelin(nullptr, ciphertext2) :
-                                       cryptoContext->EvalMultNoRelin(ciphertext1, ciphertext2);
-            auto ciphertextMul123 = (INVALID_CIPHERTEXT_ERROR2 == testData.error) ?
-                                        cryptoContext->EvalMultNoRelin(ciphertextMul12, nullptr) :
-                                        cryptoContext->EvalMultNoRelin(ciphertextMul12, ciphertext3);
+            auto ciphertextMul12                  = (INVALID_CIPHERTEXT_ERROR1 == testData.error) ?
+                                                        cryptoContext->EvalMultNoRelin(nullptr, ciphertext2) :
+                                                        cryptoContext->EvalMultNoRelin(ciphertext1, ciphertext2);
+            auto ciphertextMul123                 = (INVALID_CIPHERTEXT_ERROR2 == testData.error) ?
+                                                        cryptoContext->EvalMultNoRelin(ciphertextMul12, nullptr) :
+                                                        cryptoContext->EvalMultNoRelin(ciphertextMul12, ciphertext3);
             Ciphertext<Element> ciphertextMul1234 = nullptr;
             if (INVALID_CIPHERTEXT_ERROR3 == testData.error)
                 ciphertextMul1234 = cryptoContext->EvalMultAndRelinearize(nullptr, ciphertext4);

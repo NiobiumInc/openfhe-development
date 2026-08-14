@@ -256,7 +256,7 @@ public:
 
         auto params = g(0, 0).GetParams()->GetParams();
 
-        uint64_t digitCount = (uint64_t)ceil(log2(params[0]->GetModulus().ConvertToDouble()) / log2(base));
+        uint64_t digitCount = (uint64_t)std::ceil(std::log2(params[0]->GetModulus().ConvertToDouble()) / std::log2(base));
 
         for (size_t k = 0; k < digitCount; k++) {
             for (size_t i = 0; i < params.size(); i++) {
@@ -620,7 +620,7 @@ public:
     inline Matrix<Element> ExtractRows(size_t row_start, size_t row_end) const {
         Matrix<Element> result(this->allocZero, row_end - row_start + 1, this->cols);
 
-        for (usint row = row_start; row < row_end + 1; row++) {
+        for (uint32_t row = row_start; row < row_end + 1; row++) {
             int i = 0;
 
             for (auto elem = this->GetData()[row].begin(); elem != this->GetData()[row].end(); ++elem) {

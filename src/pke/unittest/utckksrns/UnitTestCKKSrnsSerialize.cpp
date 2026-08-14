@@ -31,7 +31,7 @@
 
 #include "ciphertext-ser.h"
 #include "cryptocontext-ser.h"
-#include "globals.h"  // for SERIALIZE_PRECOMPUTE
+#include "globals.h"
 #include "gtest/gtest.h"
 #include "scheme/ckksrns/ckksrns-ser.h"
 #include "UnitTestCCParams.h"
@@ -40,8 +40,8 @@
 #include "UnitTestUtils.h"
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace lbcrypto;
 
@@ -111,11 +111,11 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTCKKSRNS_SER&
  *        Use small values (3-4?) if you need rotations before any multiplications.
  * BATCH: The length of the packed vectors to be used with CKKS.
  */
-constexpr usint RING_DIM   = 32;
-constexpr usint SMODSIZE   = 50;
-constexpr usint MULT_DEPTH = 3;
-constexpr usint DSIZE      = 20;
-constexpr usint BATCH      = 16;
+constexpr uint32_t RING_DIM   = 32;
+constexpr uint32_t SMODSIZE   = 50;
+constexpr uint32_t MULT_DEPTH = 3;
+constexpr uint32_t DSIZE      = 20;
+constexpr uint32_t BATCH      = 16;
 // clang-format off
 static std::vector<TEST_CASE_UTCKKSRNS_SER> testCases = {
     // TestType,            Descr, Scheme,         RDim,     MultDepth,  SModSize, DSize, BatchSz, SecKeyDist, MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,  EncTech, PREMode
@@ -176,10 +176,13 @@ class UTCKKSRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTCKKSRNS_SER> {
     const double eps = EPSILON;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void UnitTestContext(const TEST_CASE_UTCKKSRNS_SER& testData, const std::string& failmsg = std::string()) {

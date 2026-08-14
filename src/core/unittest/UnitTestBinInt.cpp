@@ -29,24 +29,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
 
-/*
-  This code tests the binary integers in the math libraries of the OpenFHE lattice encryption library.
- */
-
 #include "config_core.h"
 #include "gtest/gtest.h"
 #include "lattice/lat-hal.h"
-#include "lattice/ilelement.h"
-#include "math/math-hal.h"
 #include "math/distrgen.h"
+#include "math/math-hal.h"
 #include "math/nbtheory.h"
 #include "testdefs.h"
 #include "utils/inttypes.h"
 #include "utils/utilities.h"
 
 #include <iostream>
-
-#define PROFILE
 
 using namespace lbcrypto;
 
@@ -1010,7 +1003,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS LESS THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39960");
-        usshort shift = 3;
+        uint16_t shift = 3;
 
         T calculatedResult      = a << (shift);
         uint64_t expectedResult = 319680;
@@ -1021,7 +1014,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS GREATER THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39960");
-        usshort shift = 6;
+        uint16_t shift = 6;
 
         T calculatedResult      = a << (shift);
         uint64_t expectedResult = 2557440;
@@ -1047,7 +1040,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS LESS THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39960");
-        usshort num = 3;
+        uint16_t num = 3;
 
         a <<= (num);
         uint64_t expectedResult = 319680;
@@ -1057,7 +1050,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS GREATER THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39960");
-        usshort num = 6;
+        uint16_t num = 6;
 
         a <<= (num);
         uint64_t expectedResult = 2557440;
@@ -1083,7 +1076,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS LESS THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39965675");
-        usshort shift = 3;
+        uint16_t shift = 3;
 
         T calculatedResult      = a >> (shift);
         uint64_t expectedResult = 4995709;
@@ -1094,7 +1087,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS GREATER THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39965675");
-        usshort shift = 6;
+        uint16_t shift = 6;
 
         T calculatedResult      = a >> (shift);
         uint64_t expectedResult = 624463;
@@ -1122,7 +1115,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS LESS THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39965675");
-        usshort shift = 3;
+        uint16_t shift = 3;
 
         a >>= (shift);
         uint64_t expectedResult = 4995709;
@@ -1132,7 +1125,7 @@ void shift(const std::string& msg) {
     // TEST_F CASE WHEN SHIFT IS GREATER THAN 4 (MAX SHIFT DONE AT A TIME)
     {
         T a("39965675");
-        usshort shift = 6;
+        uint16_t shift = 6;
 
         a >>= (shift);
         uint64_t expectedResult = 624463;

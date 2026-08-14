@@ -195,9 +195,8 @@ std::pair<std::vector<NativeInteger>, uint32_t> ParameterGenerationBGVRNS::compu
         firstModLowerBound = 2.0 * plainModulus * noiseEstimates.noisePerLevel - plainModulus;
     uint32_t firstModSize = std::ceil(std::log2(firstModLowerBound));
     if (firstModSize >= DCRT_MODULUS::MAX_SIZE) {
-        OPENFHE_THROW(
-            "Change parameters! Try reducing the number of additions per level, "
-            "number of key switches per level, or the digit size. We cannot support moduli greater than 60 bits.");
+        OPENFHE_THROW(std::string("Reduce the number of additions or key switches per level or the digit size. ") +
+                      "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
     }
 
     moduliQ[0] = FirstPrime<NativeInteger>(firstModSize, cyclOrder);
@@ -210,9 +209,8 @@ std::pair<std::vector<NativeInteger>, uint32_t> ParameterGenerationBGVRNS::compu
         uint32_t extraModSize = std::ceil(std::log2(extraModLowerBound));
 
         if (extraModSize >= DCRT_MODULUS::MAX_SIZE) {
-            OPENFHE_THROW(
-                "Change parameters! Try reducing the number of additions per level, "
-                "number of key switches per level, or the digit size. We cannot support moduli greater than 60 bits.");
+            OPENFHE_THROW(std::string("Reduce the number of additions or key switches per level or the digit size. ") +
+                          "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
         }
 
         moduliQ[numPrimes] = FirstPrime<NativeInteger>(extraModSize, cyclOrder);
@@ -242,9 +240,8 @@ std::pair<std::vector<NativeInteger>, uint32_t> ParameterGenerationBGVRNS::compu
 
         uint32_t modSize = std::ceil(std::log2(modLowerBound));
         if (modSize >= DCRT_MODULUS::MAX_SIZE) {
-            OPENFHE_THROW(
-                "Change parameters! Try reducing the number of additions per level, "
-                "number of key switches per level, or the digit size. We cannot support moduli greater than 60 bits.");
+            OPENFHE_THROW(std::string("Reduce the number of additions or key switches per level or the digit size. ") +
+                          "We do not support moduli greater than " + std::to_string(DCRT_MODULUS::MAX_SIZE) + " bits.");
         }
 
         // Compute moduli.
@@ -461,11 +458,19 @@ bool ParameterGenerationBGVRNS::ParamsGenBGVRNSInternal(std::shared_ptr<CryptoPa
         // we add an extra bit to account for the special logic of selecting the RNS moduli in BGV
         // ignore the case when there is only one max size modulus
         // no extra bit needs to be added for FIXEDMANUAL
-        if ((qBound != auxBits) && (scalTech != FIXEDMANUAL))
+        bool addOne = false;
+        if ((qBound != auxBits) && (scalTech != FIXEDMANUAL)) {
             qBound++;
+            addOne = true;
+        }
 
-        auto hybridKSInfo = CryptoParametersRNS::EstimateLogP(numPartQ, firstModSize, dcrtBits, extraModSize, numPrimes,
-                                                              auxBits, scalTech, true);
+        uint32_t numPrimesEst          = numPrimes;
+        bool isNoiseFloodingMultiparty = (multipartyMode == NOISE_FLOODING_MULTIPARTY);
+        if (isNoiseFloodingMultiparty)
+            numPrimesEst += NoiseFlooding::NUM_MODULI_MULTIPARTY;
+        auto hybridKSInfo =
+            CryptoParametersRNS::EstimateLogP(numPartQ, firstModSize, dcrtBits, extraModSize, numPrimesEst, auxBits,
+                                              scalTech, addOne, isNoiseFloodingMultiparty);
         qBound += std::get<0>(hybridKSInfo);
         auxTowers = std::get<1>(hybridKSInfo);
     }
@@ -493,11 +498,16 @@ bool ParameterGenerationBGVRNS::ParamsGenBGVRNSInternal(std::shared_ptr<CryptoPa
             if (multipartyMode == NOISE_FLOODING_MULTIPARTY)
                 newQBound += cryptoParamsBGVRNS->EstimateMultipartyFloodingLogQ();
             if (ksTech == HYBRID) {
+                double dcrtBitsEst    = (moduliQ.size() > 1) ? std::log2(moduliQ[1].ConvertToDouble()) : 0;
+                uint32_t numPrimesEst = (scalTech == FLEXIBLEAUTOEXT) ? moduliQ.size() - 1 : moduliQ.size();
+                bool isNoiseFloodingMultiparty = (multipartyMode == NOISE_FLOODING_MULTIPARTY);
+                if (isNoiseFloodingMultiparty)
+                    numPrimesEst += NoiseFlooding::NUM_MODULI_MULTIPARTY;
                 auto hybridKSInfo = CryptoParametersRNS::EstimateLogP(
                     numPartQ, std::log2(moduliQ[0].ConvertToDouble()),
-                    (moduliQ.size() > 1) ? std::log2(moduliQ[1].ConvertToDouble()) : 0,
+                    dcrtBitsEst,
                     (scalTech == FLEXIBLEAUTOEXT) ? std::log2(moduliQ[moduliQ.size() - 1].ConvertToDouble()) : 0,
-                    (scalTech == FLEXIBLEAUTOEXT) ? moduliQ.size() - 1 : moduliQ.size(), auxBits, scalTech, false);
+                    numPrimesEst, auxBits, scalTech, false, isNoiseFloodingMultiparty);
                 newQBound += std::get<0>(hybridKSInfo);
             }
         } while (qBound < newQBound);
@@ -640,7 +650,7 @@ bool ParameterGenerationBGVRNS::ParamsGenBGVRNSInternal(std::shared_ptr<CryptoPa
 
         if (n < nActual) {
             std::string errMsg("The ring dimension found using estimated logQ(P) [");
-            errMsg += std::to_string(n) + "] does does not meet security requirements. ";
+            errMsg += std::to_string(n) + "] does not meet security requirements. ";
             errMsg += "Report this problem to OpenFHE developers and set the ring dimension manually to ";
             errMsg += std::to_string(nActual) + ".";
 

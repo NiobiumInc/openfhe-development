@@ -40,6 +40,10 @@
 #include <string>
 
 namespace lbcrypto {
+namespace {
+// global used to validate the estimated sizeP value
+uint32_t sizeP_estimate_global{};
+}  // namespace
 
 void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, ScalingTechnique scalTech,
                                               EncryptionTechnique encTech, MultiplicationTechnique multTech,
@@ -91,8 +95,8 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
 
         // Compute the composite digits PartQ = Q_j
         std::vector<BigInteger> moduliPartQ(m_numPartQ, 1);
-        for (usint j = 0; j < m_numPartQ; j++) {
-            for (usint i = a * j; i < (j + 1) * a; i++) {
+        for (uint32_t j = 0; j < m_numPartQ; j++) {
+            for (uint32_t i = a * j; i < (j + 1) * a; i++) {
                 if (i < moduliQ.size())
                     moduliPartQ[j] *= moduliQ[i];
             }
@@ -133,6 +137,16 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
         }
         // Select number of primes in auxiliary CRT basis
         uint32_t sizeP = static_cast<uint32_t>(std::ceil(static_cast<double>(maxBits) / auxBits));
+        // validate the estimated sizeP value
+        if (sizeP_estimate_global > 0) {
+            if (sizeP_estimate_global != sizeP) {
+                auto str = "EstimateLogP() failure: expected sizeP [" + std::to_string(sizeP_estimate_global) +
+                           "], but got sizeP [" + std::to_string(sizeP) + "]";
+                OPENFHE_THROW(str);
+            }
+            // reset sizeP_estimate_global before the next use
+            sizeP_estimate_global = 0;
+        }
 
         uint64_t primeStep = FindAuxPrimeStep();
 
@@ -152,7 +166,7 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
             do {
                 moduliP[i] = PreviousPrimeHardwareFormat<NativeInteger>(pPrev, primeStep);
                 foundInQ   = false;
-                for (usint j = 0; j < sizeQ; j++)
+                for (uint32_t j = 0; j < sizeQ; j++)
                     if (moduliP[i] == moduliQ[j])
                         foundInQ = true;
                 pPrev = moduliP[i];
@@ -179,12 +193,23 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
 
         m_paramsQP = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQP, rootsQP);
 
+        // Precompute params for first 1..sizeQ towers of Q for KeySwitchDown (avoids per-call allocation).
+        m_paramsQlHybrid.resize(sizeQ);
+        std::vector<NativeInteger> moduliQl, rootsQl;
+        moduliQl.reserve(sizeQ);
+        rootsQl.reserve(sizeQ);
+        for (size_t i = 0; i < sizeQ; ++i) {
+            moduliQl.push_back(moduliQ[i]);
+            rootsQl.push_back(rootsQ[i]);
+            m_paramsQlHybrid[i] = std::make_shared<ILDCRTParams<BigInteger>>(2 * n, moduliQl, rootsQl);
+        }
+
         // Pre-compute CRT::FFT values for P
         ChineseRemainderTransformFTT<NativeVector>().PreCompute(rootsP, 2 * n, moduliP);
 
         // Pre-compute values [P]_{q_i}
         m_PModq.resize(sizeQ);
-        for (usint i = 0; i < sizeQ; i++) {
+        for (uint32_t i = 0; i < sizeQ; i++) {
             m_PModq[i] = modulusP.Mod(moduliQ[i]).ConvertToInt();
         }
 
@@ -364,12 +389,12 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
 
         modulusQ = BigInteger(GetElementParams()->GetModulus()) / BigInteger(moduliQ[0]);
         m_multipartyAlphaQModq0.resize(sizeQ - 1);
-        for (usint l = sizeQ - 1; l > 0; l--) {
+        for (uint32_t l = sizeQ - 1; l > 0; l--) {
             if (l < sizeQ - 1)
                 modulusQ = modulusQ / BigInteger(moduliQ[l + 1]);
             m_multipartyAlphaQModq0[l - 1].resize(l + 1);
             NativeInteger QlModq0 = modulusQ.Mod(moduliQ[0]).ConvertToInt();
-            for (usint j = 0; j < l + 1; ++j) {
+            for (uint32_t j = 0; j < l + 1; ++j) {
                 m_multipartyAlphaQModq0[l - 1][j] = {QlModq0.ModMul(NativeInteger(j), moduliQ[0])};
             }
         }
@@ -393,7 +418,8 @@ uint64_t CryptoParametersRNS::FindAuxPrimeStep() const {
 std::pair<double, uint32_t> CryptoParametersRNS::EstimateLogP(uint32_t numPartQ, double firstModulusSize,
                                                               double dcrtBits, double extraModulusSize,
                                                               uint32_t numPrimes, uint32_t auxBits,
-                                                              ScalingTechnique scalTech, bool addOne) {
+                                                              ScalingTechnique scalTech, bool addOne,
+                                                              bool isNoiseFloodingMultiparty) {
     // numPartQ can not be zero as there is a division by numPartQ
     if (numPartQ == 0)
         OPENFHE_THROW("numPartQ is zero");
@@ -419,6 +445,11 @@ std::pair<double, uint32_t> CryptoParametersRNS::EstimateLogP(uint32_t numPartQ,
     qi[0] = firstModulusSize;
     if (extraModulusSize > 0)
         qi[sizeQ - 1] = extraModulusSize;
+    if (isNoiseFloodingMultiparty) {
+        for (size_t i = 1; i < (NoiseFlooding::NUM_MODULI_MULTIPARTY + 1); ++i) {
+            qi[i] = NoiseFlooding::MULTIPARTY_MOD_SIZE;
+        }
+    }
 
     // Compute partitions of Q into numPartQ digits
     uint32_t maxBits = 0;
@@ -439,7 +470,8 @@ std::pair<double, uint32_t> CryptoParametersRNS::EstimateLogP(uint32_t numPartQ,
         maxBits++;
 
     // Select number of primes in auxiliary CRT basis
-    auto sizeP = static_cast<uint32_t>(std::ceil(static_cast<double>(maxBits) / auxBits));
+    uint32_t sizeP        = static_cast<uint32_t>(std::ceil(static_cast<double>(maxBits) / auxBits));
+    sizeP_estimate_global = sizeP;
 
     return std::make_pair(sizeP * auxBits, sizeP);
 }

@@ -29,12 +29,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
 
-#include "UnitTestUtils.h"
+#include "include/gtest/gtest.h"
+#include "utils/exception.h"
 #include "UnitTestCCParams.h"
 #include "UnitTestCryptoContext.h"
-#include "utils/exception.h"
+#include "UnitTestUtils.h"
 
-#include "include/gtest/gtest.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -94,8 +94,8 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_ENCR
     return os << test.toString();
 }
 //===========================================================================================================
-constexpr usint BATCH    = 16;
-constexpr usint BV_DSIZE = 4;
+constexpr uint32_t BATCH    = 16;
+constexpr uint32_t BV_DSIZE = 4;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT> testCases = {
     // TestType,  Descr, Scheme,         RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,         EncTech,  PREMode
@@ -140,15 +140,13 @@ class UTGENERAL_ENCRYPT_DECRYPT : public ::testing::TestWithParam<TEST_CASE_UTGE
     using Element = DCRTPoly;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
-        // TODO (dsuponit): do we need to remove keys before releasing all context?
-        // CryptoContextImpl<Poly>::ClearEvalMultKeys();
-        // CryptoContextImpl<Poly>::ClearEvalSumKeys();
-        // CryptoContextImpl<DCRTPoly>::ClearEvalMultKeys();
-        // CryptoContextImpl<DCRTPoly>::ClearEvalSumKeys();
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void EncryptionString(const TEST_CASE_UTGENERAL_ENCRYPT_DECRYPT& testData,

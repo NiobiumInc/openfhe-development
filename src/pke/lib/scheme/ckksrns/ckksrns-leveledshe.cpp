@@ -309,7 +309,7 @@ std::vector<DCRTPoly::Integer> LeveledSHECKKSRNS::GetElementForEvalAddOrSub(Cons
         logApprox        = logSF - logValid;
     }
     int32_t logApprox_cp = logApprox;
-    double approxFactor  = pow(2, logApprox);
+    double approxFactor  = std::pow(2, logApprox);
 
     DCRTPoly::Integer scConstant = static_cast<uint64_t>(operand * scFactor / approxFactor + 0.5);
     std::vector<DCRTPoly::Integer> crtConstant(sizeQl, scConstant);
@@ -480,7 +480,7 @@ std::vector<DCRTPoly::Integer> LeveledSHECKKSRNS::GetElementForEvalMult(ConstCip
         int32_t logValid = (logSF <= MAX_BITS_IN_WORD_LOCAL) ? logSF : MAX_BITS_IN_WORD_LOCAL;
         logApprox        = logSF - logValid;
     }
-    double approxFactor = pow(2, logApprox);
+    double approxFactor = std::pow(2, logApprox);
 
     DoubleInteger large     = static_cast<DoubleInteger>(operand / approxFactor * scFactor + 0.5);
     DoubleInteger large_abs = (large < 0 ? -large : large);
@@ -556,7 +556,7 @@ Ciphertext<DCRTPoly> LeveledSHECKKSRNS::EvalFastRotationExt(
     const auto paramsQl = cv[0].GetParams();
 
     const auto cc = ciphertext->GetCryptoContext();
-    auto cTilda   = *cc->GetScheme()->EvalFastKeySwitchCoreExt(digits, evalKey, paramsQl);
+    auto cTilda   = cc->GetScheme()->EvalFastKeySwitchCoreExt(digits, evalKey, paramsQl);
 
     if (addFirst) {
         DCRTPoly psiC0(cTilda[0].GetParams(), Format::EVALUATION, true);

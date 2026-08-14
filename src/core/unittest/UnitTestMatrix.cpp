@@ -29,28 +29,23 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
 
-/*
-  This code exercises the math libraries of the OpenFHE lattice encryption library.
- */
-
-#include <iostream>
 #include "gtest/gtest.h"
-
 #include "lattice/lat-hal.h"
 #include "math/distrgen.h"
+#include "math/matrix.h"
+#include "math/matrixstrassen-impl.h"
 #include "math/nbtheory.h"
 #include "testdefs.h"
 #include "utils/inttypes.h"
 #include "utils/utilities.h"
 
-#include "math/matrix.h"
-#include "math/matrixstrassen-impl.h"
+#include <iostream>
 
 using namespace lbcrypto;
 
 template <typename Element>
 static std::function<Element()> secureIL2nAlloc() {
-    usint m = 2048;
+    uint32_t m = 2048;
     typename Element::Integer secureModulus("8590983169");
     typename Element::Integer secureRootOfUnity("4810681236");
     return Element::Allocator(std::make_shared<typename Element::Params>(m, secureModulus, secureRootOfUnity),
@@ -59,7 +54,7 @@ static std::function<Element()> secureIL2nAlloc() {
 
 template <typename Element>
 static std::function<Element()> fastIL2nAlloc() {
-    usint m = 16;
+    uint32_t m = 16;
     typename Element::Integer modulus("67108913");
     typename Element::Integer rootOfUnity("61564");
     return Element::Allocator(std::make_shared<typename Element::Params>(m, modulus, rootOfUnity), Format::EVALUATION);
@@ -67,7 +62,7 @@ static std::function<Element()> fastIL2nAlloc() {
 
 template <typename Element>
 static std::function<Element()> fastUniformIL2nAlloc() {
-    usint m = 16;
+    uint32_t m = 16;
     typename Element::Integer modulus("67108913");
     typename Element::Integer rootOfUnity("61564");
     return Element::MakeDiscreteUniformAllocator(std::make_shared<typename Element::Params>(m, modulus, rootOfUnity),
@@ -235,7 +230,7 @@ TEST(UTMatrix, Poly_mult_square_matrix_caps) {
 }
 
 inline void expect_close(double a, double b) {
-    EXPECT_LE(fabs(a - b), 10e-8);
+    EXPECT_LE(std::fabs(a - b), 10e-8);
 }
 
 TEST(UTMatrix, cholesky) {
@@ -248,15 +243,15 @@ TEST(UTMatrix, cholesky) {
 
     auto c = Cholesky(m);
     OPENFHE_DEBUGEXP(c);
-    EXPECT_LE(fabs(4.47213595 - c(0, 0)), 1e-8);
-    EXPECT_LE(fabs(0 - c(0, 1)), 1e-8);
-    EXPECT_LE(fabs(.89442719 - c(1, 0)), 1e-8);
-    EXPECT_LE(fabs(3.03315018 - c(1, 1)), 1e-8);
+    EXPECT_LE(std::fabs(4.47213595 - c(0, 0)), 1e-8);
+    EXPECT_LE(std::fabs(0 - c(0, 1)), 1e-8);
+    EXPECT_LE(std::fabs(.89442719 - c(1, 0)), 1e-8);
+    EXPECT_LE(std::fabs(3.03315018 - c(1, 1)), 1e-8);
     auto cc = c * c.Transpose();
-    EXPECT_LE(fabs(m(0, 0) - cc(0, 0)), 1e-8);
-    EXPECT_LE(fabs(m(0, 1) - cc(0, 1)), 1e-8);
-    EXPECT_LE(fabs(m(1, 0) - cc(1, 0)), 1e-8);
-    EXPECT_LE(fabs(m(1, 1) - cc(1, 1)), 1e-8);
+    EXPECT_LE(std::fabs(m(0, 0) - cc(0, 0)), 1e-8);
+    EXPECT_LE(std::fabs(m(0, 1) - cc(0, 1)), 1e-8);
+    EXPECT_LE(std::fabs(m(1, 0) - cc(1, 0)), 1e-8);
+    EXPECT_LE(std::fabs(m(1, 1) - cc(1, 1)), 1e-8);
     OPENFHE_DEBUGEXP(cc);
 }
 

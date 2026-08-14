@@ -701,9 +701,9 @@ public:
         if (g_replay_mode) return dummy(ct);
         return m_real->KeySwitchExt(ct, addFirst);
     }
-    std::shared_ptr<std::vector<DCRTPoly>> KeySwitchCore(
+    std::vector<DCRTPoly> KeySwitchCore(
         const DCRTPoly& a, const EvalKey<DCRTPoly> ek) const override {
-        if (g_replay_mode) return empty_vec();
+        if (g_replay_mode) return {};
         return m_real->KeySwitchCore(a, ek);
     }
     std::shared_ptr<std::vector<DCRTPoly>> EvalKeySwitchPrecomputeCore(
@@ -712,18 +712,18 @@ public:
         if (g_replay_mode) return empty_vec();
         return m_real->EvalKeySwitchPrecomputeCore(c, cp);
     }
-    std::shared_ptr<std::vector<DCRTPoly>> EvalFastKeySwitchCoreExt(
+    std::vector<DCRTPoly> EvalFastKeySwitchCoreExt(
         const std::shared_ptr<std::vector<DCRTPoly>> digits,
         const EvalKey<DCRTPoly> ek,
         const std::shared_ptr<typename DCRTPoly::Params> params) const override {
-        if (g_replay_mode) return empty_vec();
+        if (g_replay_mode) return {};
         return m_real->EvalFastKeySwitchCoreExt(digits, ek, params);
     }
-    std::shared_ptr<std::vector<DCRTPoly>> EvalFastKeySwitchCore(
+    std::vector<DCRTPoly> EvalFastKeySwitchCore(
         const std::shared_ptr<std::vector<DCRTPoly>> digits,
         const EvalKey<DCRTPoly> ek,
         const std::shared_ptr<typename DCRTPoly::Params> params) const override {
-        if (g_replay_mode) return empty_vec();
+        if (g_replay_mode) return {};
         return m_real->EvalFastKeySwitchCore(digits, ek, params);
     }
 

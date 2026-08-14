@@ -29,15 +29,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==================================================================================
 
-/*
-  unit tests for the PRE capabilities
- */
-#include "UnitTestUtils.h"
+#include "gtest/gtest.h"
+#include "utils/exception.h"
 #include "UnitTestCCParams.h"
 #include "UnitTestCryptoContext.h"
-#include "utils/exception.h"
+#include "UnitTestUtils.h"
 
-#include "gtest/gtest.h"
 #include <iostream>
 #include <vector>
 
@@ -93,10 +90,10 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_REEN
     return os << test.toString();
 }
 //===========================================================================================================
-const usint PTMOD = 256;
-const usint BATCH = 16;
-const usint SCALE = 60;
-const usint DSIZ  = 20;
+const uint32_t PTMOD = 256;
+const uint32_t BATCH = 16;
+const uint32_t SCALE = 60;
+const uint32_t DSIZ  = 20;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_REENCRYPT> testCases = {
     // TestType,  Descr, Scheme,        RDim, MultDepth, SModSize, DSize,BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl, KSTech, ScalTech, LDigits, PtMod, StdDev,  EvalAddCt, KSCt, MultTech,         EncTech,  PREMode
@@ -124,10 +121,13 @@ class UTGENERAL_REENCRYPT : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_
     using Element = DCRTPoly;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void ReEncryption(const TEST_CASE_UTGENERAL_REENCRYPT& testData, const std::string& failmsg = std::string()) {
