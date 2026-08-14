@@ -52,17 +52,17 @@ void Comparison(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t rin
 
 int main() {
     // // all examples set 128-bit security
-    // SwitchCKKSToFHEW(24, 1024, 1024);
-    // SwitchFHEWtoCKKS(24, 1024, 1024);
-    // ComparisonViaSchemeSwitching(24, 1024, 1024);
+    SwitchCKKSToFHEW(24, 1024, 1024);
+    SwitchFHEWtoCKKS(24, 1024, 1024);
+    ComparisonViaSchemeSwitching(24, 1024, 1024);
 
     // // depth >= 13 + log2(numValues);
-    // ArgminViaSchemeSwitching(24, 1024, 1024);
-    // ArgminViaSchemeSwitchingAlt(24, 1024, 1024);
+    ArgminViaSchemeSwitching(24, 1024, 1024);
+    ArgminViaSchemeSwitchingAlt(24, 1024, 1024);
 
     Argmin(39, 256, 256, 1 << 17);
-    // ArgminAlt(39, 256, 256, 1 << 17);
-    // Comparison(39, 256, 256, 1 << 17);
+    ArgminAlt(39, 256, 256, 1 << 17);
+    Comparison(39, 256, 256, 1 << 17);
 
     return 0;
 }
@@ -141,9 +141,7 @@ void SwitchCKKSToFHEW(uint32_t depth, uint32_t slots, uint32_t numValues) {
     auto paramsQ                                  = elementParams.GetParams();
     auto modulus_CKKS_from                        = paramsQ[0]->GetModulus();
 
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta        = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE        = modulus_LWE / (2 * beta);  // Large precision
+    auto pLWE = 1 << (logQ_ccLWE - 12);  // Large precision
 
     double scFactor = cryptoParams->GetScalingFactorReal(0);
     if (cryptoParams->GetScalingTechnique() == FLEXIBLEAUTOEXT)
@@ -202,6 +200,8 @@ void SwitchCKKSToFHEW(uint32_t depth, uint32_t slots, uint32_t numValues) {
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void SwitchFHEWtoCKKS(uint32_t depth, uint32_t slots, uint32_t numValues) {
@@ -278,8 +278,8 @@ void SwitchFHEWtoCKKS(uint32_t depth, uint32_t slots, uint32_t numValues) {
     // Step 4: Encoding and encryption of inputs
     // For correct CKKS decryption, the messages have to be much smaller than the FHEW plaintext modulus!
     auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta        = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE        = modulus_LWE / (2 * beta);  // Large precision
+    auto pLWE        = 1 << (logQ_ccLWE - 12);  // Large precision
+
     // Inputs
     std::vector<int> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     if (x.size() < slots) {
@@ -314,6 +314,8 @@ void SwitchFHEWtoCKKS(uint32_t depth, uint32_t slots, uint32_t numValues) {
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void ComparisonViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues) {
@@ -456,6 +458,8 @@ void ComparisonViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numVa
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void ArgminViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues) {
@@ -531,9 +535,7 @@ void ArgminViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
     double scaleSign = 512.0;
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta        = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE        = modulus_LWE / (2 * beta);  // Large precision
+    auto pLWE        = 1 << (logQ_ccLWE - 12);  // Large precision
     cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
     timePrecomp = TOC(t);
     std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
@@ -606,6 +608,8 @@ void ArgminViaSchemeSwitching(uint32_t depth, uint32_t slots, uint32_t numValues
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void ArgminViaSchemeSwitchingAlt(uint32_t depth, uint32_t slots, uint32_t numValues) {
@@ -682,9 +686,7 @@ void ArgminViaSchemeSwitchingAlt(uint32_t depth, uint32_t slots, uint32_t numVal
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
     double scaleSign = 512.0;
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta        = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE        = modulus_LWE / (2 * beta);  // Large precision
+    auto pLWE        = 1 << (logQ_ccLWE - 12);  // Large precision
     cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
     timePrecomp = TOC(t);
     std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
@@ -758,6 +760,8 @@ void ArgminViaSchemeSwitchingAlt(uint32_t depth, uint32_t slots, uint32_t numVal
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void Argmin(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim) {
@@ -835,9 +839,7 @@ void Argmin(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
     double scaleSign = 512.0;
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta        = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE        = modulus_LWE / (2 * beta);  // Large precision
+    auto pLWE        = 1 << (logQ_ccLWE - 12);  // Large precision
     cc->EvalCompareSwitchPrecompute(pLWE, scaleSign);
     timePrecomp = TOC(t);
     std::cout << "Time to do the precomputations: " << timePrecomp / 1000 << " s" << std::endl;
@@ -910,6 +912,8 @@ void Argmin(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void ArgminAlt(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim) {
@@ -988,9 +992,7 @@ void ArgminAlt(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ring
     TIC(t);
     // Scale the inputs to ensure their difference is correctly represented after switching to FHEW
     double scaleSign = 512.0;
-    auto modulus_LWE = 1 << logQ_ccLWE;
-    auto beta        = ccLWE->GetBeta().ConvertToInt();
-    auto pLWE        = modulus_LWE / (2 * beta);  // Large precision
+    auto pLWE        = 1 << (logQ_ccLWE - 12);  // Large precision
 
     uint32_t init_level     = 0;
     const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(cc->GetCryptoParameters());
@@ -1068,6 +1070,8 @@ void ArgminAlt(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ring
 
     double totalTime = TOC(tTotal);
     std::cout << "\nTotal time: " << totalTime / 60000 << " min" << std::endl;
+
+    cc->ClearStaticMapsAndVectors();
 }
 
 void Comparison(uint32_t depth, uint32_t slots, uint32_t numValues, uint32_t ringDim) {

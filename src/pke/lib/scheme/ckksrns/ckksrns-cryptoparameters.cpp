@@ -49,7 +49,7 @@ void CryptoParametersCKKSRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Sca
     CryptoParametersRNS::PrecomputeCRTTables(ksTech, scalTech, encTech, multTech, numPartQ, auxBits, extraBits);
 
     size_t sizeQ             = GetElementParams()->GetParams().size();
-    uint32_t compositeDegree = this->GetCompositeDegree();
+    uint32_t compositeDegree = m_compositeDegree;
 
     std::vector<NativeInteger> moduliQ(sizeQ);
     std::vector<NativeInteger> rootsQ(sizeQ);
@@ -75,7 +75,7 @@ void CryptoParametersCKKSRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Sca
         m_qlInvModqPrecon[k].resize(l);
         BigInteger QlInvModql = modulusQ.ModInverse(moduliQ[l]);
         BigInteger result     = (QlInvModql * modulusQ) / BigInteger(moduliQ[l]);
-        for (usint i = 0; i < l; i++) {
+        for (uint32_t i = 0; i < l; i++) {
             m_QlQlInvModqlDivqlModq[k][i]       = result.Mod(moduliQ[i]).ConvertToInt();
             m_QlQlInvModqlDivqlModqPrecon[k][i] = m_QlQlInvModqlDivqlModq[k][i].PrepModMulConst(moduliQ[i]);
             m_qlInvModq[k][i]                   = moduliQ[l].ModInverse(moduliQ[i]);
@@ -93,7 +93,7 @@ void CryptoParametersCKKSRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Sca
             // mult depth = 0 and FLEXIBLEAUTO
             // when multiplicative depth = 0, we use the scaling mod size instead of modulus size
             // Plaintext modulus is used in EncodingParamsImpl to store the exponent p of the scaling factor
-            m_scalingFactorsReal[0] = pow(2, GetPlaintextModulus());
+            m_scalingFactorsReal[0] = std::pow(2, GetPlaintextModulus());
         }
         else if ((sizeQ == 2) && (extraBits > 0) && (m_scalTechnique != COMPOSITESCALINGAUTO) &&
                  (m_scalTechnique != COMPOSITESCALINGMANUAL)) {
@@ -101,7 +101,7 @@ void CryptoParametersCKKSRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Sca
             // when multiplicative depth = 0, we use the scaling mod size instead of modulus size
             // Plaintext modulus is used in EncodingParamsImpl to store the exponent p of the scaling factor
             m_scalingFactorsReal[0] = moduliQ[sizeQ - 1].ConvertToDouble();
-            m_scalingFactorsReal[1] = pow(2, GetPlaintextModulus());
+            m_scalingFactorsReal[1] = std::pow(2, GetPlaintextModulus());
         }
         else {
             m_scalingFactorsReal[0] = moduliQ[sizeQ - 1].ConvertToDouble();
@@ -171,7 +171,7 @@ void CryptoParametersCKKSRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Sca
     }
     else {
         const auto p = GetPlaintextModulus();
-        m_approxSF   = pow(2, p);
+        m_approxSF   = std::pow(2, p);
     }
     if (m_ksTechnique == HYBRID) {
         const auto BarrettBase128Bit(BigInteger(1).LShiftEq(128));

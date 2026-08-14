@@ -288,10 +288,13 @@ static std::vector<TEST_CASE_FBT> testCases = {
 
 class UTCKKSRNS_FBT : public ::testing::TestWithParam<TEST_CASE_FBT> {
 protected:
-    void SetUp() {};
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    };
 
     void TearDown() {
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void UnitTest_ArbLUT(TEST_CASE_FBT t, const std::string& failmsg = std::string()) {
@@ -426,14 +429,14 @@ protected:
 #endif
 
             auto exact(x);
-            std::transform(x.begin(), x.end(), exact.begin(), [&](const int64_t& elem) {
+            std::transform(x.begin(), x.end(), exact.begin(), [&](int64_t elem) {
                 return (f(elem) > t.POutput.ConvertToDouble() / 2.) ? f(elem) - t.POutput.ConvertToInt<int64_t>() :
                                                                       f(elem);
             });
 
             std::transform(exact.begin(), exact.end(), computed.begin(), exact.begin(), std::minus<int64_t>());
             std::transform(exact.begin(), exact.end(), exact.begin(),
-                           [&](const int64_t& elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
+                           [&](int64_t elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
             auto max_error_it = std::max_element(exact.begin(), exact.end());
             // std::cerr << "\n=======Error count: " << std::accumulate(exact.begin(), exact.end(), 0) << "\n";
             // std::cerr << "\n=======Max absolute error: " << *max_error_it << "\n";
@@ -477,7 +480,7 @@ protected:
 
             auto exact(x);
             std::transform(x.begin(), x.end(), exact.begin(),
-                           [&](const int64_t& elem) { return (elem >= t.PInput.ConvertToDouble() / 2.); });
+                           [&](int64_t elem) { return (elem >= t.PInput.ConvertToDouble() / 2.); });
 
             std::vector<int64_t> coeffintMod;
             std::vector<std::complex<double>> coeffcompMod;
@@ -657,7 +660,7 @@ protected:
 
                     std::transform(exact.begin(), exact.end(), computed.begin(), exact.begin(), std::minus<int64_t>());
                     std::transform(exact.begin(), exact.end(), exact.begin(),
-                                   [&](const int64_t& elem) { return (std::abs(elem)) % (t.PInput.ConvertToInt()); });
+                                   [&](int64_t elem) { return (std::abs(elem)) % (t.PInput.ConvertToInt()); });
                     auto max_error_it = std::max_element(exact.begin(), exact.end());
                     // std::cerr << "\n=======Error count: " << std::accumulate(exact.begin(), exact.end(), 0) << "\n";
                     // std::cerr << "\n=======Max absolute error: " << *max_error_it << "\n";
@@ -857,7 +860,7 @@ protected:
 #endif
 
             auto exact(x);
-            std::transform(x.begin(), x.end(), exact.begin(), [&](const int64_t& elem) {
+            std::transform(x.begin(), x.end(), exact.begin(), [&](int64_t elem) {
                 return (f(elem) % t.POutput.ConvertToInt() > t.POutput.ConvertToDouble() / 2.) ?
                            f(elem) % t.POutput.ConvertToInt() - t.POutput.ConvertToInt() :
                            f(elem) % t.POutput.ConvertToInt();
@@ -872,14 +875,14 @@ protected:
 
             std::transform(exact2.begin(), exact2.end(), computed1.begin(), exact2.begin(), std::minus<int64_t>());
             std::transform(exact2.begin(), exact2.end(), exact2.begin(),
-                           [&](const int64_t& elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
+                           [&](int64_t elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
 
             auto max_error_it = std::max_element(exact2.begin(), exact2.end());
             // std::cerr << "\n=======Error count: " << std::accumulate(exact.begin(), exact.end(), 0) << "\n";
             // std::cerr << "\n=======Max absolute error: " << *max_error_it << "\n";
             checkEquality((*max_error_it), int64_t(0), 0.0001, failmsg + " LUT evaluation fails");
 
-            std::transform(exact3.begin(), exact3.end(), exact.begin(), [&](const int64_t& elem) {
+            std::transform(exact3.begin(), exact3.end(), exact.begin(), [&](int64_t elem) {
                 return (f(elem) % t.POutput.ConvertToInt() > t.POutput.ConvertToDouble() / 2.) ?
                            f(elem) % t.POutput.ConvertToInt() - t.POutput.ConvertToInt() :
                            f(elem) % t.POutput.ConvertToInt();
@@ -887,7 +890,7 @@ protected:
 
             std::transform(exact.begin(), exact.end(), computed2.begin(), exact.begin(), std::minus<int64_t>());
             std::transform(exact.begin(), exact.end(), exact.begin(),
-                           [&](const int64_t& elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
+                           [&](int64_t elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
             max_error_it = std::max_element(exact.begin(), exact.end());
             // std::cerr << "\n=======Error count: " << std::accumulate(exact.begin(), exact.end(), 0) << "\n";
             // std::cerr << "\n=======Max absolute error: " << *max_error_it << "\n";
@@ -1066,7 +1069,7 @@ protected:
 #endif
 
             auto exact(x);
-            std::transform(x.begin(), x.end(), exact.begin(), [&](const int64_t& elem) {
+            std::transform(x.begin(), x.end(), exact.begin(), [&](int64_t elem) {
                 return (f1(elem) % t.POutput.ConvertToInt() > t.POutput.ConvertToDouble() / 2.) ?
                            f1(elem) % t.POutput.ConvertToInt() - t.POutput.ConvertToInt() :
                            f1(elem);
@@ -1074,13 +1077,13 @@ protected:
 
             std::transform(exact.begin(), exact.end(), computed1.begin(), exact.begin(), std::minus<int64_t>());
             std::transform(exact.begin(), exact.end(), exact.begin(),
-                           [&](const int64_t& elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
+                           [&](int64_t elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
             auto max_error_it = std::max_element(exact.begin(), exact.end());
             // std::cerr << "\n=======Error count: " << std::accumulate(exact.begin(), exact.end(), 0) << "\n";
             // std::cerr << "\n=======Max absolute error: " << *max_error_it << "\n";
             checkEquality((*max_error_it), int64_t(0), 0.0001, failmsg + " LUT evaluation fails");
 
-            std::transform(x.begin(), x.end(), exact.begin(), [&](const int64_t& elem) {
+            std::transform(x.begin(), x.end(), exact.begin(), [&](int64_t elem) {
                 return (f2(elem) % t.POutput.ConvertToInt() > t.POutput.ConvertToDouble() / 2.) ?
                            f2(elem) % t.POutput.ConvertToInt() - t.POutput.ConvertToInt() :
                            f2(elem);
@@ -1088,7 +1091,7 @@ protected:
 
             std::transform(exact.begin(), exact.end(), computed2.begin(), exact.begin(), std::minus<int64_t>());
             std::transform(exact.begin(), exact.end(), exact.begin(),
-                           [&](const int64_t& elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
+                           [&](int64_t elem) { return (std::abs(elem)) % (t.POutput.ConvertToInt()); });
             max_error_it = std::max_element(exact.begin(), exact.end());
             // std::cerr << "\n=======Error count: " << std::accumulate(exact.begin(), exact.end(), 0) << "\n";
             // std::cerr << "\n=======Max absolute error: " << *max_error_it << "\n";

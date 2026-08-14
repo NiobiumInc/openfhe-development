@@ -62,6 +62,9 @@ int main(int argc, char* argv[]) {
 void RunBGVrnsAdditive() {
     CCParams<CryptoContextBGVRNS> parameters;
     parameters.SetPlaintextModulus(65537);
+    parameters.SetMultiplicativeDepth(0);
+    parameters.SetKeySwitchTechnique(BV);
+    parameters.SetDigitSize(10);
 
     // NOISE_FLOODING_MULTIPARTY adds extra noise to the ciphertext before decrypting
     // and is most secure mode of threshold FHE for BFV and BGV.
@@ -82,7 +85,7 @@ void RunBGVrnsAdditive() {
     // Print out the parameters
     std::cout << "p = " << cc->GetCryptoParameters()->GetPlaintextModulus() << std::endl;
     std::cout << "n = " << cc->GetCryptoParameters()->GetElementParams()->GetCyclotomicOrder() / 2 << std::endl;
-    std::cout << "log2 q = " << log2(cc->GetCryptoParameters()->GetElementParams()->GetModulus().ConvertToDouble())
+    std::cout << "log2 q = " << std::log2(cc->GetCryptoParameters()->GetElementParams()->GetModulus().ConvertToDouble())
               << std::endl;
 
     // Initialize Public Key Containers for 3 parties
@@ -198,7 +201,7 @@ void RunBGVrnsAdditive() {
 }
 
 void RunBFVrns() {
-    usint batchSize = 16;
+    uint32_t batchSize = 16;
 
     CCParams<CryptoContextBFVRNS> parameters;
     parameters.SetPlaintextModulus(65537);
@@ -223,7 +226,7 @@ void RunBFVrns() {
     // Output the generated parameters
     std::cout << "p = " << cc->GetCryptoParameters()->GetPlaintextModulus() << std::endl;
     std::cout << "n = " << cc->GetCryptoParameters()->GetElementParams()->GetCyclotomicOrder() / 2 << std::endl;
-    std::cout << "log2 q = " << log2(cc->GetCryptoParameters()->GetElementParams()->GetModulus().ConvertToDouble())
+    std::cout << "log2 q = " << std::log2(cc->GetCryptoParameters()->GetElementParams()->GetModulus().ConvertToDouble())
               << std::endl;
 
     // Initialize Public Key Containers for two parties A and B
@@ -250,7 +253,7 @@ void RunBFVrns() {
     // Generate evalsum key part for A
     cc->EvalSumKeyGen(kp1.secretKey);
     auto evalSumKeys =
-        std::make_shared<std::map<usint, EvalKey<DCRTPoly>>>(cc->GetEvalSumKeyMap(kp1.secretKey->GetKeyTag()));
+        std::make_shared<std::map<uint32_t, EvalKey<DCRTPoly>>>(cc->GetEvalSumKeyMap(kp1.secretKey->GetKeyTag()));
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 
@@ -414,7 +417,7 @@ void RunBFVrns() {
 }
 
 void RunCKKS() {
-    usint batchSize = 16;
+    uint32_t batchSize = 16;
 
     CCParams<CryptoContextCKKSRNS> parameters;
     parameters.SetMultiplicativeDepth(3);
@@ -436,7 +439,7 @@ void RunCKKS() {
     // Output the generated parameters
     std::cout << "p = " << cc->GetCryptoParameters()->GetPlaintextModulus() << std::endl;
     std::cout << "n = " << cc->GetCryptoParameters()->GetElementParams()->GetCyclotomicOrder() / 2 << std::endl;
-    std::cout << "log2 q = " << log2(cc->GetCryptoParameters()->GetElementParams()->GetModulus().ConvertToDouble())
+    std::cout << "log2 q = " << std::log2(cc->GetCryptoParameters()->GetElementParams()->GetModulus().ConvertToDouble())
               << std::endl;
 
     // Initialize Public Key Containers
@@ -463,7 +466,7 @@ void RunCKKS() {
     // Generate evalsum key part for A
     cc->EvalSumKeyGen(kp1.secretKey);
     auto evalSumKeys =
-        std::make_shared<std::map<usint, EvalKey<DCRTPoly>>>(cc->GetEvalSumKeyMap(kp1.secretKey->GetKeyTag()));
+        std::make_shared<std::map<uint32_t, EvalKey<DCRTPoly>>>(cc->GetEvalSumKeyMap(kp1.secretKey->GetKeyTag()));
 
     std::cout << "Round 1 of key generation completed." << std::endl;
 

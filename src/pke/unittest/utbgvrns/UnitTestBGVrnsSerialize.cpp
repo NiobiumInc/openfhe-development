@@ -31,17 +31,16 @@
 
 #include "ciphertext-ser.h"
 #include "cryptocontext-ser.h"
+#include "globals.h"
+#include "include/gtest/gtest.h"
 #include "key/key-ser.h"
 #include "scheme/bgvrns/bgvrns-ser.h"
-
-#include "UnitTestUtils.h"
-#include "UnitTestSer.h"
 #include "UnitTestCCParams.h"
 #include "UnitTestCryptoContext.h"
+#include "UnitTestSer.h"
+#include "UnitTestUtils.h"
 #include "utils/exception.h"
-#include "globals.h"  // for SERIALIZE_PRECOMPUTE
 
-#include "include/gtest/gtest.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -111,13 +110,13 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTBGVRNS_SER& 
  * PTM:        The plaintext modulus.
  * BATCH:      The length of the packed vectors to be used with CKKS.
  */
-constexpr usint RING_DIM        = 32;
-constexpr usint MULT_DEPTH      = 3;
-constexpr usint MAX_RELIN_DEG   = 2;
-constexpr usint DSIZE           = 4;
-constexpr usint PTM             = 65537;
-constexpr usint BATCH           = 16;
-constexpr usint FIRST_MOD_SIZE  = 0;
+constexpr uint32_t RING_DIM        = 32;
+constexpr uint32_t MULT_DEPTH      = 3;
+constexpr uint32_t MAX_RELIN_DEG   = 2;
+constexpr uint32_t DSIZE           = 4;
+constexpr uint32_t PTM             = 65537;
+constexpr uint32_t BATCH           = 16;
+constexpr uint32_t FIRST_MOD_SIZE  = 0;
 constexpr SecurityLevel SEC_LVL = HEStd_NotSet;
 // TODO (dsuponit): are there any changes under this condition - #if NATIVEINT != 128?
 
@@ -159,10 +158,13 @@ class UTBGVRNS_SER : public ::testing::TestWithParam<TEST_CASE_UTBGVRNS_SER> {
     const double eps = EPSILON;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void UnitTestContext(const TEST_CASE_UTBGVRNS_SER& testData, const std::string& failmsg = std::string()) {

@@ -33,14 +33,14 @@
   unit tests for the SHE capabilities
  */
 
-#include "UnitTestUtils.h"
+#include "gtest/gtest.h"
 #include "UnitTestCCParams.h"
 #include "UnitTestCryptoContext.h"
 #include "UnitTestMetadataTest.h"
+#include "UnitTestUtils.h"
 
 #include <iostream>
 #include <vector>
-#include "gtest/gtest.h"
 
 using namespace lbcrypto;
 
@@ -143,13 +143,13 @@ static std::ostream& operator<<(std::ostream& os, const TEST_CASE_UTGENERAL_SHE&
 }
 //===========================================================================================================
 // NOTE the SHE tests are all based on these
-constexpr usint BATCH     = 16;
-constexpr usint BATCH_LRG = 1 << 12;
-constexpr usint PTM       = 64;
-constexpr usint PTM_LRG   = 65537;
+constexpr uint32_t BATCH     = 16;
+constexpr uint32_t BATCH_LRG = 1 << 12;
+constexpr uint32_t PTM       = 64;
+constexpr uint32_t PTM_LRG   = 65537;
 // checks BFV for a 46-bit plaintext modulus
 constexpr uint64_t PTM_XTR_LRG = 35184372744193;
-constexpr usint BV_DSIZE       = 4;
+constexpr uint32_t BV_DSIZE       = 4;
 // clang-format off
 static std::vector<TEST_CASE_UTGENERAL_SHE> testCases = {
     // TestType,  Descr, Scheme,        RDim, MultDepth, SModSize, DSize,    BatchSz, SecKeyDist,      MaxRelinSkDeg, FModSize, SecLvl,       KSTech, ScalTech,        LDigits, PtMod, StdDev, EvalAddCt, KSCt, MultTech,         EncTech,   PREMode
@@ -495,10 +495,13 @@ class UTGENERAL_SHE : public ::testing::TestWithParam<TEST_CASE_UTGENERAL_SHE> {
     const double eps = EPSILON;
 
 protected:
-    void SetUp() {}
+    void SetUp() {
+        OpenFHEParallelControls.UnitTestStart();
+    }
 
     void TearDown() {
         CryptoContextFactory<DCRTPoly>::ReleaseAllContexts();
+        OpenFHEParallelControls.UnitTestStop();
     }
 
     void UnitTest_Add_Packed(const TEST_CASE_UTGENERAL_SHE& testData, const std::string& failmsg = std::string()) {
@@ -1016,7 +1019,7 @@ protected:
                 << "Ciphertext metadata mismatch in EvalAtIndex -2";
 
             std::vector<double> weights(2);
-            for (usint i = 0; i < 2; i++)
+            for (uint32_t i = 0; i < 2; i++)
                 weights[i] = i;
 
             std::vector<Ciphertext<Element>> ciphertexts(2);

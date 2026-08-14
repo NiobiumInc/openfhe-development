@@ -68,6 +68,18 @@ public:
     virtual ~FHEBase() = default;
 
     /**
+   * Clear scheme-level bootstrap precomputations, if this FHE component
+   * caches any. The default implementation is a no-op.
+   */
+    virtual void ClearBootstrapPrecom() noexcept {}
+
+    /**
+   * Clear scheme-switch precomputations, if this FHE component owns any.
+   * The default implementation is a no-op.
+   */
+    virtual void ClearSchemeSwitchPrecom() noexcept {}
+
+    /**
    * Bootstrap functionality:
    * There are three methods that have to be called in this specific order:
    * 1. EvalBootstrapSetup: computes and encodes the coefficients for encoding and
@@ -104,6 +116,17 @@ public:
    */
     virtual std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalBootstrapKeyGen(
         const PrivateKey<Element> privateKey, uint32_t slots) {
+        OPENFHE_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
+    }
+
+    /**
+   * Returns the eval-key map indices required to serialize bootstrap keys.
+   *
+   * @param cc crypto context.
+   * @param slots - number of slots to be bootstrapped
+   * @return the list of eval-key map indices.
+   */
+    virtual std::vector<uint32_t> EvalBootstrapKeyMapIndices(const CryptoContext<Element>& cc, uint32_t slots) {
         OPENFHE_THROW(NOT_SUPPORTED_SIMPLE_ERROR);
     }
 

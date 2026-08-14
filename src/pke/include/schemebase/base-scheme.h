@@ -309,9 +309,9 @@ public:
         return m_KeySwitch->EvalKeySwitchPrecomputeCore(c, cryptoParamsBase);
     }
 
-    virtual std::shared_ptr<std::vector<Element>> EvalFastKeySwitchCoreExt(
-        const std::shared_ptr<std::vector<Element>> digits, const EvalKey<Element> evalKey,
-        const std::shared_ptr<ParmType> params) const {
+    virtual std::vector<Element> EvalFastKeySwitchCoreExt(const std::shared_ptr<std::vector<Element>> digits,
+                                                          const EvalKey<Element> evalKey,
+                                                          const std::shared_ptr<ParmType> params) const {
         VerifyKeySwitchEnabled(__func__);
         if (nullptr == digits)
             OPENFHE_THROW("Input digits is nullptr");
@@ -324,9 +324,9 @@ public:
         return m_KeySwitch->EvalFastKeySwitchCoreExt(digits, evalKey, params);
     }
 
-    virtual std::shared_ptr<std::vector<Element>> EvalFastKeySwitchCore(
-        const std::shared_ptr<std::vector<Element>> digits, const EvalKey<Element> evalKey,
-        const std::shared_ptr<ParmType> params) const {
+    virtual std::vector<Element> EvalFastKeySwitchCore(const std::shared_ptr<std::vector<Element>> digits,
+                                                       const EvalKey<Element> evalKey,
+                                                       const std::shared_ptr<ParmType> params) const {
         VerifyKeySwitchEnabled(__func__);
         if (nullptr == digits)
             OPENFHE_THROW("Input digits is nullptr");
@@ -339,8 +339,7 @@ public:
         return m_KeySwitch->EvalFastKeySwitchCore(digits, evalKey, params);
     }
 
-    virtual std::shared_ptr<std::vector<Element>> KeySwitchCore(const Element& a,
-                                                                const EvalKey<Element> evalKey) const {
+    virtual std::vector<Element> KeySwitchCore(const Element& a, const EvalKey<Element> evalKey) const {
         VerifyKeySwitchEnabled(__func__);
         if (!evalKey)
             OPENFHE_THROW("Input evaluation key is nullptr");
@@ -691,6 +690,15 @@ public:
         if (!ciphertext)
             OPENFHE_THROW("Input ciphertext is nullptr");
         return m_LeveledSHE->EvalFastRotationPrecompute(ciphertext);
+    }
+
+    virtual Ciphertext<Element> EvalAutomorphismCore(ConstCiphertext<Element>& ciphertext, uint32_t autoIndex,
+                                                     const std::shared_ptr<std::vector<Element>>& digits,
+                                                     const EvalKey<Element>& evalKey) const {
+        VerifyLeveledSHEEnabled(__func__);
+        if (!ciphertext)
+            OPENFHE_THROW("Input ciphertext is nullptr");
+        return m_LeveledSHE->EvalAutomorphismCore(ciphertext, autoIndex, digits, evalKey);
     }
 
     /**
@@ -1165,10 +1173,25 @@ public:
         m_FHE->EvalBootstrapSetup(cc, levelBudget, dim1, slots, correctionFactor, precompute, BTSlotsEncoding);
     }
 
+    void ClearBootstrapPrecom() noexcept {
+        VerifyFHEEnabled(__func__);
+        m_FHE->ClearBootstrapPrecom();
+    }
+
+    void ClearSchemeSwitchPrecom() noexcept {
+        VerifySchemeSwitchEnabled(__func__);
+        m_SchemeSwitch->ClearSchemeSwitchPrecom();
+    }
+
     std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> EvalBootstrapKeyGen(const PrivateKey<Element> privateKey,
                                                                               uint32_t slots) {
         VerifyFHEEnabled(__func__);
         return m_FHE->EvalBootstrapKeyGen(privateKey, slots);
+    }
+
+    std::vector<uint32_t> EvalBootstrapKeyMapIndices(const CryptoContext<Element>& cc, uint32_t slots) {
+        VerifyFHEEnabled(__func__);
+        return m_FHE->EvalBootstrapKeyMapIndices(cc, slots);
     }
 
     void EvalBootstrapPrecompute(const CryptoContextImpl<Element>& cc, uint32_t slots = 0) {

@@ -88,9 +88,9 @@ bool ParameterGenerationCKKSRNS::ParamsGenCKKSRNSInternal(std::shared_ptr<Crypto
             errorMsg += " Also, you can use COMPOSITESCALINGMANUAL at your own risk.";
             OPENFHE_THROW(errorMsg);
         }
-        else if (compositeDegree == 1 && registerWordSize < 64) {
+        else if (compositeDegree == 1 && registerWordSize <= 64) {
             OPENFHE_THROW(
-                "This COMPOSITESCALING* version does not support composite degree == 1 with register size < 64.");
+                "This COMPOSITESCALING* version does not support composite degree == 1 with register size <= 64.");
         }
         else if (compositeDegree < 1) {
             OPENFHE_THROW("Composite degree must be greater than or equal to 1.");
@@ -455,7 +455,7 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
             */
             double sf = moduliQ[numPrimes - 1].ConvertToDouble();
             for (size_t i = numPrimes - 2, cnt = 0; i >= 1; --i, ++cnt) {
-                sf                  = pow(sf, 2) / moduliQ[i + 1].ConvertToDouble();
+                sf                  = std::pow(sf, 2) / moduliQ[i + 1].ConvertToDouble();
                 NativeInteger sfInt = std::llround(sf);
                 NativeInteger sfRem = sfInt.Mod(cyclOrder);
                 bool hasSameMod     = true;

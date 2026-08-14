@@ -89,9 +89,14 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalAdd(ConstCiphertext<Element>& c
 template <class Element>
 void LeveledSHEBase<Element>::EvalAddInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
     auto& cv = ciphertext->GetElements();
-    auto pt  = plaintext->GetElement<Element>();
-    pt.SetFormat(cv[0].GetFormat());
-    cv[0] += pt;
+    if (cv[0].GetFormat() == plaintext->GetElement<Element>().GetFormat()) {
+        cv[0] += plaintext->GetElement<Element>();
+    }
+    else {
+        auto pt = plaintext->GetElement<Element>();
+        pt.SetFormat(cv[0].GetFormat());
+        cv[0] += pt;
+    }
 }
 
 /////////////////////////////////////////
@@ -123,9 +128,14 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalSub(ConstCiphertext<Element>& c
 template <class Element>
 void LeveledSHEBase<Element>::EvalSubInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
     auto& cv = ciphertext->GetElements();
-    auto pt  = plaintext->GetElement<Element>();
-    pt.SetFormat(cv[0].GetFormat());
-    cv[0] -= pt;
+    if (cv[0].GetFormat() == plaintext->GetElement<Element>().GetFormat()) {
+        cv[0] -= plaintext->GetElement<Element>();
+    }
+    else {
+        auto pt = plaintext->GetElement<Element>();
+        pt.SetFormat(cv[0].GetFormat());
+        cv[0] -= pt;
+    }
 }
 
 /////////////////////////////////////////
@@ -151,10 +161,10 @@ std::vector<EvalKey<Element>> LeveledSHEBase<Element>::EvalMultKeysGen(const Pri
     auto privateKeyPower = std::make_shared<PrivateKeyImpl<Element>>(cc);
     privateKeyPower->SetPrivateElement(s);
 
-    size_t maxRelinSkDeg = privateKey->GetCryptoParameters()->GetMaxRelinSkDeg() - 1;
+    uint32_t maxRelinSkDeg = privateKey->GetCryptoParameters()->GetMaxRelinSkDeg() - 1;
     std::vector<EvalKey<Element>> evalKeyVec;
     evalKeyVec.reserve(maxRelinSkDeg);
-    for (size_t i = 0; i < maxRelinSkDeg; ++i) {
+    for (uint32_t i = 0; i < maxRelinSkDeg; ++i) {
         privateKeyPower->SetPrivateElement(s * privateKeyPower->GetPrivateElement());
         evalKeyVec.emplace_back(cc->GetScheme()->KeySwitchGen(privateKeyPower, privateKey));
     }
@@ -172,10 +182,20 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalMult(ConstCiphertext<Element>& 
 
 template <class Element>
 void LeveledSHEBase<Element>::EvalMultInPlace(Ciphertext<Element>& ciphertext, ConstPlaintext& plaintext) const {
-    auto pt = plaintext->GetElement<Element>();
-    pt.SetFormat(Format::EVALUATION);
-    for (auto& c : ciphertext->GetElements())
-        c *= pt;
+    if (plaintext->GetElement<Element>().GetFormat() == Format::EVALUATION) {
+        for (auto& c : ciphertext->GetElements()) {
+            c.SetFormat(Format::EVALUATION);
+            c *= plaintext->GetElement<Element>();
+        }
+    }
+    else {
+        auto pt = plaintext->GetElement<Element>();
+        pt.SetFormat(Format::EVALUATION);
+        for (auto& c : ciphertext->GetElements()) {
+            c.SetFormat(Format::EVALUATION);
+            c *= pt;
+        }
+    }
 }
 
 template <class Element>
@@ -185,16 +205,11 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalMult(ConstCiphertext<Element>& 
     auto ciphertext = EvalMult(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = ciphertext->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
-
     return ciphertext;
 }
 
@@ -204,14 +219,10 @@ void LeveledSHEBase<Element>::EvalMultInPlace(Ciphertext<Element>& ciphertext1, 
     ciphertext1 = EvalMult(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext1->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = ciphertext1->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
 }
 
@@ -222,16 +233,11 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalMultMutable(Ciphertext<Element>
     auto ciphertext = EvalMultMutable(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = ciphertext->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
-
     return ciphertext;
 }
 
@@ -241,16 +247,11 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalSquare(ConstCiphertext<Element>
     auto csquare = EvalSquare(ciphertext);
 
     auto& cv = csquare->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = csquare->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
-
     return csquare;
 }
 
@@ -259,14 +260,10 @@ void LeveledSHEBase<Element>::EvalSquareInPlace(Ciphertext<Element>& ciphertext,
     ciphertext = EvalSquare(ciphertext);
 
     auto& cv = ciphertext->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = ciphertext->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
 }
 
@@ -276,16 +273,11 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalSquareMutable(Ciphertext<Elemen
     auto csquare = EvalSquareMutable(ciphertext);
 
     auto& cv = csquare->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = csquare->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
-
     return csquare;
 }
 
@@ -295,14 +287,10 @@ void LeveledSHEBase<Element>::EvalMultMutableInPlace(Ciphertext<Element>& cipher
     ciphertext1 = EvalMultMutable(ciphertext1, ciphertext2);
 
     auto& cv = ciphertext1->GetElements();
-    for (auto& c : cv)
-        c.SetFormat(Format::EVALUATION);
 
     auto ab = ciphertext1->GetCryptoContext()->GetScheme()->KeySwitchCore(cv[2], evalKey);
-
-    cv[0] += (*ab)[0];
-    cv[1] += (*ab)[1];
-
+    cv[0] += ab[0];
+    cv[1] += ab[1];
     cv.resize(2);
 }
 
@@ -334,8 +322,8 @@ void LeveledSHEBase<Element>::RelinearizeInPlace(Ciphertext<Element>& ciphertext
 
     for (size_t j = 2; j < cv.size(); ++j) {
         auto ab = algo->KeySwitchCore(cv[j], evalKeyVec[j - 2]);
-        cv[0] += (*ab)[0];
-        cv[1] += (*ab)[1];
+        cv[0] += ab[0];
+        cv[1] += ab[1];
     }
     cv.resize(2);
 }
@@ -376,7 +364,7 @@ std::shared_ptr<std::map<uint32_t, EvalKey<Element>>> LeveledSHEBase<Element>::E
         (*evalKeys)[indx];
 
     const uint32_t sz = newIndices.size();
-#pragma omp parallel for
+#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sz))
     for (uint32_t i = 0; i < sz; ++i) {
         auto index = NativeInteger(newIndices[i]).ModInverse(M).ConvertToInt<uint32_t>();
         std::vector<uint32_t> vec(N);
@@ -403,34 +391,67 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalAutomorphism(ConstCiphertext<El
     if (evalKeyIterator == evalKeyMap.end())
         OPENFHE_THROW("EvalKey for index [" + std::to_string(i) + "] is not found." + CALLER_INFO);
 
-    // we already have checks on higher level?
-    //  if (cv.size() < 2) {
-    //    std::string errorMsg(
-    //        std::string("Insufficient number of elements in ciphertext: ") +
-    //        std::to_string(cv.size()) + CALLER_INFO);
-    //    OPENFHE_THROW( errorMsg);
-    //  }
+    // Delegate to the shared automorphism core so that EvalAutomorphism/EvalAtIndex
+    // produce ciphertexts bit-identical to EvalFastRotation with fresh digits
+    return EvalAutomorphismCore(ciphertext, i, EvalFastRotationPrecompute(ciphertext), evalKeyIterator->second);
+}
 
-    uint32_t N = ciphertext->GetElements()[0].GetRingDimension();
-
-    //  if (i == 2 * N - 1)
-    //    OPENFHE_THROW(
-    //                   "conjugation is disabled " + CALLER_INFO);
-
-    //  if (i > 2 * N - 1)
-    //    OPENFHE_THROW(
-    //        "automorphism indices higher than 2*n are not allowed " + CALLER_INFO);
-
-    auto result = ciphertext->Clone();
-    ciphertext->GetCryptoContext()->GetScheme()->KeySwitchInPlace(result, evalKeyIterator->second);
-
+template <class Element>
+Ciphertext<Element> LeveledSHEBase<Element>::EvalAutomorphismCore(ConstCiphertext<Element>& ciphertext,
+                                                                  uint32_t autoIndex,
+                                                                  const std::shared_ptr<std::vector<Element>>& digits,
+                                                                  const EvalKey<Element>& evalKey) const {
+    const auto cc    = ciphertext->GetCryptoContext();
+    const uint32_t N = cc->GetRingDimension();
     std::vector<uint32_t> vec(N);
-    PrecomputeAutoMap(N, i, &vec);
+    PrecomputeAutoMap(N, autoIndex, &vec);
 
-    auto& rcv = result->GetElements();
-    rcv[0]    = rcv[0].AutomorphismTransform(i, vec);
-    rcv[1]    = rcv[1].AutomorphismTransform(i, vec);
-    return result;
+    const auto& cv0 = ciphertext->GetElements()[0];
+
+    const auto cryptoParams = std::dynamic_pointer_cast<CryptoParametersRNS>(evalKey->GetCryptoParameters());
+
+    if (cryptoParams->GetKeySwitchTechnique() == HYBRID) {
+        //  This branch trades slightly higher complexity for significant performance boost on GPU backend
+
+        const PlaintextModulus t = (cryptoParams->GetNoiseScale() == 1) ? 0 : cryptoParams->GetPlaintextModulus();
+
+        auto ba = cc->GetScheme()->EvalFastKeySwitchCoreExt(digits, evalKey, cv0.GetParams());
+
+        // ba[0] += cv[0] * P;
+        uint32_t sizeQ = cv0.GetNumOfElements();
+#pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(sizeQ))
+        for (uint32_t i = 0; i < sizeQ; ++i)
+            ba[0].GetAllElements()[i] += (cv0.GetAllElements()[i] * cryptoParams->GetPModq()[i]);
+
+        ba[0] = ba[0]
+                    .AutomorphismTransform(autoIndex, vec)
+                    .ApproxModDown(cv0.GetParams(), cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
+                                   cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
+                                   cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
+                                   cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
+                                   cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon());
+        ba[1] = ba[1]
+                    .AutomorphismTransform(autoIndex, vec)
+                    .ApproxModDown(cv0.GetParams(), cryptoParams->GetParamsP(), cryptoParams->GetPInvModq(),
+                                   cryptoParams->GetPInvModqPrecon(), cryptoParams->GetPHatInvModp(),
+                                   cryptoParams->GetPHatInvModpPrecon(), cryptoParams->GetPHatModq(),
+                                   cryptoParams->GetModqBarrettMu(), cryptoParams->GettInvModp(),
+                                   cryptoParams->GettInvModpPrecon(), t, cryptoParams->GettModqPrecon());
+
+        auto result = ciphertext->CloneEmpty();
+        result->SetElements(std::move(ba));
+        return result;
+    }
+    else {
+        auto ba = cc->GetScheme()->EvalFastKeySwitchCore(digits, evalKey, cv0.GetParams());
+        ba[0] += cv0;
+        ba[0] = ba[0].AutomorphismTransform(autoIndex, vec);
+        ba[1] = ba[1].AutomorphismTransform(autoIndex, vec);
+
+        auto result = ciphertext->CloneEmpty();
+        result->SetElements(std::move(ba));
+        return result;
+    }
 }
 
 template <class Element>
@@ -454,24 +475,7 @@ Ciphertext<Element> LeveledSHEBase<Element>::EvalFastRotation(
     auto evalKeyIterator = evalKeyMap.find(autoIndex);
     if (evalKeyIterator == evalKeyMap.end())
         OPENFHE_THROW("EvalKey for index [" + std::to_string(autoIndex) + "] is not found.");
-    auto evalKey = evalKeyIterator->second;
-
-    const auto cryptoParams = ciphertext->GetCryptoParameters();
-
-    const uint32_t N = cryptoParams->GetElementParams()->GetRingDimension();
-    std::vector<uint32_t> vec(N);
-    PrecomputeAutoMap(N, autoIndex, &vec);
-
-    const auto& cv = ciphertext->GetElements();
-
-    auto ba = *cc->GetScheme()->EvalFastKeySwitchCore(digits, evalKey, cv[0].GetParams());
-    ba[0] += cv[0];
-    ba[0] = ba[0].AutomorphismTransform(autoIndex, vec);
-    ba[1] = ba[1].AutomorphismTransform(autoIndex, vec);
-
-    auto result = ciphertext->CloneEmpty();
-    result->SetElements(std::move(ba));
-    return result;
+    return EvalAutomorphismCore(ciphertext, autoIndex, digits, evalKeyIterator->second);
 }
 
 template <class Element>

@@ -52,10 +52,10 @@ bool ParameterGenerationBFVRNS::ParamsGenBFVRNSInternal(std::shared_ptr<CryptoPa
     if (!cryptoParams)
         OPENFHE_THROW("No crypto parameters are supplied to BFVrns ParamsGen");
 
-    if ((dcrtBits < DCRT_MODULUS::MIN_SIZE) || (dcrtBits > DCRT_MODULUS::MAX_SIZE))
-        OPENFHE_THROW(
-            "BFVrns.ParamsGen: Number of bits in CRT moduli should be "
-            "in the range from 30 to 60");
+    if ((dcrtBits < DCRT_MODULUS::MIN_SIZE) || (dcrtBits > DCRT_MODULUS::MAX_SIZE)) {
+        OPENFHE_THROW("Number of bits in CRT moduli should be in the range from " +
+                      std::to_string(DCRT_MODULUS::MIN_SIZE) + " to " + std::to_string(DCRT_MODULUS::MAX_SIZE));
+    }
 
     const auto cryptoParamsBFVRNS = std::dynamic_pointer_cast<CryptoParametersBFVRNS>(cryptoParams);
 
@@ -156,7 +156,7 @@ bool ParameterGenerationBFVRNS::ParamsGenBFVRNSInternal(std::shared_ptr<CryptoPa
         }
         else {
             double numDigitsPerTower = (digitSize == 0) ? 1 : ((dcrtBits / digitSize) + 1);
-            return delta(n) * numDigitsPerTower * (floor(logqPrev / (dcrtBits)) + 1) * w * Berr / 2.0;
+            return delta(n) * numDigitsPerTower * (std::floor(logqPrev / (dcrtBits)) + 1) * w * Berr / 2.0;
         }
     };
 
@@ -263,8 +263,8 @@ bool ParameterGenerationBFVRNS::ParamsGenBFVRNSInternal(std::shared_ptr<CryptoPa
 
         // main correctness constraint
         auto logqBFV = [&](uint32_t n, double logqPrev) -> double {
-            return log2(4 * p) + (multiplicativeDepth - 1) * log2(C1(n)) +
-                   log2(C1(n) * Vnorm(n) + multiplicativeDepth * C2(n, logqPrev));
+            return std::log2(4 * p) + (multiplicativeDepth - 1) * std::log2(C1(n)) +
+                   std::log2(C1(n) * Vnorm(n) + multiplicativeDepth * C2(n, logqPrev));
         };
 
         // initial values
@@ -399,7 +399,7 @@ bool ParameterGenerationBFVRNS::ParamsGenBFVRNSInternal(std::shared_ptr<CryptoPa
         uint32_t nActual = StdLatticeParm::FindRingDim(distType, stdLevel, logActualQ);
         if (n < nActual) {
             std::string errMsg("The ring dimension found using estimated logQ(P) [");
-            errMsg += std::to_string(n) + "] does does not meet security requirements. ";
+            errMsg += std::to_string(n) + "] does not meet security requirements. ";
             errMsg += "Report this problem to OpenFHE developers and set the ring dimension manually to ";
             errMsg += std::to_string(nActual) + ".";
 
