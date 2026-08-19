@@ -357,10 +357,10 @@ IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
 
     IntType M(m);
 
-    if (M >= (IntType(1) << 17)) {
+    if (M >= (IntType(1) << 16)) {
         return FirstPrime<IntType>(nBits, m);
     } else {
-        return FirstPrime<IntType>(nBits, static_cast<uint64_t>(1) << 17);
+        return FirstPrime<IntType>(nBits, static_cast<uint64_t>(1) << 16);
     }
 }
 
@@ -401,10 +401,10 @@ IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
 
     IntType M(m);
 
-    if (M >= (IntType(1) << 17)) {
+    if (M >= (IntType(1) << 16)) {
         return LastPrime<IntType>(nBits, m);
     } else {
-        return LastPrime<IntType>(nBits, static_cast<uint64_t>(1) << 17);
+        return LastPrime<IntType>(nBits, static_cast<uint64_t>(1) << 16);
     }
 }
 
@@ -428,7 +428,7 @@ IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
     // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
 
     IntType M(m);
-    IntType hardware_m = (IntType(1) << 17);
+    IntType hardware_m = (IntType(1) << 16);
 
     if (M >= hardware_m) {
         return NextPrime<IntType>(q, m);
@@ -436,7 +436,7 @@ IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
         // The incoming q need not satisfy the required modularity condition, and thus we must correct that.
         IntType q_temp = q;
         q_temp = q_temp + (hardware_m - (q_temp % hardware_m)) + IntType(1);
-        return NextPrime<IntType>(q_temp, static_cast<uint64_t>(1) << 17);
+        return NextPrime<IntType>(q_temp, static_cast<uint64_t>(1) << 16);
     }
 }
 
@@ -460,7 +460,7 @@ IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
     // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
 
     IntType M(m);
-    IntType hardware_m = (IntType(1) << 17);
+    IntType hardware_m = (IntType(1) << 16);
 
     if (M >= hardware_m) {
         return PreviousPrime<IntType>(q, m);
@@ -468,7 +468,7 @@ IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
         // The incoming q need not satisfy the required modularity condition, and thus we must correct that.
         IntType q_temp = q;
         q_temp = q_temp - (q_temp % hardware_m) + IntType(1);
-        return PreviousPrime<IntType>(q_temp, static_cast<uint64_t>(1) << 17);
+        return PreviousPrime<IntType>(q_temp, static_cast<uint64_t>(1) << 16);
     }
 }
 
