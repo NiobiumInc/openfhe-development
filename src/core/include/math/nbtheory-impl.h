@@ -351,9 +351,9 @@ template <typename IntType>
 IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
-    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
+    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
 
     IntType M(m);
 
@@ -395,9 +395,9 @@ template <typename IntType>
 IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
-    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
+    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
 
     IntType M(m);
 
@@ -423,9 +423,9 @@ template <typename IntType>
 IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
-    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
+    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
 
     IntType M(m);
     IntType hardware_m = (IntType(1) << 16);
@@ -455,9 +455,9 @@ template <typename IntType>
 IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 17, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 17, we just just call the existing prime generation with m = 2^17.
-    // This works because if q % 2^17 == 1, then q % 2^k == 1 for all k <= 17.
+    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
+    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
 
     IntType M(m);
     IntType hardware_m = (IntType(1) << 16);
