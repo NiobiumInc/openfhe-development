@@ -2,7 +2,7 @@ THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 ============================================================
 
 Project: openfhe-development
-Generated: 2026-08-23
+Generated: 2026-08-25
 Tool: SCANOSS (snippet detection with License dataset)
 Components: 68
 
@@ -561,17 +561,16 @@ COMPONENT ATTRIBUTIONS
     Copyright 2005 ; Google Inc.
     Copyright 2008 ; Google Inc.
     Copyright 2014 gperftools Contributors
-    Copyright 2023 gperftools Contributors
     Copyright (c) 2003; Google Inc.
     Copyright (c) 2004; Google Inc.
     Copyright (c) 2006; Google Inc.
     Copyright (c) 2007; Google Inc.
-    Copyright (c) 2008-2009; Google Inc.
     Copyright (c) 2009; Google Inc.
     Copyright (c) 2011; Google Inc.
     Copyright (c) 2013; Google Inc.
     Copyright (c) 2021; IBM Ltd.
     Copyright (c) 2021; gperftools Contributors
+    Copyright (c) 2023; gperftools Contributors
     Copyright (c) 2024; gperftools Contributors
   License: BSD-3-Clause
 
@@ -929,15 +928,13 @@ COMPONENT ATTRIBUTIONS
   License: Apache-2.0
 
   platform/external/googletest
-  Version: studio-2024.3.1
-  Source: https://android.googlesource.com/platform/external/googletest/+archive/studio-2024.3.1.tar.gz
+  Version: aml_ads_351017080
+  Source: https://android.googlesource.com/platform/external/googletest/+archive/aml_ads_351017080.tar.gz
   PURL: pkg:googlesource/android/platform/external/googletest
   Copyright:
     Copyright 2024 Google Inc
-    Copyright 2005; Google Inc.
     Copyright 2006; Google Inc.
     Copyright 2007; Google Inc.
-    Copyright 2018; Google Inc.
   License: BSD-3-Clause
 
   rayx
