@@ -36,6 +36,8 @@
 #ifndef LBCRYPTO_INC_MATH_NBTHEORY_IMPL_H
 #define LBCRYPTO_INC_MATH_NBTHEORY_IMPL_H
 
+#include <cstdint>
+#include <cstdlib>
 #define _USE_MATH_DEFINES
 
 #include "math/distributiongenerator.h"
@@ -347,20 +349,35 @@ IntType FirstPrime(uint32_t nBits, uint64_t m) {
     return qNew;
 }
 
+namespace nb_detail {
+    // The currently hardware supported lower bound
+    inline constexpr uint32_t NB_LOWER_BOUND = 16;
+    // Returns a lower bound of the log2 of the cyclotomic order used for prime search.
+    // Returns 16 if none is set.
+    inline const uint32_t& NB_CYCLOTOMIC_ORDER_LOWER_BOUND() {
+        static const uint32_t value = []() {
+            const char* env_p = std::getenv("NB_CYCLOTOMIC_ORDER_LOWER_BOUND");
+            return env_p ? std::stoi(env_p) : NB_LOWER_BOUND;
+        }();
+        return value;
+    }
+}
+
 template <typename IntType>
 IntType FirstPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
-    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
+    uint32_t bound = nb_detail::NB_CYCLOTOMIC_ORDER_LOWER_BOUND();
+    // If the cyclotomic order is 2^k where k >= bound, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < bound, we just just call the existing prime generation with m = 2^bound.
+    // This works because if q % 2^bound == 1, then q % 2^k == 1 for all k <= bound.
 
     IntType M(m);
 
-    if (M >= (IntType(1) << 16)) {
+    if (M >= (IntType(1) << bound)) {
         return FirstPrime<IntType>(nBits, m);
     } else {
-        return FirstPrime<IntType>(nBits, static_cast<uint64_t>(1) << 16);
+        return FirstPrime<IntType>(nBits, static_cast<uint64_t>(1) << bound);
     }
 }
 
@@ -395,16 +412,17 @@ template <typename IntType>
 IntType LastPrimeHardwareFormat(uint32_t nBits, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
-    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
+    uint32_t bound = nb_detail::NB_CYCLOTOMIC_ORDER_LOWER_BOUND();
+    // If the cyclotomic order is 2^k where k >= bound, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < bound, we just just call the existing prime generation with m = 2^bound.
+    // This works because if q % 2^bound == 1, then q % 2^k == 1 for all k <= bound.
 
     IntType M(m);
 
-    if (M >= (IntType(1) << 16)) {
+    if (M >= (IntType(1) << bound)) {
         return LastPrime<IntType>(nBits, m);
     } else {
-        return LastPrime<IntType>(nBits, static_cast<uint64_t>(1) << 16);
+        return LastPrime<IntType>(nBits, static_cast<uint64_t>(1) << bound);
     }
 }
 
@@ -423,12 +441,13 @@ template <typename IntType>
 IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
-    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
+    uint32_t bound = nb_detail::NB_CYCLOTOMIC_ORDER_LOWER_BOUND();
+    // If the cyclotomic order is 2^k where k >= bound, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < bound, we just just call the existing prime generation with m = 2^bound.
+    // This works because if q % 2^bound == 1, then q % 2^k == 1 for all k <= bound.
 
     IntType M(m);
-    IntType hardware_m = (IntType(1) << 16);
+    IntType hardware_m = (IntType(1) << bound);
 
     if (M >= hardware_m) {
         return NextPrime<IntType>(q, m);
@@ -436,7 +455,7 @@ IntType NextPrimeHardwareFormat(const IntType& q, uint64_t m) {
         // The incoming q need not satisfy the required modularity condition, and thus we must correct that.
         IntType q_temp = q;
         q_temp = q_temp + (hardware_m - (q_temp % hardware_m)) + IntType(1);
-        return NextPrime<IntType>(q_temp, static_cast<uint64_t>(1) << 16);
+        return NextPrime<IntType>(q_temp, static_cast<uint64_t>(1) << bound);
     }
 }
 
@@ -455,12 +474,13 @@ template <typename IntType>
 IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
     assert((m & (m - 1)) == 0); // Hardware can only support power-of-two cyclotomic orders
 
-    // If the cyclotomic order is 2^k where k >= 16, the existing prime generation will work for the hardware.
-    // If the cyclotomic order is 2^k where k < 16, we just just call the existing prime generation with m = 2^16.
-    // This works because if q % 2^16 == 1, then q % 2^k == 1 for all k <= 16.
+    uint32_t bound = nb_detail::NB_CYCLOTOMIC_ORDER_LOWER_BOUND();
+    // If the cyclotomic order is 2^k where k >= bound, the existing prime generation will work for the hardware.
+    // If the cyclotomic order is 2^k where k < bound, we just just call the existing prime generation with m = 2^bound.
+    // This works because if q % 2^bound == 1, then q % 2^k == 1 for all k <= bound.
 
     IntType M(m);
-    IntType hardware_m = (IntType(1) << 16);
+    IntType hardware_m = (IntType(1) << bound);
 
     if (M >= hardware_m) {
         return PreviousPrime<IntType>(q, m);
@@ -468,7 +488,7 @@ IntType PreviousPrimeHardwareFormat(const IntType& q, uint64_t m) {
         // The incoming q need not satisfy the required modularity condition, and thus we must correct that.
         IntType q_temp = q;
         q_temp = q_temp - (q_temp % hardware_m) + IntType(1);
-        return PreviousPrime<IntType>(q_temp, static_cast<uint64_t>(1) << 16);
+        return PreviousPrime<IntType>(q_temp, static_cast<uint64_t>(1) << bound);
     }
 }
 
