@@ -2,7 +2,7 @@ THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 ============================================================
 
 Project: openfhe-development
-Generated: 2026-09-05
+Generated: 2026-09-06
 Tool: SCANOSS (snippet detection with License dataset)
 Components: 70
 
@@ -400,7 +400,7 @@ COMPONENT ATTRIBUTIONS
 
   Fall_Semester_programing
   Version: 32-Linux
-  Source: https://github.com/Kirya23/Fall_Semester_programing
+  Source: https://github.com/kirya23/fall_semester_programing
   PURL: pkg:github/kirya23/fall_semester_programing
   Copyright:
     Copyright 2000-2001 ; University of Notre Dame.
