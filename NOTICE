@@ -2,7 +2,7 @@ THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 ============================================================
 
 Project: openfhe-development
-Generated: 2026-09-06
+Generated: 2026-09-09
 Tool: SCANOSS (snippet detection with License dataset)
 Components: 70
 
@@ -660,7 +660,7 @@ COMPONENT ATTRIBUTIONS
 
   imodel-native
   Version: v4.0.6
-  Source: https://github.com/iTwin/imodel-native
+  Source: https://github.com/itwin/imodel-native
   PURL: pkg:github/itwin/imodel-native
   Copyright:
     Copyright 2008 Google Inc
