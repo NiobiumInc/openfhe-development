@@ -2,7 +2,7 @@ THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 ============================================================
 
 Project: openfhe-development
-Generated: 2026-09-24
+Generated: 2026-09-25
 Tool: SCANOSS (snippet detection with License dataset)
 Components: 96
 
@@ -1088,6 +1088,7 @@ COMPONENT ATTRIBUTIONS
     Copyright 2008 Google Inc
     Copyright 2005; Google Inc.
     Copyright 2007; Google Inc.
+    Copyright 2015; Google Inc.
   License: BSD-3-Clause
 
   Otus_IP_filter
@@ -1161,12 +1162,14 @@ COMPONENT ATTRIBUTIONS
   Copyright:
     Copyright 2008 Google Inc
     Copyright 2009 Google Inc. All Rights Reserved
+    Copyright 2010 Google Inc. All Rights Reserved
     Copyright 2017 Google Inc
     Copyright 2024 Google Inc
     Copyright 2005; Google Inc.
     Copyright 2006; Google Inc.
     Copyright 2007; Google Inc.
     Copyright 2009 Google Inc.
+    Copyright 2010 Google Inc.
     Copyright 2013; Google Inc.
     Copyright 2018; Google Inc.
     Copyright 2020; Google Inc.
@@ -1298,6 +1301,7 @@ COMPONENT ATTRIBUTIONS
   PURL: pkg:github/browserworks/waterfox
   Copyright:
     Copyright 2005; Google Inc.
+    Copyright 2010; Google Inc.
   License: Apache-2.0, MIT
 
   winchecksec
