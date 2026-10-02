@@ -156,9 +156,13 @@ void openfhe_cprobe_muli(uintptr_t dst, uintptr_t src, uint64_t immediate,
                          uint64_t modulus);
 
 /// Record: dst = src_acc + src_mul * immediate (mod modulus) (multiply-accumulate).
+/// src_mul holds residues mod src_modulus, which may differ from (and exceed)
+/// modulus: the product is taken on the unreduced residue, as
+/// NativeVector::MultAccEqNoCheck does.
+/// immediate may be >= modulus; the probe reduces it after its recording check.
 void openfhe_cprobe_multacceq(uintptr_t dst, uintptr_t src_acc,
                               uintptr_t src_mul, uint64_t immediate,
-                              uint64_t modulus);
+                              uint64_t src_modulus, uint64_t modulus);
 
 // ============================================================================
 // Transform and permutation operations
