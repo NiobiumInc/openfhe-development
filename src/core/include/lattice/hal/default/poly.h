@@ -475,6 +475,17 @@ public:
         if (!g_hollow_mode) {
             m_values->MultAccEqNoCheck(*V.m_values, I);
         }
+#ifdef OPENFHE_CPROBES
+        // this += V * I (mod this modulus), V's residues taken unreduced from
+        // V's own modulus. Without this probe the op never reaches the trace:
+        // with WITH_REDUCED_NOISE=OFF, ApproxSwitchCRTBasis (ModUp/ModDown)
+        // accumulates through here, so every key switch replayed as zeros.
+        // The immediate is passed raw: the probe reduces it mod `modulus` only
+        // after its own recording check, so nothing extra runs when not recording.
+        openfhe_cprobe_multacceq(GetId(), GetId(), V.GetId(), I.ConvertToInt(),
+                                 V.m_params->GetModulus().ConvertToInt(),
+                                 m_params->GetModulus().ConvertToInt());
+#endif
         return *this;
     }
 
