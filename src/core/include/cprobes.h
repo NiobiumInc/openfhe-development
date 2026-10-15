@@ -15,6 +15,13 @@ void openfhe_cprobe_resume_recording();
 
 void openfhe_cprobe_annotate(const char*);
 
+// Niobium: set the (phase, level, kind, j, i) tag attached to every instruction
+// recorded from here on, by this thread.  phase == 0 clears it.  Metadata only.
+// Weak: a host that never records (replay, the fhetch tools) does not define it,
+// and callers test the address before calling.
+void openfhe_cprobe_tag(uint32_t phase, uint32_t level, uint32_t kind, uint32_t j, uint32_t i)
+    __attribute__((weak));
+
 void openfhe_cprobe_id(uintptr_t);
 uintptr_t* openfhe_cprobe_address(uintptr_t);
 uintptr_t* openfhe_cprobe_result(uintptr_t);

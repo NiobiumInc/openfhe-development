@@ -47,6 +47,15 @@ void openfhe_cprobe_resume_recording();
 /// Annotate the trace with a human-readable comment.
 void openfhe_cprobe_annotate(const char* annotation);
 
+/**
+ * Tag every instruction recorded from here on by the calling thread with
+ * (phase, level, kind, j, i); phase == 0 clears the tag.  Used by the
+ * CoeffsToSlots / SlotsToCoeffs drivers so the compiler can reorder the
+ * linear transforms.  Metadata only: it never changes what is recorded.
+ */
+void openfhe_cprobe_tag(uint32_t phase, uint32_t level, uint32_t kind,
+                        uint32_t j, uint32_t i);
+
 // ============================================================================
 // Polynomial identity and address tracking
 // ============================================================================

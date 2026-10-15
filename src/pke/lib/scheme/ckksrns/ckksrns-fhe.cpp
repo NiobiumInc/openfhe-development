@@ -59,6 +59,44 @@
 #include <utility>
 #include <vector>
 
+#ifdef OPENFHE_CPROBES
+// Niobium: tags every polynomial op recorded inside CtS/StC with
+// (phase, level, kind, j, i) so the compiler can re-order the linear
+// transforms.  A tag is metadata only; it never changes what is recorded.
+namespace {
+enum : uint32_t {
+    NB_TAG_PHASE_CTS = 1, NB_TAG_PHASE_STC = 2,
+    NB_TAG_PRE = 1, NB_TAG_ROT = 2, NB_TAG_MAC = 3, NB_TAG_HORN = 4,
+    NB_TAG_HADD = 5, NB_TAG_DELTA = 6, NB_TAG_DOWN = 7, NB_TAG_GKEY = 8
+};
+class NbTagScope {
+public:
+    NbTagScope() = default;
+    NbTagScope(uint32_t ph, uint32_t lv, uint32_t kind, uint32_t j, uint32_t i) { set(ph, lv, kind, j, i); }
+    NbTagScope(const NbTagScope&) = delete;
+    NbTagScope& operator=(const NbTagScope&) = delete;
+    ~NbTagScope() { set(0, 0, 0, 0, 0); }
+    void set(uint32_t ph, uint32_t lv, uint32_t kind, uint32_t j, uint32_t i) {
+        if (openfhe_cprobe_tag != nullptr)
+            openfhe_cprobe_tag(ph, lv, kind, j, i);
+    }
+};
+}  // namespace
+#else
+namespace {
+enum : uint32_t {
+    NB_TAG_PHASE_CTS = 1, NB_TAG_PHASE_STC = 2,
+    NB_TAG_PRE = 1, NB_TAG_ROT = 2, NB_TAG_MAC = 3, NB_TAG_HORN = 4,
+    NB_TAG_HADD = 5, NB_TAG_DELTA = 6, NB_TAG_DOWN = 7, NB_TAG_GKEY = 8
+};
+struct NbTagScope {
+    NbTagScope() = default;
+    NbTagScope(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t) {}
+    void set(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t) {}
+};
+}  // namespace
+#endif
+
 #ifdef BOOTSTRAPTIMING
     #include <ostream>
     #define PROFILE
@@ -2201,23 +2239,30 @@ Ciphertext<DCRTPoly> FHECKKSRNS::EvalCoeffsToSlots(const std::vector<std::vector
     // hoisted automorphisms
     const int32_t smax = -1 + p.lvlb;
     for (int32_t s = smax; s > stop; --s) {
+        NbTagScope tag;
         if (s != smax)
             algo->ModReduceInternalInPlace(result, compositeDegree);
 
         const int32_t scale = 1 << ((s - flagRem) * p.layersCollapse + p.remCollapse);
 
+        tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_PRE, 0, 0);
+
         auto digits = cc->EvalFastRotationPrecompute(result);
         std::vector<Ciphertext<DCRTPoly>> fastRotation(p.g);
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(p.g))
-        for (uint32_t j = 0; j < p.g; ++j)
+        for (uint32_t j = 0; j < p.g; ++j) {
+            NbTagScope tj(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_ROT, j, 0);
             fastRotation[j] = (j != 0) ?
                                   cc->EvalFastRotationExt(result, ReduceRotation(scale * j, reduceMod), digits, true) :
                                   cc->KeySwitchExt(result, true);
+        }
 
         // Horner backward accumulation with single giant stride t = g * scale
         const int32_t t = ReduceRotation(scale * p.g, reduceMod);
 
         const int32_t bLast = static_cast<int32_t>(p.b) - 1;
+
+        tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_GKEY, 0, 0);
 
         uint32_t giantAutoIndex = 0;
         std::vector<uint32_t> giantMap;
@@ -2226,44 +2271,61 @@ Ciphertext<DCRTPoly> FHECKKSRNS::EvalCoeffsToSlots(const std::vector<std::vector
             giantKey = GetGiantStepRotation(result, t, giantAutoIndex, giantMap);
 
         const uint32_t Gtop        = p.g * bLast;
+        tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_MAC, 0, bLast);
         Ciphertext<DCRTPoly> outer = EvalMultExt(fastRotation[0], A[s][Gtop]);
-        for (uint32_t j = 1; j < p.g; ++j)
+        for (uint32_t j = 1; j < p.g; ++j) {
+            tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_MAC, j, bLast);
             if ((Gtop + j) != p.numRotations)
                 EvalAddExtInPlace(outer, EvalMultExt(fastRotation[j], A[s][Gtop + j]));
+        }
 
         for (int32_t i = bLast - 1; i >= 0; --i) {
+            tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_HORN, 0, static_cast<uint32_t>(i));
             if (t != 0)
                 outer = EvalHornerGiantRotate(outer, giantAutoIndex, giantMap, giantKey);
             const uint32_t G = p.g * i;
+            tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_MAC, 0, static_cast<uint32_t>(i));
             auto inner       = EvalMultExt(fastRotation[0], A[s][G]);
-            for (uint32_t j = 1; j < p.g; ++j)
+            for (uint32_t j = 1; j < p.g; ++j) {
+                tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_MAC, j, static_cast<uint32_t>(i));
                 EvalAddExtInPlace(inner, EvalMultExt(fastRotation[j], A[s][G + j]));
+            }
+            tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_HADD, 0, static_cast<uint32_t>(i));
             EvalAddExtInPlace(outer, inner);
         }
         if (s == stop + 1 && flagRem == 0 && CtSDelta != 0) {
+            tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_DELTA, 0, 0);
             uint32_t deltaAutoIndex = 0;
             std::vector<uint32_t> deltaMap;
             auto deltaKey = GetGiantStepRotation(result, CtSDelta, deltaAutoIndex, deltaMap);
             outer         = EvalHornerGiantRotate(outer, deltaAutoIndex, deltaMap, deltaKey);
         }
+        tag.set(NB_TAG_PHASE_CTS, static_cast<uint32_t>(s), NB_TAG_DOWN, 0, 0);
         result = cc->KeySwitchDown(outer);
     }
 
     if (flagRem == 1) {
+        NbTagScope tag;
         algo->ModReduceInternalInPlace(result, compositeDegree);
+
+        tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_PRE, 0, 0);
 
         auto digits = cc->EvalFastRotationPrecompute(result);
         std::vector<Ciphertext<DCRTPoly>> fastRotationRem(p.gRem);
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(p.gRem))
-        for (uint32_t j = 0; j < p.gRem; ++j)
+        for (uint32_t j = 0; j < p.gRem; ++j) {
+            NbTagScope tj(NB_TAG_PHASE_CTS, 255, NB_TAG_ROT, j, 0);
             fastRotationRem[j] = (j != 0) ?
                                      cc->EvalFastRotationExt(result, ReduceRotation(j, reduceMod), digits, true) :
                                      cc->KeySwitchExt(result, true);
+        }
 
         // Remainder scale is 1 in CtS; Horner giant stride = gRem
         const int32_t tRem = ReduceRotation(p.gRem, reduceMod);
 
         const int32_t bLast = static_cast<int32_t>(p.bRem) - 1;
+
+        tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_GKEY, 0, 0);
 
         uint32_t giantAutoIndex = 0;
         std::vector<uint32_t> giantMap;
@@ -2272,26 +2334,36 @@ Ciphertext<DCRTPoly> FHECKKSRNS::EvalCoeffsToSlots(const std::vector<std::vector
             giantKey = GetGiantStepRotation(result, tRem, giantAutoIndex, giantMap);
 
         const uint32_t GtopRem     = p.gRem * bLast;
+        tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_MAC, 0, bLast);
         Ciphertext<DCRTPoly> outer = EvalMultExt(fastRotationRem[0], A[stop][GtopRem]);
-        for (uint32_t j = 1; j < p.gRem; ++j)
+        for (uint32_t j = 1; j < p.gRem; ++j) {
+            tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_MAC, j, bLast);
             if ((GtopRem + j) != p.numRotationsRem)
                 EvalAddExtInPlace(outer, EvalMultExt(fastRotationRem[j], A[stop][GtopRem + j]));
+        }
 
         for (int32_t i = bLast - 1; i >= 0; --i) {
+            tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_HORN, 0, static_cast<uint32_t>(i));
             if (tRem != 0)
                 outer = EvalHornerGiantRotate(outer, giantAutoIndex, giantMap, giantKey);
             const uint32_t GRem = p.gRem * i;
+            tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_MAC, 0, static_cast<uint32_t>(i));
             auto inner          = EvalMultExt(fastRotationRem[0], A[stop][GRem]);
-            for (uint32_t j = 1; j < p.gRem; ++j)
+            for (uint32_t j = 1; j < p.gRem; ++j) {
+                tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_MAC, j, static_cast<uint32_t>(i));
                 EvalAddExtInPlace(inner, EvalMultExt(fastRotationRem[j], A[stop][GRem + j]));
+            }
+            tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_HADD, 0, static_cast<uint32_t>(i));
             EvalAddExtInPlace(outer, inner);
         }
         if (CtSDelta != 0) {
+            tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_DELTA, 0, 0);
             uint32_t deltaAutoIndex = 0;
             std::vector<uint32_t> deltaMap;
             auto deltaKey = GetGiantStepRotation(result, CtSDelta, deltaAutoIndex, deltaMap);
             outer         = EvalHornerGiantRotate(outer, deltaAutoIndex, deltaMap, deltaKey);
         }
+        tag.set(NB_TAG_PHASE_CTS, 255, NB_TAG_DOWN, 0, 0);
         result = cc->KeySwitchDown(outer);
     }
 
@@ -2323,23 +2395,30 @@ Ciphertext<DCRTPoly> FHECKKSRNS::EvalSlotsToCoeffs(const std::vector<std::vector
     const int32_t StCDelta = ReduceRotation(-static_cast<int32_t>(slots - 1), reduceMod);
 
     for (int32_t s = 0; s < smax; ++s) {
+        NbTagScope tag;
         if (s != 0)
             algo->ModReduceInternalInPlace(result, compositeDegree);
 
         const int32_t scale = 1 << (s * p.layersCollapse);
 
+        tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_PRE, 0, 0);
+
         auto digits = cc->EvalFastRotationPrecompute(result);
         std::vector<Ciphertext<DCRTPoly>> fastRotation(p.g);
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(p.g))
-        for (uint32_t j = 0; j < p.g; ++j)
+        for (uint32_t j = 0; j < p.g; ++j) {
+            NbTagScope tj(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_ROT, j, 0);
             fastRotation[j] = (j != 0) ?
                                   cc->EvalFastRotationExt(result, ReduceRotation(scale * j, reduceMod), digits, true) :
                                   cc->KeySwitchExt(result, true);
+        }
 
         // Horner backward accumulation with single giant stride t = g * scale
         const int32_t t = ReduceRotation(scale * p.g, reduceMod);
 
         const int32_t bLast = static_cast<int32_t>(p.b) - 1;
+
+        tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_GKEY, 0, 0);
 
         uint32_t giantAutoIndex = 0;
         std::vector<uint32_t> giantMap;
@@ -2348,46 +2427,63 @@ Ciphertext<DCRTPoly> FHECKKSRNS::EvalSlotsToCoeffs(const std::vector<std::vector
             giantKey = GetGiantStepRotation(result, t, giantAutoIndex, giantMap);
 
         const uint32_t Gtop        = p.g * bLast;
+        tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_MAC, 0, bLast);
         Ciphertext<DCRTPoly> outer = EvalMultExt(fastRotation[0], A[s][Gtop]);
-        for (uint32_t j = 1; j < p.g; ++j)
+        for (uint32_t j = 1; j < p.g; ++j) {
+            tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_MAC, j, bLast);
             if ((Gtop + j) != p.numRotations)
                 EvalAddExtInPlace(outer, EvalMultExt(fastRotation[j], A[s][Gtop + j]));
+        }
 
         for (int32_t i = bLast - 1; i >= 0; --i) {
+            tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_HORN, 0, static_cast<uint32_t>(i));
             if (t != 0)
                 outer = EvalHornerGiantRotate(outer, giantAutoIndex, giantMap, giantKey);
             const uint32_t G = p.g * i;
+            tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_MAC, 0, static_cast<uint32_t>(i));
             auto inner       = EvalMultExt(fastRotation[0], A[s][G]);
-            for (uint32_t j = 1; j < p.g; ++j)
+            for (uint32_t j = 1; j < p.g; ++j) {
+                tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_MAC, j, static_cast<uint32_t>(i));
                 EvalAddExtInPlace(inner, EvalMultExt(fastRotation[j], A[s][G + j]));
+            }
+            tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_HADD, 0, static_cast<uint32_t>(i));
             EvalAddExtInPlace(outer, inner);
         }
         if (s == smax - 1 && flagRem == 0 && StCDelta != 0) {
+            tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_DELTA, 0, 0);
             uint32_t deltaAutoIndex = 0;
             std::vector<uint32_t> deltaMap;
             auto deltaKey = GetGiantStepRotation(result, StCDelta, deltaAutoIndex, deltaMap);
             outer         = EvalHornerGiantRotate(outer, deltaAutoIndex, deltaMap, deltaKey);
         }
+        tag.set(NB_TAG_PHASE_STC, static_cast<uint32_t>(s), NB_TAG_DOWN, 0, 0);
         result = cc->KeySwitchDown(outer);
     }
 
     if (flagRem == 1) {
+        NbTagScope tag;
         algo->ModReduceInternalInPlace(result, compositeDegree);
 
         const int32_t scaleRem = 1 << (smax * p.layersCollapse);
 
+        tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_PRE, 0, 0);
+
         auto digits = cc->EvalFastRotationPrecompute(result);
         std::vector<Ciphertext<DCRTPoly>> fastRotationRem(p.gRem);
 #pragma omp parallel for num_threads(OpenFHEParallelControls.GetThreadLimit(p.gRem))
-        for (uint32_t j = 0; j < p.gRem; ++j)
+        for (uint32_t j = 0; j < p.gRem; ++j) {
+            NbTagScope tj(NB_TAG_PHASE_STC, 255, NB_TAG_ROT, j, 0);
             fastRotationRem[j] =
                 (j != 0) ? cc->EvalFastRotationExt(result, ReduceRotation(scaleRem * j, reduceMod), digits, true) :
                            cc->KeySwitchExt(result, true);
+        }
 
         // Horner giant stride for remainder: g_rem * scale_rem
         const int32_t tRem = ReduceRotation(scaleRem * p.gRem, reduceMod);
 
         const int32_t bLast = static_cast<int32_t>(p.bRem) - 1;
+
+        tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_GKEY, 0, 0);
 
         uint32_t giantAutoIndex = 0;
         std::vector<uint32_t> giantMap;
@@ -2396,26 +2492,36 @@ Ciphertext<DCRTPoly> FHECKKSRNS::EvalSlotsToCoeffs(const std::vector<std::vector
             giantKey = GetGiantStepRotation(result, tRem, giantAutoIndex, giantMap);
 
         const uint32_t GtopRem     = p.gRem * bLast;
+        tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_MAC, 0, bLast);
         Ciphertext<DCRTPoly> outer = EvalMultExt(fastRotationRem[0], A[smax][GtopRem]);
-        for (uint32_t j = 1; j < p.gRem; ++j)
+        for (uint32_t j = 1; j < p.gRem; ++j) {
+            tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_MAC, j, bLast);
             if ((GtopRem + j) != p.numRotationsRem)
                 EvalAddExtInPlace(outer, EvalMultExt(fastRotationRem[j], A[smax][GtopRem + j]));
+        }
 
         for (int32_t i = bLast - 1; i >= 0; --i) {
+            tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_HORN, 0, static_cast<uint32_t>(i));
             if (tRem != 0)
                 outer = EvalHornerGiantRotate(outer, giantAutoIndex, giantMap, giantKey);
             const uint32_t GRem = p.gRem * i;
+            tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_MAC, 0, static_cast<uint32_t>(i));
             auto inner          = EvalMultExt(fastRotationRem[0], A[smax][GRem]);
-            for (uint32_t j = 1; j < p.gRem; ++j)
+            for (uint32_t j = 1; j < p.gRem; ++j) {
+                tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_MAC, j, static_cast<uint32_t>(i));
                 EvalAddExtInPlace(inner, EvalMultExt(fastRotationRem[j], A[smax][GRem + j]));
+            }
+            tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_HADD, 0, static_cast<uint32_t>(i));
             EvalAddExtInPlace(outer, inner);
         }
         if (StCDelta != 0) {
+            tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_DELTA, 0, 0);
             uint32_t deltaAutoIndex = 0;
             std::vector<uint32_t> deltaMap;
             auto deltaKey = GetGiantStepRotation(result, StCDelta, deltaAutoIndex, deltaMap);
             outer         = EvalHornerGiantRotate(outer, deltaAutoIndex, deltaMap, deltaKey);
         }
+        tag.set(NB_TAG_PHASE_STC, 255, NB_TAG_DOWN, 0, 0);
         result = cc->KeySwitchDown(outer);
     }
 
