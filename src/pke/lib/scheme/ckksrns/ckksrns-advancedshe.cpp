@@ -38,6 +38,7 @@ CKKS implementation. See https://eprint.iacr.org/2020/1118 for details.
 #include "scheme/ckksrns/ckksrns-advancedshe.h"
 #include "scheme/ckksrns/ckksrns-utils.h"
 #include "schemebase/base-scheme.h"
+#include "scheme/ckksrns/ckksrns-nbtag.h"
 
 #include <complex>
 #include <vector>
@@ -438,7 +439,11 @@ Ciphertext<DCRTPoly> InnerEvalPolyPS(ConstCiphertext<DCRTPoly>& x, const std::ve
 
 #pragma omp taskwait
 
-    auto result = cc->EvalMult(cu, qu);
+    Ciphertext<DCRTPoly> result;
+    {
+        NbRelinScope relin;
+        result = cc->EvalMult(cu, qu);
+    }
     cc->ModReduceInPlace(result);
     cc->EvalAddInPlace(result, su);
     return result;
@@ -800,7 +805,11 @@ Ciphertext<DCRTPoly> InnerEvalChebyshevPS_NB(ConstCiphertext<DCRTPoly>& x, const
 
     cu = cu ? cc->EvalAdd(T2[m - 1], cu) : cc->EvalAdd(T2[m - 1], divcs->q.front() / 2.0);
 
-    auto result = cc->EvalMult(cu, qu);
+    Ciphertext<DCRTPoly> result;
+    {
+        NbRelinScope relin;
+        result = cc->EvalMult(cu, qu);
+    }
     cc->ModReduceInPlace(result);
     cc->EvalAddInPlace(result, su);
     return result;
@@ -921,7 +930,11 @@ Ciphertext<DCRTPoly> InnerEvalChebyshevPS(ConstCiphertext<DCRTPoly>& x, const st
 
     cu = cu ? cc->EvalAdd(T2[m - 1], cu) : cc->EvalAdd(T2[m - 1], divcs->q.front() / 2.0);
 
-    auto result = cc->EvalMult(cu, qu);
+    Ciphertext<DCRTPoly> result;
+    {
+        NbRelinScope relin;
+        result = cc->EvalMult(cu, qu);
+    }
     cc->ModReduceInPlace(result);
     cc->EvalAddInPlace(result, su);
     return result;
@@ -958,14 +971,20 @@ std::shared_ptr<seriesPowers<DCRTPoly>> internalEvalChebyPolysPS(ConstCiphertext
     for (uint32_t i = 2; i <= k; ++i) {
         if (i & 0x1) {  // if i is odd
             // compute T_{2i+1}(y) = 2*T_i(y)*T_{i+1}(y) - y
-            T[i - 1] = cc->EvalMult(T[i / 2 - 1], T[i / 2]);
+            {
+                NbRelinScope relin;
+                T[i - 1] = cc->EvalMult(T[i / 2 - 1], T[i / 2]);
+            }
             cc->EvalAddInPlaceNoCheck(T[i - 1], T[i - 1]);
             cc->ModReduceInPlace(T[i - 1]);
             cc->EvalSubInPlace(T[i - 1], T[0]);
         }
         else {
             // compute T_{2i}(y) = 2*T_i(y)^2 - 1
-            T[i - 1] = cc->EvalSquare(T[i / 2 - 1]);
+            {
+                NbRelinScope relin;
+                T[i - 1] = cc->EvalSquare(T[i / 2 - 1]);
+            }
             cc->EvalAddInPlaceNoCheck(T[i - 1], T[i - 1]);
             cc->ModReduceInPlace(T[i - 1]);
             cc->EvalAddInPlace(T[i - 1], -1.0);
@@ -992,13 +1011,19 @@ std::shared_ptr<seriesPowers<DCRTPoly>> internalEvalChebyPolysPS(ConstCiphertext
 
     for (uint32_t i = 1; i < m; ++i) {
         // Compute the Chebyshev polynomials T_k(y), T_{2k}(y), T_{4k}(y), ... , T_{2^{m-1}k}(y)
-        T2[i] = cc->EvalSquare(T2[i - 1]);
+        {
+            NbRelinScope relin;
+            T2[i] = cc->EvalSquare(T2[i - 1]);
+        }
         cc->EvalAddInPlaceNoCheck(T2[i], T2[i]);
         cc->ModReduceInPlace(T2[i]);
         cc->EvalAddInPlace(T2[i], -1.0);
 
         // compute T_{k(2*m - 1)} = 2*T_{k(2^{m-1}-1)}(y)*T_{k*2^{m-1}}(y) - T_k(y)
-        T2km1 = cc->EvalMult(T2km1, T2[i]);
+        {
+            NbRelinScope relin;
+            T2km1 = cc->EvalMult(T2km1, T2[i]);
+        }
         cc->EvalAddInPlaceNoCheck(T2km1, T2km1);
         cc->ModReduceInPlace(T2km1);
         cc->EvalSubInPlace(T2km1, T2[0]);

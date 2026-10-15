@@ -59,43 +59,7 @@
 #include <utility>
 #include <vector>
 
-#ifdef OPENFHE_CPROBES
-// Niobium: tags every polynomial op recorded inside CtS/StC with
-// (phase, level, kind, j, i) so the compiler can re-order the linear
-// transforms.  A tag is metadata only; it never changes what is recorded.
-namespace {
-enum : uint32_t {
-    NB_TAG_PHASE_CTS = 1, NB_TAG_PHASE_STC = 2,
-    NB_TAG_PRE = 1, NB_TAG_ROT = 2, NB_TAG_MAC = 3, NB_TAG_HORN = 4,
-    NB_TAG_HADD = 5, NB_TAG_DELTA = 6, NB_TAG_DOWN = 7, NB_TAG_GKEY = 8
-};
-class NbTagScope {
-public:
-    NbTagScope() = default;
-    NbTagScope(uint32_t ph, uint32_t lv, uint32_t kind, uint32_t j, uint32_t i) { set(ph, lv, kind, j, i); }
-    NbTagScope(const NbTagScope&) = delete;
-    NbTagScope& operator=(const NbTagScope&) = delete;
-    ~NbTagScope() { set(0, 0, 0, 0, 0); }
-    void set(uint32_t ph, uint32_t lv, uint32_t kind, uint32_t j, uint32_t i) {
-        if (openfhe_cprobe_tag != nullptr)
-            openfhe_cprobe_tag(ph, lv, kind, j, i);
-    }
-};
-}  // namespace
-#else
-namespace {
-enum : uint32_t {
-    NB_TAG_PHASE_CTS = 1, NB_TAG_PHASE_STC = 2,
-    NB_TAG_PRE = 1, NB_TAG_ROT = 2, NB_TAG_MAC = 3, NB_TAG_HORN = 4,
-    NB_TAG_HADD = 5, NB_TAG_DELTA = 6, NB_TAG_DOWN = 7, NB_TAG_GKEY = 8
-};
-struct NbTagScope {
-    NbTagScope() = default;
-    NbTagScope(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t) {}
-    void set(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t) {}
-};
-}  // namespace
-#endif
+#include "scheme/ckksrns/ckksrns-nbtag.h"
 
 #ifdef BOOTSTRAPTIMING
     #include <ostream>
@@ -2707,7 +2671,10 @@ void FHECKKSRNS::ApplyDoubleAngleIterations(Ciphertext<DCRTPoly>& ciphertext, ui
 
     for (int32_t i = 1 - numIter; i <= 0; ++i) {
         double scalar = -std::pow(twoPi, -std::pow(2.0, i));
-        cc->EvalSquareInPlace(ciphertext);
+        {
+            NbRelinScope relin;
+            cc->EvalSquareInPlace(ciphertext);
+        }
         cc->EvalAddInPlace(ciphertext, cc->EvalAdd(ciphertext, scalar));
         cc->ModReduceInPlace(ciphertext);
     }
