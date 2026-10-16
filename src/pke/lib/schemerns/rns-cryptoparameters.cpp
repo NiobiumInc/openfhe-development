@@ -38,6 +38,9 @@
 #include <memory>
 #include <utility>
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
 
 namespace lbcrypto {
 namespace {
@@ -174,6 +177,27 @@ void CryptoParametersRNS::PrecomputeCRTTables(KeySwitchTechnique ksTech, Scaling
             rootsP[i] = RootOfUnity<NativeInteger>(2 * n, moduliP[i]);
             modulusP *= moduliP[i];
             pPrev = moduliP[i];
+        }
+
+        // EXPERIMENT (exp/p7-primes): NB_P7_PRIMES=<file>, line 2 = the P primes
+        if (const char* f = std::getenv("NB_P7_PRIMES")) {
+            std::ifstream in(f);
+            std::string line;
+            std::getline(in, line);
+            std::getline(in, line);
+            std::istringstream ss(line);
+            std::vector<uint64_t> ps;
+            uint64_t v = 0;
+            while (ss >> v)
+                ps.push_back(v);
+            if (ps.size() != sizeP)
+                OPENFHE_THROW("NB_P7_PRIMES: expected " + std::to_string(sizeP) + " P primes, got " + std::to_string(ps.size()));
+            modulusP = BigInteger(1);
+            for (uint32_t i = 0; i < sizeP; i++) {
+                moduliP[i] = NativeInteger(ps[i]);
+                rootsP[i]  = RootOfUnity<NativeInteger>(2 * n, moduliP[i]);
+                modulusP *= moduliP[i];
+            }
         }
 
         // Store the created moduli and roots in m_paramsP

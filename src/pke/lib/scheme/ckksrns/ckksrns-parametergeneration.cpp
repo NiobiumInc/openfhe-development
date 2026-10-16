@@ -43,6 +43,10 @@ CKKS implementation. See https://eprint.iacr.org/2020/1118 for details.
 #include <string>
 #include <unordered_set>
 #include <iostream>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
 
 namespace lbcrypto {
 
@@ -514,6 +518,27 @@ void ParameterGenerationCKKSRNS::SinglePrimeModuliGen(std::vector<NativeInteger>
         maxPrime = moduliQ[0];
 
     rootsQ[0] = RootOfUnity(cyclOrder, moduliQ[0]);
+
+    // EXPERIMENT (exp/p7-primes): NB_P7_PRIMES=<file> replaces the Q chain. Line 1 = moduliQ[0..n-1], line 2 = P (read in rns-cryptoparameters.cpp).
+    if (const char* f = std::getenv("NB_P7_PRIMES")) {
+        std::ifstream in(f);
+        std::string line;
+        std::getline(in, line);
+        std::istringstream ss(line);
+        std::vector<uint64_t> qs;
+        uint64_t v = 0;
+        while (ss >> v)
+            qs.push_back(v);
+        if (qs.size() != numPrimes)
+            OPENFHE_THROW("NB_P7_PRIMES: expected " + std::to_string(numPrimes) + " Q primes, got " + std::to_string(qs.size()));
+        for (size_t i = 0; i < numPrimes; i++) {
+            if (qs[i] % cyclOrder != 1)
+                OPENFHE_THROW("NB_P7_PRIMES: prime not 1 mod cyclOrder");
+            moduliQ[i] = NativeInteger(qs[i]);
+            rootsQ[i]  = RootOfUnity(cyclOrder, moduliQ[i]);
+        }
+        maxPrime = *std::max_element(moduliQ.begin(), moduliQ.begin() + numPrimes);
+    }
 
     if (scalTech == FLEXIBLEAUTOEXT) {
         // moduliQ[numPrimes] must still be 0, so it has to be populated now
